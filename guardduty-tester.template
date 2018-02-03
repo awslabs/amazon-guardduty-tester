@@ -1,0 +1,1271 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "This template creates the basic VPC infrastructure for an isolated testing environment. It will deploy a bastion host into the public subnet for a single Availability Zone so we have a protected point of entry. It will then create a linux instance with some red team scripts & tools that operate against common applications that are created in the same private subnet. **WARNING** This template creates Amazon EC2 instance and related resources. You will be billed for the AWS resources used if you create a stack from this template.",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "Network Configuration"
+                    },
+                    "Parameters": [
+                        "AvailabilityZones",
+                        "VPCCIDR",
+                        "PrivateSubnet1CIDR",
+                        "PublicSubnet1CIDR",
+                        "RemoteAccessCIDR"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Amazon EC2 Configuration"
+                    },
+                    "Parameters": [
+                        "KeyPairName"
+                    ]
+                }
+            ],
+            "ParameterLabels": {
+                "AvailabilityZones": {
+                    "default": "Availability Zones"
+                },
+                "KeyPairName": {
+                    "default": "Key Pair Name"
+                },
+                "PrivateSubnetCIDR": {
+                    "default": "Private Subnet CIDR"
+                },
+                "PublicSubnetCIDR": {
+                    "default": "Public Subnet CIDR"
+                },
+                "RemoteAccessCIDR": {
+                    "default": "Allowed Bastion External Access CIDR"
+                },
+                "VPCCIDR": {
+                    "default": "VPC CIDR"
+                }
+            }
+        }
+    },
+    "Parameters": {
+        "AvailabilityZones": {
+            "Description": "Availability Zone to use for the subnets in the VPC. You can select many, but we just use 1 (the first).",
+            "Type": "List<AWS::EC2::AvailabilityZone::Name>"
+        },
+        "KeyPairName": {
+            "Description": "Public/private key pairs allow you to securely connect to your instance after it launches",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "PrivateSubnetCIDR": {
+            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
+            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
+            "Default": "172.16.0.16/28",
+            "Description": "CIDR block for isolated private subnet.",
+            "Type": "String"
+        },
+        "PublicSubnetCIDR": {
+            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
+            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
+            "Default": "172.16.0.0/28",
+            "Description": "CIDR Block for the public DMZ subnet for secure administrative entry",
+            "Type": "String"
+        },
+        "RemoteAccessCIDR": {
+            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
+            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
+            "Default": "0.0.0.0/0",
+            "Description": "CIDR from which access to bastion is to be permitted",
+            "Type": "String"
+        },
+        "VPCCIDR": {
+            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
+            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
+            "Default": "172.16.0.0/27",
+            "Description": "CIDR Block for the VPC",
+            "Type": "String"
+        }
+    },
+    "Conditions": {
+        "GovCloudCondition": {
+            "Fn::Equals": [
+                {
+                    "Ref": "AWS::Region"
+                },
+                "us-gov-west-1"
+            ]
+        },
+       "NATInstanceCondition": {
+            "Fn::Equals": [
+                {
+                    "Ref": "AWS::Region"
+                },
+                "us-gov-west-1"
+            ]
+        },
+        "NATGatewayCondition": {
+            "Fn::Not": [
+                {
+                    "Condition": "GovCloudCondition"
+                }
+            ]
+        },
+	"NVirginiaRegionCondition": {
+            "Fn::Equals": [
+                {
+                    "Ref": "AWS::Region"
+                },
+                "us-east-1"
+            ]
+        }
+    },
+  "Mappings": {
+      "AWSAMIRegionMap": {
+           "NATAMI": {
+                "AWSNATHVM": "amzn-ami-vpc-nat-hvm-2017.03.0.20170401-x86_64-ebs"
+            },
+            "us-gov-west-1": {
+                "AWSNATHVM": "ami-3f0a8f5e"
+            },
+ 	   "AMI": {
+               "AMZNLINUXHVM": "amzn-ami-hvm-2017.12.0.20171223-x86_64-gp2",
+               "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2017.10.13"
+           },
+            "ap-northeast-1": {
+                "AMZNLINUXHVM": "ami-c2680fa4",
+		"WS2012R2": "ami-1a7ee47c"
+            },
+            "ap-northeast-2": {
+                "AMZNLINUXHVM": "ami-3e04a450",
+		"WS2012R2": "ami-0b4eee65"
+            },
+            "ap-south-1": {
+                "AMZNLINUXHVM": "ami-3b2f7954",
+		"WS2012R2": "ami-c488dfab"
+            },
+           "ap-southeast-1": {
+                "AMZNLINUXHVM": "ami-4f89f533",
+               "WS2012R2": "ami-c83944b4"
+            },
+            "ap-southeast-2": {
+                "AMZNLINUXHVM": "ami-38708c5a",
+		"WS2012R2": "ami-30a55952"
+            },
+            "ca-central-1": {
+                "AMZNLINUXHVM": "ami-7549cc11",
+		"WS2012R2": "ami-b9b431dd"
+            },
+            "eu-central-1": {
+                "AMZNLINUXHVM": "ami-1b2bb774",
+		"WS2012R2": "ami-3204995d"
+            },
+            "eu-west-1": {
+                "AMZNLINUXHVM": "ami-db1688a2",
+		"WS2012R2": "ami-cc821eb5"
+            },
+            "eu-west-2": {
+                "AMZNLINUXHVM": "ami-6d263d09",
+		"WS2012R2": "ami-9f677cfb"
+            },
+            "sa-east-1": {
+                "AMZNLINUXHVM": "ami-f1337e9d",
+		"WS2012R2": "ami-d6c785ba"
+            },
+            "us-east-1": {
+                "AMZNLINUXHVM": "ami-428aa838",
+	 	"WS2012R2": "ami-013e197b"
+            },
+            "us-east-2": {
+                "AMZNLINUXHVM": "ami-710e2414",
+		"WS2012R2": "ami-02446e67"
+            },
+            "us-west-1": {
+                "AMZNLINUXHVM": "ami-4a787a2a",
+		"WS2012R2": "ami-92fefdf2"
+            },
+            "us-west-2": {
+                "AMZNLINUXHVM": "ami-7f43f307",
+		"WS2012R2": "ami-afe051d7"
+            }
+        },
+        "AMINameMap": {
+            "Amazon-Linux-HVM": {
+                "Code": "AMZNLINUXHVM"
+            },
+	    "Windows-Server-2012": {
+		"Code": "WS2012R2"
+	    }
+        }
+    },
+    "Resources": {
+        "BastionMainLogGroup": {
+            "Type": "AWS::Logs::LogGroup"
+        },
+        "SSHMetricFilter": {
+            "Type": "AWS::Logs::MetricFilter",
+            "Properties": {
+                "LogGroupName": {
+                    "Ref": "BastionMainLogGroup"
+                },
+                "FilterPattern": "ON FROM USER PWD",
+                "MetricTransformations": [
+                    {
+                        "MetricName": "SSHCommandCount",
+                        "MetricValue": 1,
+                        "MetricNamespace": {
+                            "Fn::Join": [
+                                "/",
+                                [
+                                    "AWSQuickStart",
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    }
+                                ]
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+	"DHCPOptions": {
+            "Type": "AWS::EC2::DHCPOptions",
+            "Properties": {
+                "DomainName": {
+                "Fn::If": [
+                    "NVirginiaRegionCondition",
+                    "ec2.internal",
+                    {
+                        "Fn::Join": [
+                                "",
+                            [
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ".compute.internal"
+                            ]
+                        ]
+                    }
+                ]
+             },
+             "DomainNameServers": [
+               "AmazonProvidedDNS"
+             ]
+        }
+        },
+        "VPC": {
+            "Type": "AWS::EC2::VPC",
+            "Properties": {
+                "CidrBlock": {
+                    "Ref": "VPCCIDR"
+                },
+                "InstanceTenancy": "default",
+                "EnableDnsSupport": "true",
+                "EnableDnsHostnames": "true",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ]
+            }
+        },
+        "VPCDHCPOptionsAssociation": {
+            "Type": "AWS::EC2::VPCDHCPOptionsAssociation",
+            "Properties": {
+       	         "VpcId": {
+                    "Ref": "VPC"
+                },
+                "DhcpOptionsId": {
+                    "Ref": "DHCPOptions"
+                }
+            }
+        },
+        "InternetGateway": {
+            "Type": "AWS::EC2::InternetGateway",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Network",
+                        "Value": "Public"
+                    }
+                ]
+            }
+        },
+        "VPCGatewayAttachment": {
+            "Type": "AWS::EC2::VPCGatewayAttachment",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPC"
+                },
+                "InternetGatewayId": {
+                    "Ref": "InternetGateway"
+                }
+            }
+        },
+	"PrivateSubnet": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPC"
+                },
+                "CidrBlock": {
+                    "Ref": "PrivateSubnetCIDR"
+                },
+                "AvailabilityZone": {
+                    "Fn::Select": [
+                        "0",
+                        {
+                            "Ref": "AvailabilityZones"
+                        }
+                    ]
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Private subnet"
+                    },
+                    {
+                        "Key": "Network",
+                        "Value": "Private"
+                    }
+                ]
+            }
+        },
+        "PublicSubnet": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPC"
+                },
+                "CidrBlock": {
+                    "Ref": "PublicSubnetCIDR"
+                },
+                "AvailabilityZone": {
+                    "Fn::Select": [
+                        "0",
+                        {
+                            "Ref": "AvailabilityZones"
+                        }
+                    ]
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Public subnet"
+                    },
+                    {
+                        "Key": "Network",
+                        "Value": "Public"
+                    }
+                ],
+                "MapPublicIpOnLaunch": true
+            }
+        },
+        "PrivateSubnetRouteTable": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPC"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Private subnet"
+                    },
+                    {
+                        "Key": "Network",
+                        "Value": "Private"
+                    }
+                ]
+            }
+          },
+	   "PrivateSubnetRoute": {
+            "Type": "AWS::EC2::Route",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PrivateSubnetRouteTable"
+                },
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "InstanceId": {
+                    "Fn::If": [
+                        "NATInstanceCondition",
+                        {
+                            "Ref": "NATInstance"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
+                "NatGatewayId": {
+                    "Fn::If": [
+                        "NATGatewayCondition",
+                        {
+                            "Ref": "NATGateway"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                }
+            }
+        },
+        "PrivateSubnetRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": {
+                    "Ref": "PrivateSubnet"
+                },
+                "RouteTableId": {
+                    "Ref": "PrivateSubnetRouteTable"
+                }
+            }
+        },
+        "PublicSubnetRouteTable": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPC"
+                },
+                "Tags": [
+                    {
+        	        "Key": "Name",
+                        "Value": "Public Subnets"
+                    },
+                    {
+                        "Key": "Network",
+                        "Value": "Public"
+                    }
+                ]
+            }
+        },
+        "PublicSubnetRoute": {
+            "DependsOn": "VPCGatewayAttachment",
+            "Type": "AWS::EC2::Route",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PublicSubnetRouteTable"
+                },
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": {
+                    "Ref": "InternetGateway"
+                }
+            }
+        },
+        "PublicSubnetRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": {
+                    "Ref": "PublicSubnet"
+                },
+                "RouteTableId": {
+                    "Ref": "PublicSubnetRouteTable"
+                }
+            }
+        },
+        "NATEIP": {
+            "DependsOn": "VPCGatewayAttachment",
+            "Type": "AWS::EC2::EIP",
+            "Properties": {
+                "Domain": "vpc",
+                "InstanceId": {
+                    "Fn::If": [
+                        "NATInstanceCondition",
+                        {
+                            "Ref": "NATInstance"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                }
+            }
+        },
+        "NATGateway": {
+            "Condition": "NATGatewayCondition",
+            "DependsOn": "VPCGatewayAttachment",
+            "Type": "AWS::EC2::NatGateway",
+            "Properties": {
+                "AllocationId": {
+                    "Fn::GetAtt": [
+                        "NATEIP",
+                        "AllocationId"
+                    ]
+                },
+                "SubnetId": {
+                    "Ref": "PublicSubnet"
+                }
+            }
+        },
+       "NATInstance": {
+            "Condition": "NATInstanceCondition",
+            "DependsOn": "VPCGatewayAttachment",
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSAMIRegionMap",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        "AWSNATHVM"
+                    ]
+                },
+                "InstanceType": "t2.micro",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "NAT"
+                    }
+                ],
+                "NetworkInterfaces": [
+                    {
+                        "GroupSet": [
+                            {
+                                "Ref": "NATInstanceSecurityGroup"
+                            }
+                        ],
+                        "AssociatePublicIpAddress": "true",
+                        "DeviceIndex": "0",
+                        "DeleteOnTermination": "true",
+                        "SubnetId": {
+                            "Ref": "PublicSubnet"
+                        }
+                    }
+                ],
+                "KeyName": {
+                    "Fn::If": [
+                        "NATInstanceCondition",
+                        {
+                            "Ref": "KeyPairName"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
+                "SourceDestCheck": "false"
+            }
+       },
+	"NATInstanceSecurityGroup": {
+            "Condition": "NATInstanceCondition",
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Enables outbound internet access for the VPC via the NAT instances",
+                "VpcId": {
+                    "Ref": "VPC"
+                },
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "-1",
+                        "FromPort": "1",
+                        "ToPort": "65535",
+                        "CidrIp": {
+                            "Ref": "VPCCIDR"
+                        }
+                    }
+                ]
+            }
+        },
+	"BastionHostRole": {
+	    "Type": "AWS::IAM::Role",
+            "Properties": {
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "logs:CreateLogStream",
+                                        "logs:GetLogEvents",
+                                        "logs:PutLogEvents",
+                                        "logs:DescribeLogGroups",
+                                        "logs:DescribeLogStreams",
+                                        "logs:PutRetentionPolicy",
+                                        "logs:PutMetricFilter",
+                                        "logs:CreateLogGroup"
+                                    ],
+                                    "Resource": {
+                                        "Fn::Sub": [
+                                            "arn:${Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*",
+                                            {
+                                                "Partition": {
+                                                    "Fn::If": [
+                                                        "GovCloudCondition",
+                                                        "aws-us-gov",
+                                                        "aws"
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    "Effect": "Allow"
+                                }
+                            ]
+                        },
+                        "PolicyName": "bastion-cloudwatch-logs-policy"
+                    },
+		    {
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "ec2:AssociateAddress",
+                                        "ec2:DescribeAddresses"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ],
+                                    "Effect": "Allow"
+                                }
+                            ]
+                        },
+                        "PolicyName": "bastion-eip-policy"
+                    }
+                ],
+                "Path": "/",
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            },
+                            "Effect": "Allow"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            }
+        },
+        "BastionHostProfile": {
+            "Type": "AWS::IAM::InstanceProfile",
+            "Properties": {
+                "Roles": [
+                    {
+                        "Ref": "BastionHostRole"
+                    }
+                ],
+                "Path": "/"
+            }
+        },
+        "EIP": {
+            "Type": "AWS::EC2::EIP",
+            "Properties": {
+                "Domain": "vpc"
+            }
+        },
+        "BastionAutoScalingGroup": {
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "Properties": {
+                "LaunchConfigurationName": {
+                    "Ref": "BastionLaunchConfiguration"
+                },
+                "VPCZoneIdentifier": [
+                    {
+                        "Ref": "PublicSubnet"
+                    }
+                ],
+		"MinSize": "1",
+                "MaxSize": "2",
+                "Cooldown": "300",
+                "DesiredCapacity": "1",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "LinuxBastion",
+                        "PropagateAtLaunch": "true"
+                    }
+                ]
+            },
+            "CreationPolicy": {
+                "ResourceSignal": {
+                    "Count": "1",
+                    "Timeout": "PT30M"
+        	}
+            }
+        },
+        "BastionLaunchConfiguration": {
+            "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "Metadata": {
+                "AWS::CloudFormation::Init": {
+                    "config": {
+                        "files": {
+                            "/tmp/bastion_bootstrap.sh": {
+                                "source": "https://github.com/tomstickle/amazon-guardduty-tester/bastion_bootstrap.sh",
+                                "mode": "000550",
+                                "owner": "root",
+                                "group": "root"
+                            }
+                        },
+                        "commands": {
+                            "b-bootstrap": {
+                                "command": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "./tmp/bastion_bootstrap.sh",
+                                            " --banner ",
+                                            "https://github.com/tomstickle/amazon-guardduty-tester/artifacts/banner_message.txt",
+                                            " --enable true",
+                                            " --tcp-forwarding true",
+                                            " --x11-forwarding false"
+                                        ]
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+	    "Properties": {
+                "KeyName": {
+                    "Ref": "KeyPairName"
+                },
+                "IamInstanceProfile": {
+                    "Ref": "BastionHostProfile"
+                },
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSAMIRegionMap",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        {
+                            "Fn::FindInMap": ["AMINameMap", "Amazon-Linux-HVM","Code"]
+                        }
+                    ]
+                },
+                "SecurityGroups": [
+                {
+                    "Ref": "BastionSecurityGroup"
+                }
+            ],
+             "InstanceType": "t2.small",
+             "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash\n",
+                                "export PATH=$PATH:/usr/local/bin\n",
+                                "which pip &> /dev/null\n",
+                                "if [ $? -ne 0 ] ; then\n",
+                                "    echo \"PIP NOT INSTALLED\"\n",
+                                "    [ `which yum` ] && $(yum install -y epel-release; yum install -y python-pip) && echo \"PIP INSTALLED\"\n",
+                                "    [ `which apt-get` ] && apt-get -y update && apt-get -y install python-pip && echo \"PIP INSTALLED\"\n",
+                                "fi\n",
+                                "pip install --upgrade pip &> /dev/null\n",
+                                "pip install awscli --ignore-installed six &> /dev/null\n",
+                                "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
+				"EIP_LIST=\"",
+                                {
+                                    "Ref": "EIP"
+                                },
+                                ",Null,Null,Null",
+				"\"\n",
+                                "CLOUDWATCHGROUP=",
+                                {
+                                    "Ref": "BastionMainLogGroup"
+                                },
+                                "\n",
+				"cfn-init -v --stack ",
+                                {
+                                    "Ref": "AWS::StackName"
+                                },
+                                " --resource BastionLaunchConfiguration --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "\n",
+                                "cfn-signal -e $? --stack ",
+                                {
+                                    "Ref": "AWS::StackName"
+                                },
+                                " --resource BastionAutoScalingGroup --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
+        "BastionSecurityGroup": {
+	    "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Enables SSH Access to Bastion Hosts",
+                "VpcId": {
+                    "Ref": "VPC"
+                 },
+                 "SecurityGroupIngress": [
+                 {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "CidrIp": {
+                            "Ref": "RemoteAccessCIDR"
+                        }
+                 }
+                ]
+            }
+         },
+         "RedTeamSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Enables SSH Access to RedTeam Tools Host",
+                 "VpcId": {
+                    "Ref": "VPC"
+                 },
+                "SecurityGroupIngress": [
+		    {
+                        "IpProtocol": "tcp",
+       	                "FromPort": "22",
+                        "ToPort": "22",
+                        "SourceSecurityGroupId": {
+                             "Ref": "BastionSecurityGroup"
+                        }
+                    },
+                    {
+		       "IpProtocol": "tcp",
+       	               "FromPort": "53",
+                       "ToPort": "53",
+                       "CidrIp": {
+                           "Ref": "PrivateSubnetCIDR"
+                       }
+                    },
+                    {
+		       "IpProtocol": "udp",
+       	               "FromPort": "53",
+                       "ToPort": "53",
+                       "CidrIp": {
+                           "Ref": "PrivateSubnetCIDR"
+                       }
+                    },
+		     {
+		       "IpProtocol": "tcp",
+       	               "FromPort": "5050",
+                       "ToPort": "5050",
+                       "CidrIp": {
+                           "Ref": "PrivateSubnetCIDR"
+                       }
+                    },
+                    {
+                       "IpProtocol": "icmp",
+                       "FromPort": "-1",
+                       "ToPort": "-1",
+                       "SourceSecurityGroupId": {
+                          "Ref": "BastionSecurityGroup"
+		       }
+                    }
+		]			
+	    }		 
+	 },
+	"RedTeamIAMRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+               "AssumeRolePolicyDocument": {
+                   "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            },
+                            "Effect": "Allow"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+               },
+                "Path": "/",
+                "Policies": [
+		    ]
+		
+	    }
+	},
+          "RedTeamInstanceProfile": {
+                "Type": "AWS::IAM::InstanceProfile",
+                "Properties": {
+                    "Roles": [
+                        {
+                            "Ref": "RedTeamIAMRole"
+                        }
+                    ],
+                    "Path": "/"
+                }
+            },
+	    "RedTeamNetInt" : {
+                "Type" : "AWS::EC2::NetworkInterface",
+                "Properties" : {
+                    "SubnetId": { "Ref" : "PrivateSubnet" },
+                    "GroupSet": [{"Ref": "RedTeamSecurityGroup" }]
+                }
+            },
+            "BasicLinuxNetInt" : {
+                "Type" : "AWS::EC2::NetworkInterface",
+                "Properties" : {
+                    "SubnetId": { "Ref" : "PrivateSubnet" },
+                    "GroupSet": [{"Ref": "BasicLinuxSecurityGroup"}]
+                }
+             },
+            "RedTeam" : {
+                "DependsOn" : ["BasicLinuxTarget", "BasicWindowsTarget"],
+                "Type" : "AWS::EC2::Instance",
+                "Properties" : {
+                    "KeyName" : {
+			"Ref" : "KeyPairName"
+		    },
+		    "NetworkInterfaces": [{
+	  	        "NetworkInterfaceId" : {"Ref" : "RedTeamNetInt"},
+                        "DeviceIndex" : "0"
+                    }],
+                    "IamInstanceProfile" : {"Ref" : "RedTeamInstanceProfile"},
+                    "UserData" : {
+                         "Fn::Base64" : {
+                             "Fn::Join" : [ "",
+					    [
+  	                                     	"#!/bin/bash\n",
+      	       	                             	"export PATH=$PATH:/usr/local/bin:/usr/sbin:/root/.local/bin\n",
+						"echo 'export PATH=/root/.local/bin:/usr/sbin:$PATH' >> /home/ec2-user/.profile\n",
+                                                "yum update -y\n",
+						"yum install nmap git python python-argparse python-paramiko gcc gcc-c++ cmake openssl-devel libX11-devel -y\n",
+						"export privateIP=`curl http://169.254.169.254/latest/meta-data/local-ipv4`\n",
+						"cat >>/home/ec2-user/update-scripts.sh <<END\n",
+						"curl -L -O https://github.com/tomstickle/amazon-guardduty-tester/guardduty_tester.sh > /home/ec2-user/threat-generator.sh\n",
+                                                "END\n",
+						"mkdir /home/ec2-user/compromised_keys\n",
+                                                "mkdir /home/ec2-user/domains\n",
+						"mkdir /home/ec2-user/passwords\n",
+                                                "curl -L -O https://github.com/tomstickle/amazon-guardduty-tester/artifacts/queries.txt /home/ec2-user/domains/queries.txt\n",
+                                                "curl -L -O https://github.com/tomstickle/amazon-guardduty-tester/artifacts/password_list.txt /home/ec2-user/passwords/password_list.txt\n",
+						"curl -L -O https://github.com/tomstickle/amazon-guardduty-tester/artifacts/never_used_sample_key.foo /home/ec2-user/compromised_keys/compromised.pem\n",
+		                                "FILE=\"/home/ec2-user/compromised_keys/compromised.pem\"\n",
+ 						"for FILE in {1..20}; do cp /home/ec2-user/compromised_keys/compromised.pem /home/ec2-user/compromised_keys/compromised$FILE.pem; done\n",
+						"echo 'BASIC_LINUX_TARGET=\"",
+						{ "Fn::GetAtt" : [ "BasicLinuxTarget", "PrivateIp" ]},
+						"\"' >> /home/ec2-user/localIps.sh\n",
+						"echo 'BASIC_WINDOWS_TARGET=\"",
+						{ "Fn::GetAtt" : [ "BasicWindowsTarget", "PrivateIp" ] },
+						"\"' >> /home/ec2-user/localIps.sh\n",
+                                                "echo -n 'RED_TEAM_INSTANCE=\"' >> /home/ec2-user/localIps.sh\n",
+						"wget -q -O - http://169.254.169.254/latest/meta-data/instance-id >> /home/ec2-user/localIps.sh\n",
+						"echo '\"' >> /home/ec2-user/localIps.sh\n",
+                                                "echo -n 'RED_TEAM_IP=\"' >> /home/ec2-user/localIps.sh\n",
+						"wget -q -O - http://169.254.169.254/latest/meta-data/local-ipv4 >> /home/ec2-user/localIps.sh\n",
+						"echo '\"' >> /home/ec2-user/localIps.sh\n",
+						"echo 'BASIC_LINUX_INSTANCE=\"",
+						{ "Ref" : "BasicLinuxTarget"},
+						"\"' >> /home/ec2-user/localIps.sh\n",
+						"echo 'BASIC_WINDOWS_INSTANCE=\"",
+						{ "Ref" : "BasicWindowsTarget"},
+						"\"' >> /home/ec2-user/localIps.sh\n",
+                                                "mkdir /home/ec2-user/FreeRDP\n",
+						"git clone git://github.com/FreeRDP/FreeRDP.git /home/ec2-user/FreeRDP\n",
+						"cd /home/ec2-user/FreeRDP\n",
+						"cmake -DCMAKE_BUILD_TYPE=Debug -DWITH_SSE2=ON .\n",
+                                                "make install\n",
+						"echo '/usr/local/lib/freerdp' >> /etc/ld.so.conf.d/freerdp.conf\n",
+						"ln -s /usr/local/bin/xfreerdp /usr/bin/xfreerdp\n",
+						"cd /home/ec2-user\n",
+						"git clone https://github.com/galkan/crowbar /home/ec2-user/crowbar\n",
+						"chown -R ec2-user: /home/ec2-user\n",
+						"chmod +x /home/ec2-user/threat-generator.sh\n",
+						"chmod +x /home/ec2-user/crowbar/crowbar.py\n"
+					    ]
+                              ]
+                          }
+                      },
+                      "InstanceType" : "m4.large",
+                      "AvailabilityZone": {
+                          "Fn::Select": [
+                              "0",
+                           {
+                                "Ref": "AvailabilityZones"
+                           }
+                         ]
+                      },
+                      "ImageId": {
+                          "Fn::FindInMap": [
+                              "AWSAMIRegionMap",
+                              {
+                                  "Ref": "AWS::Region"
+                              },
+                              {
+                                 "Fn::FindInMap": ["AMINameMap", "Amazon-Linux-HVM","Code"]
+                              }
+                          ]
+                      },
+                      "Tags" : [ {
+                          "Key" : "Name",
+                          "Value" : "RedTeam"
+                       } ]
+                }                 
+            },
+            "BasicLinuxSecurityGroup": {
+                "Type": "AWS::EC2::SecurityGroup",
+                "Properties": {
+                    "GroupDescription": "Enables Admin Access to basic linux hosts",
+                     "VpcId": {
+                        "Ref": "VPC"
+                     },
+                    "SecurityGroupIngress": [
+			{
+                            "IpProtocol": "tcp",
+        		    "FromPort": "22",
+                            "ToPort": "22",
+                            "SourceSecurityGroupId": {
+                                "Ref": "RedTeamSecurityGroup"
+                            }
+                         },
+                         {
+                            "IpProtocol": "tcp",
+                            "FromPort": "80",
+                            "ToPort": "80",
+                            "SourceSecurityGroupId": {
+                                "Ref": "RedTeamSecurityGroup"
+                            }
+                         },
+                         {
+                            "IpProtocol": "tcp",
+                            "FromPort": "5050",
+                            "ToPort": "5050",
+                            "SourceSecurityGroupId": {
+                                "Ref": "RedTeamSecurityGroup"
+                            }
+                         },
+			 {
+                            "IpProtocol": "icmp",
+                            "FromPort": "-1",
+                            "ToPort": "-1",
+                            "SourceSecurityGroupId": {
+                                "Ref": "RedTeamSecurityGroup"
+                            }
+                         }
+		    ]
+		}
+	    },
+            "BasicLinuxIAMRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/",
+		"ManagedPolicyArns": [
+		    "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess"
+		]
+	    }
+	    },
+	    "BasicLinuxInstanceProfile": {
+               	"Type": "AWS::IAM::InstanceProfile",
+                "Properties": {
+                    "Roles": [
+                        {
+                            "Ref": "BasicLinuxIAMRole"
+                       	}
+                    ],
+                    "Path": "/"
+               	}
+            },
+        "BasicLinuxTarget" : {
+                "Type" : "AWS::EC2::Instance",
+                "Properties" : {
+                    "KeyName" : {
+			"Ref" : "KeyPairName"
+		    },
+		    "NetworkInterfaces": [{
+	  	        "NetworkInterfaceId" : {"Ref" : "BasicLinuxNetInt"},
+                        "DeviceIndex" : "0"
+                    }],
+                    "IamInstanceProfile" : {"Ref" : "BasicLinuxInstanceProfile"},
+                     "UserData" : {
+                         "Fn::Base64" : {
+                             "Fn::Join" : [ "",
+					    [
+  	                                     	"#!/bin/bash\n",
+      	       	                             	"export PATH=$PATH:/usr/local/bin\n",
+                                                "yum update -y\n",
+						"yum install -y httpd24 php70 mysql56-server php70-mysqlnd gcc openssl-devel* nmap\n",
+						"service httpd start\n",
+						"export LOCAL_HOST=`curl http://169.254.169.254/latest/meta-data/local-hostname`\n",
+                                                "wget -O /home/ec2-user/install https://d1wk0tztpsntt1.cloudfront.net/linux/latest/install\n",
+						"chmod +x /home/ec2-user/install\n",
+						"bash /home/ec2-user/install -u false\n"
+					    ]
+                              ]
+                          }
+                      },
+                      "InstanceType" : "m4.large",
+                      "AvailabilityZone": {
+                          "Fn::Select": [
+                              "0",
+                           {
+                                "Ref": "AvailabilityZones"
+                           }
+                         ]
+                      },
+                      "ImageId": {
+                          "Fn::FindInMap": [
+                              "AWSAMIRegionMap",
+                              {
+                                  "Ref": "AWS::Region"
+                              },
+                              {
+                                 "Fn::FindInMap": ["AMINameMap", "Amazon-Linux-HVM","Code"]
+                              }
+                          ]
+                      },
+                      "Tags" : [ {
+                          "Key" : "Name",
+                          "Value" : "BasicLinuxTarget"
+                       } ]
+                                 
+		}
+	    },
+            "BasicWindowsSecurityGroup": {
+                "Type": "AWS::EC2::SecurityGroup",
+                "Properties": {
+                    "GroupDescription": "Enables Admin Access to basic windows hosts",
+                     "VpcId": {
+                        "Ref": "VPC"
+                     },
+                    "SecurityGroupIngress": [
+                         {
+                            "IpProtocol": "tcp",
+                            "FromPort": "3389",
+                            "ToPort": "3389",
+                            "SourceSecurityGroupId": {
+                                "Ref": "RedTeamSecurityGroup"
+                            }
+                         },
+                         {
+                            "IpProtocol": "icmp",
+                            "FromPort": "-1",
+                            "ToPort": "-1",
+                            "SourceSecurityGroupId": {
+                                "Ref": "RedTeamSecurityGroup"
+                            }
+                         }
+		     ]
+		}
+	    },
+            "BasicWindowsIAMRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/"
+	    }
+	    },
+	    "BasicWindowsInstanceProfile": {
+               	"Type": "AWS::IAM::InstanceProfile",
+                "Properties": {
+                    "Roles": [
+                        {
+                            "Ref": "BasicWindowsIAMRole"
+                       	}
+                    ],
+                    "Path": "/"
+               	}
+	    },
+	    "BasicWindowsTarget" : {
+                "Type" : "AWS::EC2::Instance",
+                "Properties" : {
+                    "KeyName" : {
+			"Ref" : "KeyPairName"
+		    },
+                    "NetworkInterfaces": [
+                    {
+                        "GroupSet": [
+                            {
+                                "Ref": "BasicWindowsSecurityGroup"
+                            }
+                        ],
+                        "AssociatePublicIpAddress": "false",
+                        "DeviceIndex": "0",
+                        "DeleteOnTermination": "true",
+                        "SubnetId" : {
+                            "Ref": "PrivateSubnet"
+			}
+                    }
+                    ],
+                      "InstanceType" : "m4.large",
+                      "AvailabilityZone": {
+                          "Fn::Select": [
+                              "0",
+                           {
+                                "Ref": "AvailabilityZones"
+                           }
+                         ]
+                      },
+                      "ImageId": {
+                          "Fn::FindInMap": [
+                              "AWSAMIRegionMap",
+                              {
+                                  "Ref": "AWS::Region"
+                              },
+                              {
+                                 "Fn::FindInMap": ["AMINameMap", "Windows-Server-2012","Code"]
+                              }
+                          ]
+                      },
+                      "Tags" : [ {
+                          "Key" : "Name",
+                          "Value" : "BasicWindowsTarget"
+                       } ]
+                                 
+		}
+            }
+    },
+    "Outputs": {
+        "BastionIp": {
+            "Description": "Elastic IP for Bastion",
+            "Value": {
+                "Ref": "EIP"
+            }
+        },
+        "RedTeamIp": {
+            "Description": "Local IP for RedTeam Instance",
+            "Value": {
+	        "Fn::GetAtt" : [ "RedTeam", "PrivateIp" ] 
+            }
+        }
+    }
+}
