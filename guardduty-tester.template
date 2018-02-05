@@ -707,7 +707,7 @@
                         },
                         "commands": {
                             "b-bootstrap": {
-                                "command": {
+                                    "command": {
                                     "Fn::Join": [
                                         "",
                                         [
