@@ -62,8 +62,8 @@ echo '* will trigger a detection, but will fail to get into the target      *'
 echo '* windows instance.                                                   *'
 echo '***********************************************************************'
 echo
-sudo ./crowbar/crowbar.py -b rdp -s $BASIC_WINDOWS_TARGET/32 -u Administrator -C ./passwords/password_list.txt;
-sudo ./crowbar/crowbar.py -b rdp -s $BASIC_WINDOWS_TARGET/32 -u Administrator -C ./passwords/password_list.txt;
+echo 'Sending 250 password attempts at the windows server...'
+sudo hydra -v -f -t 2 -l administrator -p ./passwords/password_list.txt rdp://$BASIC_WINDOWS_TARGET > /dev/null &
 echo
 echo '-----------------------------------------------------------------------'
 echo
@@ -92,6 +92,7 @@ echo '* but it will generate enough unusual DNS activity to trigger the     *'
 echo '* detection.                                                          *'
 echo '***********************************************************************'
 echo
+echo "Calling large numbers of large domains to simulate tunneling via DNS" 
 dig -f ./domains/queries.txt > /dev/null &
 echo
 echo
@@ -99,7 +100,7 @@ echo '**************************************************************************
 echo 'Expected GuardDuty Findings'
 echo
 echo 'Test 1: Internal Port Scanning'
-echo 'Expected Finding: EC2 Instance ' $RED_TEAM_INSTANCE ' is performing outbound port scans.'
+echo 'Expected Finding: EC2 Instance ' $RED_TEAM_INSTANCE ' is performing outbound port scans against remote host.'
 echo 'Finding Type: Recon:EC2/Portscan'
 echo 
 echo 'Test 2: SSH Brute Force with Compromised Keys'
@@ -115,10 +116,10 @@ echo 'Inbound: ' $RED_TEAM_IP ' is performing RDP brute force attacks against ' 
 echo 'Finding Type : UnauthorizedAccess:EC2/RDPBruteForce'
 echo
 echo 'Test 4: Cryptocurrency Activity'
-echo 'Expected Finding: ' $RED_TEAM_INSTANCE ' is performing RDP brute force attacks against ' $BASIC_WINDOWS_TARGET
-echo 'Finding Type : UnauthorizedAccess:EC2/RDPBruteForce'
+echo 'Expected Finding: EC2 Instance ' $RED_TEAM_INSTANCE ' is querying a domain name that is associated with bitcoin activity'
+echo 'Finding Type : CryptoCurrency:EC2/BitcoinTool.B!DNS'
 echo
 echo 'Test 5: DNS Exfiltration'
-echo 'Expected Finding: ' $RED_TEAM_INSTANCE ' is performing RDP brute force attacks against ' $BASIC_WINDOWS_TARGET
-echo 'Finding Type : UnauthorizedAccess:EC2/RDPBruteForce'
+echo 'Expected Finding: EC2 instance ' $RED_TEAM_INSTANCE ' is attempting to query domain names that resemble exfiltrated data'
+echo 'Finding Type : Trojan:EC2/DNSDataExfiltration'
 
