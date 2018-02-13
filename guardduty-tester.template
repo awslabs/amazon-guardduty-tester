@@ -929,7 +929,7 @@
 						"yum install cmake openssl-devel libX11-devel libXi-devel libXtst-devel libXinerama-devel -y\n",
 						"pip install paramiko\n",
 						"export privateIP=`curl http://169.254.169.254/latest/meta-data/local-ipv4`\n",
-						"curl -L https://raw.githubusercontent.com/awslabs/amazon-guardduty-tester/master/guardduty_tester.sh > /home/ec2-user/threat-generator.sh\n",
+						"curl -L https://raw.githubusercontent.com/awslabs/amazon-guardduty-tester/master/guardduty_tester.sh > /home/ec2-user/guardduty_tester.sh\n",
 						"mkdir /home/ec2-user/compromised_keys\n",
                                                 "mkdir /home/ec2-user/domains\n",
 						"mkdir /home/ec2-user/passwords\n",
@@ -972,7 +972,7 @@
 						"cd /home/ec2-user\n",
 						"git clone https://github.com/galkan/crowbar /home/ec2-user/crowbar\n",
 						"chown -R ec2-user: /home/ec2-user\n",
-						"chmod +x /home/ec2-user/threat-generator.sh\n",
+						"chmod +x /home/ec2-user/guardduty_tester.sh\n",
 						"chmod +x /home/ec2-user/crowbar/crowbar.py\n"
 					    ]
                               ]
