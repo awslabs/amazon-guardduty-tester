@@ -20,7 +20,7 @@ Before you run guardduty-tester.template , modify it with values for the followi
 
 Click the checkbox next to your running CloudFormation stack created in the step above. In the displayed set of tabs, select the Output tab. Note the IP addresses assigned to the bastion host and the tester EC2 instance. You need both of these IP addresses in order to ssh into the tester EC2 instance.
 
-Create the following entry in your ~/.ssh/config file to login to your instance through the bastion host:
+Create the following entry in your ~/.ssh/config file to login to your instance through the bastion host:</br>
 </br>
 Host bastion</br>
 &nbsp;&nbsp;&nbsp;&nbsp;HostName {Elastic IP Address of Bastion}</br>
