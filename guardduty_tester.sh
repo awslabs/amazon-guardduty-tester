@@ -45,7 +45,7 @@ echo '* keys and credentials (This attempt will not actually succeed in     *'
 echo '* obtaining access to the target linux instance in this subnet)       *'
 echo '***********************************************************************'
 echo
-for j in `seq 1 5`; 
+for j in `seq 1 10`; 
 do
 	sudo ./crowbar/crowbar.py -b sshkey -s $BASIC_LINUX_TARGET/32 -u ec2-user -k ./compromised_keys;
 done
