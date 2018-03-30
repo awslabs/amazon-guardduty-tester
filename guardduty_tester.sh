@@ -95,12 +95,22 @@ echo
 echo "Calling large numbers of large domains to simulate tunneling via DNS" 
 dig -f ./domains/queries.txt > /dev/null &
 echo
+# 6 - Backdoor:EC2/C&CActivity.B!DNS
+echo '***********************************************************************'
+echo '* Test #6 - Fake domain to prove that GuardDuty is working            *'
+echo '* This is a permanent fake domain that customers can use to prove that*'
+echo '* GuardDuty is working.  Calling this domain will always generate the *'
+echo '* Backdoor:EC2/C&CActivity.B!DNS finding type                         *'
+echo '***********************************************************************'
+echo
+echo "Calling a well known fake domain that is used to generate a known finding"
+dig GuardDutyC2ActivityB.com any
 echo
 echo '*****************************************************************************************************'
 echo 'Expected GuardDuty Findings'
 echo
 echo 'Test 1: Internal Port Scanning'
-echo 'Expected Finding: EC2 Instance ' $RED_TEAM_INSTANCE ' is performing outbound port scans against remote host.'
+echo 'Expected Finding: EC2 Instance ' $RED_TEAM_INSTANCE ' is performing outbound port scans against remote host.' $BASIC_LINUX_TARGET
 echo 'Finding Type: Recon:EC2/Portscan'
 echo 
 echo 'Test 2: SSH Brute Force with Compromised Keys'
@@ -121,5 +131,8 @@ echo 'Finding Type : CryptoCurrency:EC2/BitcoinTool.B!DNS'
 echo
 echo 'Test 5: DNS Exfiltration'
 echo 'Expected Finding: EC2 instance ' $RED_TEAM_INSTANCE ' is attempting to query domain names that resemble exfiltrated data'
-echo 'Finding Type : Trojan:EC2/DNSDataExfiltration'
-
+echo 'Finding Type : Backdoor:EC2/DNSDataExfiltration'
+echo
+echo 'Test 6: C&C Activity'
+echo 'Expected Finding: EC2 instance ' $RED_TEAM_INSTANCE ' is querying a domain name associated with a known Command & Control server. '
+echo 'Finding Type : Backdoor:EC2/C&CActivity.B!DNS'
