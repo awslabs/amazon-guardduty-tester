@@ -23,7 +23,7 @@ source localIps.sh
 echo
 echo '***********************************************************************'
 echo '* Test #1 - Internal port scanning                                    *'
-echo '* This siumulates internal reconaissance by an internal actor or an   *'
+echo '* This simulates internal reconaissance by an internal actor or an   *'
 echo '* external actor after an initial compromise. This is considered a    *'
 echo '* low priority finding for GuardDuty because its not a clear indicator*'
 echo '* of malicious intent on its own.                                     *'
@@ -36,7 +36,7 @@ echo
 # 2 - ssh brute force with list of keys found on web
 echo '***********************************************************************'
 echo '* Test #2 - SSH Brute Force with Compromised Keys                     *'
-echo '* This siumulates an SSH brute force attack on an SSH port that we    *'
+echo '* This simulates an SSH brute force attack on an SSH port that we    *'
 echo '* can access from this instance. It uses (phony) compromised keys in  *'
 echo '* many subsequent attempts to see if one works. This is a common      *'
 echo '* techique where the bad actors will harvest keys from the web in     *'
@@ -55,7 +55,7 @@ echo
 # 3 - rdp brute force with known user and list of passwords found on web
 echo '***********************************************************************'
 echo '* Test #3 - RDP Brute Force with Password List                        *'
-echo '* This siumulates an RDP brute force attack on the internal RDP port  *'
+echo '* This simulates an RDP brute force attack on the internal RDP port  *'
 echo '* of the windows server that we installed in the environment.  It uses*'
 echo '* a list of common passwords that can be found on the web. This test  *'
 echo '* will trigger a detection, but will fail to get into the target      *'
@@ -70,7 +70,7 @@ echo
 # 4 - CryptoCurrency Activity
 echo '***********************************************************************'
 echo '* Test #4 - CryptoCurrency Mining Activity                            *'
-echo '* This siumulates interaction with a cryptocurrency mining pool which *'
+echo '* This simulates interaction with a cryptocurrency mining pool which *'
 echo '* can be an indication of an instance compromise. In this case, we are*'
 echo '* only interacting with the URL of the pool, but not downloading      *'
 echo '* any files. This will trigger a threat intel based detection.        *'
