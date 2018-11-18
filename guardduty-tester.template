@@ -83,7 +83,15 @@
             "Default": "172.16.0.0/27",
             "Description": "CIDR Block for the VPC",
             "Type": "String"
-        }
+        },
+        "LatestLinuxAMI": {
+            "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+            "Default": "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+        },
+        "LatestWindows2012R2AMI": {
+            "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+            "Default": "/aws/service/ami-windows-latest/Windows_Server-2012-R2_RTM-English-64Bit-Base"
+        }        
     },
     "Conditions": {
         "GovCloudCondition": {
@@ -125,76 +133,7 @@
             },
             "us-gov-west-1": {
                 "AWSNATHVM": "ami-3f0a8f5e"
-            },
- 	   "AMI": {
-               "AMZNLINUXHVM": "amzn-ami-hvm-2017.12.0.20171223-x86_64-gp2",
-               "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2017.10.13"
-           },
-            "ap-northeast-1": {
-                "AMZNLINUXHVM": "ami-c2680fa4",
-		"WS2012R2": "ami-1a7ee47c"
-            },
-            "ap-northeast-2": {
-                "AMZNLINUXHVM": "ami-3e04a450",
-		"WS2012R2": "ami-0b4eee65"
-            },
-            "ap-south-1": {
-                "AMZNLINUXHVM": "ami-3b2f7954",
-		"WS2012R2": "ami-c488dfab"
-            },
-           "ap-southeast-1": {
-                "AMZNLINUXHVM": "ami-4f89f533",
-               "WS2012R2": "ami-c83944b4"
-            },
-            "ap-southeast-2": {
-                "AMZNLINUXHVM": "ami-38708c5a",
-		"WS2012R2": "ami-30a55952"
-            },
-            "ca-central-1": {
-                "AMZNLINUXHVM": "ami-7549cc11",
-		"WS2012R2": "ami-b9b431dd"
-            },
-            "eu-central-1": {
-                "AMZNLINUXHVM": "ami-1b2bb774",
-		"WS2012R2": "ami-3204995d"
-            },
-            "eu-west-1": {
-                "AMZNLINUXHVM": "ami-db1688a2",
-		"WS2012R2": "ami-cc821eb5"
-            },
-            "eu-west-2": {
-                "AMZNLINUXHVM": "ami-6d263d09",
-		"WS2012R2": "ami-9f677cfb"
-            },
-            "sa-east-1": {
-                "AMZNLINUXHVM": "ami-f1337e9d",
-		"WS2012R2": "ami-d6c785ba"
-            },
-            "us-east-1": {
-                "AMZNLINUXHVM": "ami-428aa838",
-	 	"WS2012R2": "ami-013e197b"
-            },
-            "us-east-2": {
-                "AMZNLINUXHVM": "ami-710e2414",
-		"WS2012R2": "ami-02446e67"
-            },
-            "us-west-1": {
-                "AMZNLINUXHVM": "ami-4a787a2a",
-		"WS2012R2": "ami-92fefdf2"
-            },
-            "us-west-2": {
-                "AMZNLINUXHVM": "ami-7f43f307",
-		"WS2012R2": "ami-afe051d7"
             }
-        },
-        "AMINameMap": {
-            "Amazon-Linux-HVM": {
-                "Code": "AMZNLINUXHVM"
-            },
-	    "Windows-Server-2012": {
-		"Code": "WS2012R2"
-	    }
-        }
     },
     "Resources": {
         "BastionMainLogGroup": {
@@ -722,16 +661,9 @@
                 "IamInstanceProfile": {
                     "Ref": "BastionHostProfile"
                 },
-                "ImageId": {
-                    "Fn::FindInMap": [
-                        "AWSAMIRegionMap",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        {
-                            "Fn::FindInMap": ["AMINameMap", "Amazon-Linux-HVM","Code"]
-                        }
-                    ]
+                "ImageId": 
+                {
+                    "Ref": "LatestLinuxAMI"
                 },
                 "SecurityGroups": [
                 {
@@ -987,16 +919,9 @@
                            }
                          ]
                       },
-                      "ImageId": {
-                          "Fn::FindInMap": [
-                              "AWSAMIRegionMap",
-                              {
-                                  "Ref": "AWS::Region"
-                              },
-                              {
-                                 "Fn::FindInMap": ["AMINameMap", "Amazon-Linux-HVM","Code"]
-                              }
-                          ]
+                      "ImageId": 
+                      {
+                        "Ref": "LatestLinuxAMI"
                       },
                       "Tags" : [ {
                           "Key" : "Name",
@@ -1119,16 +1044,9 @@
                            }
                          ]
                       },
-                      "ImageId": {
-                          "Fn::FindInMap": [
-                              "AWSAMIRegionMap",
-                              {
-                                  "Ref": "AWS::Region"
-                              },
-                              {
-                                 "Fn::FindInMap": ["AMINameMap", "Amazon-Linux-HVM","Code"]
-                              }
-                          ]
+                      "ImageId": 
+                      {
+                        "Ref": "LatestLinuxAMI"
                       },
                       "Tags" : [ {
                           "Key" : "Name",
@@ -1226,22 +1144,14 @@
                            }
                          ]
                       },
-                      "ImageId": {
-                          "Fn::FindInMap": [
-                              "AWSAMIRegionMap",
-                              {
-                                  "Ref": "AWS::Region"
-                              },
-                              {
-                                 "Fn::FindInMap": ["AMINameMap", "Windows-Server-2012","Code"]
-                              }
-                          ]
+                      "ImageId": 
+                      {
+                        "Ref": "LatestWindows2012R2AMI"
                       },
                       "Tags" : [ {
                           "Key" : "Name",
                           "Value" : "BasicWindowsTarget"
-                       } ]
-                                 
+                       } ]                                 
 		}
             }
     },
