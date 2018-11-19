@@ -134,6 +134,7 @@
             "us-gov-west-1": {
                 "AWSNATHVM": "ami-3f0a8f5e"
             }
+        }
     },
     "Resources": {
         "BastionMainLogGroup": {
