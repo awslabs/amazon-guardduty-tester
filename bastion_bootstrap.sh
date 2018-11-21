@@ -172,8 +172,13 @@ EOF
     sed -i.back "s/$TMPREGION/region = $Region/g" /etc/awslogs/awscli.conf
 
     #Restart awslogs service
-    service awslogs restart
-    chkconfig awslogs on
+    VERSION=`cat /etc/os-release | grep '^VERSION=' |  tr -d \" | sed 's/\n//g' | sed 's/VERSION=//g'`
+    if [ "$VERSION" == "2" ]; then
+      systemctl restart awslogsd
+    else
+      service awslogs restart
+      chkconfig awslogs on
+    fi
 
     #Run security updates
 cat <<'EOF' >> ~/mycron
