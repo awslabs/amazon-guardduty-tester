@@ -77,8 +77,8 @@ echo '* any files. This will trigger a threat intel based detection.        *'
 echo '***********************************************************************'
 echo
 echo "Calling bitcoin wallets to download mining toolkits"
-curl -s http://com.minergate.pool/dkjdjkjdlsajdkljalsskajdksakjdksajkllalkdjsalkjdsalkjdlkasj  > /dev/null &
-curl -s http://xdn-xmr.pool.minergate.com/dhdhjkhdjkhdjkhajkhdjskahhjkhjkahdsjkakjasdhkjahdjk  > /dev/null &
+curl -s http://pool.minergate.com/dkjdjkjdlsajdkljalsskajdksakjdksajkllalkdjsalkjdsalkjdlkasj  > /dev/null &
+curl -s http://xmr.pool.minergate.com/dhdhjkhdjkhdjkhajkhdjskahhjkhjkahdsjkakjasdhkjahdjk  > /dev/null &
 echo
 echo '-----------------------------------------------------------------------'
 echo
