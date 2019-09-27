@@ -206,6 +206,10 @@
                         "Value": {
                             "Ref": "AWS::StackName"
                         }
+                    },
+                    {
+                        "Key" : "CreatedBy",
+                        "Value" : "GuardDuty Test Script"
                     }
                 ]
             }
@@ -268,6 +272,10 @@
                     {
                         "Key": "Network",
                         "Value": "Private"
+                    },
+                    {
+                        "Key" : "CreatedBy",
+                        "Value" : "GuardDuty Test Script"
                     }
                 ]
             }
@@ -297,6 +305,10 @@
                     {
                         "Key": "Network",
                         "Value": "Public"
+                    },
+                    {
+                        "Key" : "CreatedBy",
+                        "Value" : "GuardDuty Test Script"
                     }
                 ],
                 "MapPublicIpOnLaunch": true
@@ -457,6 +469,10 @@
                     {
                         "Key": "Name",
                         "Value": "NAT"
+                    },
+                    {
+                        "Key" : "CreatedBy",
+                        "Value" : "GuardDuty Test Script"
                     }
                 ],
                 "NetworkInterfaces": [
@@ -622,6 +638,10 @@
                         "Key": "Name",
                         "Value": "LinuxBastion",
                         "PropagateAtLaunch": "true"
+                    },
+                    {
+                        "Key" : "CreatedBy",
+                        "Value" : "GuardDuty Test Script"
                     }
                 ]
             },
@@ -927,6 +947,10 @@
                       "Tags" : [ {
                           "Key" : "Name",
                           "Value" : "RedTeam"
+                       },
+                       {
+                           "Key" : "CreatedBy",
+                           "Value" : "GuardDuty Test Script"
                        } ]
                 }                 
             },
@@ -1052,6 +1076,10 @@
                       "Tags" : [ {
                           "Key" : "Name",
                           "Value" : "BasicLinuxTarget"
+                       },
+                       {
+                           "Key" : "CreatedBy",
+                           "Value" : "GuardDuty Test Script"
                        } ]
                                  
 		}
@@ -1152,6 +1180,10 @@
                       "Tags" : [ {
                           "Key" : "Name",
                           "Value" : "BasicWindowsTarget"
+                       },
+                       {
+                           "Key" : "CreatedBy",
+                           "Value" : "GuardDuty Test Script"
                        } ]                                 
 		}
             }
