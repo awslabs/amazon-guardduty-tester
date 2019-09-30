@@ -641,7 +641,8 @@
                     },
                     {
                         "Key" : "CreatedBy",
-                        "Value" : "GuardDuty Test Script"
+                        "Value" : "GuardDuty Test Script",
+                        "PropagateAtLaunch": "true"
                     }
                 ]
             },
