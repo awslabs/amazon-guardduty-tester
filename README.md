@@ -31,7 +31,7 @@ Host tester</br>
 &nbsp;&nbsp;&nbsp;&nbsp;HostName {Local IP Address of RedTeam Instance}</br>
 &nbsp;&nbsp;&nbsp;&nbsp;User ec2-user</br>
 &nbsp;&nbsp;&nbsp;&nbsp;IdentityFile ~/.ssh/{your-ssh-key.pem</br>
-&nbsp;&nbsp;&nbsp;&nbsp;ProxyCommand ssh bastion nc %h %p</br>
+&nbsp;&nbsp;&nbsp;&nbsp;ProxyCommand ssh -W %h:%p bastion</br>
 &nbsp;&nbsp;&nbsp;&nbsp;ServerAliveInterval 240</br>
 </br>
 You would simply call $ ssh tester to login at that point. </br>
