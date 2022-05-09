@@ -926,7 +926,7 @@
                                                 "cmake -DUNIT_TESTING=OFF -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..\n",
                                                 "make && make install\n",
 						"cd /home/ec2-user\n",
-						"git clone -b \"stable-2.0\" git://github.com/FreeRDP/FreeRDP.git /home/ec2-user/FreeRDP\n",
+						"git clone -b \"stable-2.0\" https://github.com/FreeRDP/FreeRDP.git /home/ec2-user/FreeRDP\n",
 						"cd /home/ec2-user/FreeRDP\n",
 						"cmake -DCMAKE_BUILD_TYPE=Debug -DWITH_SSE2=ON .\n",
                                                 "make install\n",
