@@ -464,7 +464,7 @@
                         "AWSNATHVM"
                     ]
                 },
-                "InstanceType": "t2.micro",
+                "InstanceType": "t3.micro",
                 "Tags": [
                     {
                         "Key": "Name",
@@ -692,7 +692,7 @@
                     "Ref": "BastionSecurityGroup"
                 }
             ],
-             "InstanceType": "t2.small",
+             "InstanceType": "t3.small",
              "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
@@ -946,7 +946,7 @@
                               ]
                           }
                       },
-                      "InstanceType" : "m4.large",
+                      "InstanceType" : "m5.large",
                       "AvailabilityZone": {
                           "Fn::Select": [
                               "0",
@@ -1075,7 +1075,7 @@
                               ]
                           }
                       },
-                      "InstanceType" : "m4.large",
+                      "InstanceType" : "m5.large",
                       "AvailabilityZone": {
                           "Fn::Select": [
                               "0",
@@ -1179,7 +1179,7 @@
 			}
                     }
                     ],
-                      "InstanceType" : "m4.large",
+                      "InstanceType" : "m5.large",
                       "AvailabilityZone": {
                           "Fn::Select": [
                               "0",
