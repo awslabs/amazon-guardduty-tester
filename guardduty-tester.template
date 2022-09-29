@@ -86,14 +86,6 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Default: /aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id
 Conditions:
-  GovCloudCondition: !Equals 
-    - !Ref 'AWS::Region'
-    - us-gov-west-1
-  NATInstanceCondition: !Equals 
-    - !Ref 'AWS::Region'
-    - us-gov-west-1
-  NATGatewayCondition: !Not 
-    - !Condition GovCloudCondition
   NVirginiaRegionCondition: !Equals 
     - !Ref 'AWS::Region'
     - us-east-1
@@ -213,14 +205,7 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateSubnetRouteTable
       DestinationCidrBlock: 0.0.0.0/0
-      InstanceId: !If 
-        - NATInstanceCondition
-        - !Ref NATInstance
-        - !Ref 'AWS::NoValue'
-      NatGatewayId: !If 
-        - NATGatewayCondition
-        - !Ref NATGateway
-        - !Ref 'AWS::NoValue'
+      NatGatewayId: !Ref NATGateway
 
   PrivateSubnetRouteTableAssociation:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
@@ -257,13 +242,8 @@ Resources:
     Type: 'AWS::EC2::EIP'
     Properties:
       Domain: vpc
-      InstanceId: !If 
-        - NATInstanceCondition
-        - !Ref NATInstance
-        - !Ref 'AWS::NoValue'
 
   NATGateway:
-    Condition: NATGatewayCondition
     DependsOn: VPCGatewayAttachment
     Type: 'AWS::EC2::NatGateway'
     Properties:
@@ -271,46 +251,6 @@ Resources:
         - NATEIP
         - AllocationId
       SubnetId: !Ref PublicSubnet
-
-  NATInstance:
-    Condition: NATInstanceCondition
-    DependsOn: VPCGatewayAttachment
-    Type: 'AWS::EC2::Instance'
-    Properties:
-      ImageId: !FindInMap 
-        - AWSAMIRegionMap
-        - !Ref 'AWS::Region'
-        - AWSNATHVM
-      InstanceType: t2.micro
-      Tags:
-        - Key: Name
-          Value: NAT
-        - Key: CreatedBy
-          Value: GuardDuty Test Script
-      NetworkInterfaces:
-        - GroupSet:
-            - !Ref NATInstanceSecurityGroup
-          AssociatePublicIpAddress: 'true'
-          DeviceIndex: '0'
-          DeleteOnTermination: 'true'
-          SubnetId: !Ref PublicSubnet
-      KeyName: !If 
-        - NATInstanceCondition
-        - !Ref KeyPairName
-        - !Ref 'AWS::NoValue'
-      SourceDestCheck: 'false'
-
-  NATInstanceSecurityGroup:
-    Condition: NATInstanceCondition
-    Type: 'AWS::EC2::SecurityGroup'
-    Properties:
-      GroupDescription: Enables outbound internet access for the VPC via the NAT instances
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-        - IpProtocol: '-1'
-          FromPort: '1'
-          ToPort: '65535'
-          CidrIp: !Ref VPCCIDR
 
   BastionHostRole:
     Type: 'AWS::IAM::Role'
@@ -328,13 +268,8 @@ Resources:
                   - 'logs:PutRetentionPolicy'
                   - 'logs:PutMetricFilter'
                   - 'logs:CreateLogGroup'
-                Resource: !Sub 
-                  - >-
-                    arn:${Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*
-                  - Partition: !If 
-                      - GovCloudCondition
-                      - aws-us-gov
-                      - aws
+                Resource:
+                  !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*"
                 Effect: Allow
           PolicyName: bastion-cloudwatch-logs-policy
         - PolicyDocument:
