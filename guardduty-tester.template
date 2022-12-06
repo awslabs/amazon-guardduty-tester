@@ -497,11 +497,13 @@ Resources:
               yum update -y
             - >
               yum install nmap git python python2-pip python3 python-argparse
-              gcc gcc-c++ glib2-devel bind-utils wget -y
+              gcc gcc-c++ glib2-devel bind-utils wget unzip -y
             - >
               yum install cmake openssl-devel libX11-devel libXi-devel
               libXtst-devel libXinerama-devel libusb-static libusbmuxd-devel
               libusbx-devel libusb-devel -y
+            - |
+              yum install freerdp freerdp-devel desktop-file-utils -y
             - |
               pip install paramiko
             - |
@@ -513,12 +515,10 @@ Resources:
               curl -L
               https://raw.githubusercontent.com/awslabs/amazon-guardduty-tester/master/guardduty_tester.sh
               > /home/ec2-user/guardduty_tester.sh
-            - |
+            - >
               mkdir /home/ec2-user/compromised_keys
-            - |
-              mkdir /home/ec2-user/domains
-            - |
-              mkdir /home/ec2-user/passwords
+              /home/ec2-user/domains
+              /home/ec2-user/passwords
             - >
               curl -L
               https://raw.githubusercontent.com/awslabs/amazon-guardduty-tester/master/artifacts/queries.txt
@@ -572,18 +572,6 @@ Resources:
             - |
               "' >> /home/ec2-user/localIps.sh
             - |
-              pip install cmake
-            - |
-              mkdir /home/ec2-user/FreeRDP
-            - |
-              mkdir /home/ec2-user/thc-hydra
-            - >
-              git clone https://github.com/vanhauser-thc/thc-hydra
-              /home/ec2-user/thc-hydra
-            - >
-              wget -q -O /home/ec2-user/libssh.tar.xz
-              https://www.libssh.org/files/0.9/libssh-0.9.4.tar.xz
-            - |
               cd /home/ec2-user/
             - |
               cat << EOF >> users
@@ -596,6 +584,14 @@ Resources:
               www
               nobody
               EOF
+            - |
+              pip install cmake
+            - >
+              wget https://github.com/vanhauser-thc/thc-hydra/archive/refs/tags/v9.4.zip 
+              -P /home/ec2-user
+            - >
+              wget -q -O /home/ec2-user/libssh.tar.xz
+              https://www.libssh.org/files/0.9/libssh-0.9.4.tar.xz
             - |
               tar -xvf /home/ec2-user/libssh.tar.xz
             - |
@@ -611,29 +607,12 @@ Resources:
               make && make install
             - |
               cd /home/ec2-user
-            - >
-              git clone -b "stable-2.0" https://github.com/FreeRDP/FreeRDP.git
-              /home/ec2-user/FreeRDP
             - |
-              cd /home/ec2-user/FreeRDP
+              unzip v9.4.zip
             - |
-              cmake -DCMAKE_BUILD_TYPE=Debug -DWITH_SSE2=ON .
-            - |
-              make install
-            - |
-              echo '/usr/local/lib/freerdp' >> /etc/ld.so.conf.d/freerdp.conf
-            - |
-              ln -s /usr/local/bin/xfreerdp /usr/bin/xfreerdp
-            - |
-              cd /home/ec2-user
-            - >
-              echo "export
-              LD_LIBRARY_PATH=/usr/lib:/usr/local/lib64:$LD_LIBRARY_PATH" >>
-              .bash_profile
-            - |
-              cd /home/ec2-user/thc-hydra
-            - |
-              /home/ec2-user/thc-hydra/configure
+              cd /home/ec2-user/thc-hydra-9.4
+            - |    
+              /home/ec2-user/thc-hydra-9.4/configure
             - |
               make
             - |
