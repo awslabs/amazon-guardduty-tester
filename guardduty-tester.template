@@ -89,12 +89,6 @@ Conditions:
   NVirginiaRegionCondition: !Equals 
     - !Ref 'AWS::Region'
     - us-east-1
-Mappings:
-  AWSAMIRegionMap:
-    NATAMI:
-      AWSNATHVM: amzn-ami-vpc-nat-hvm-2017.03.0.20170401-x86_64-ebs
-    us-gov-west-1:
-      AWSNATHVM: ami-3f0a8f5e
 
 Resources:
   BastionMainLogGroup:
