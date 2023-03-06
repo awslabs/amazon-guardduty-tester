@@ -1,4 +1,4 @@
-# Copyright 2017 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Cxopyright 2017 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #  
 #  Licensed under the Apache License, Version 2.0 (the "License").
 #  You may not use this file except in compliance with the License.
@@ -148,7 +148,7 @@ EOF
     #Install CloudWatch Log service on AMZN
     yum update -y
     yum install -y awslogs
-    export CWG=`curl http://169.254.169.254/latest/user-data/ | grep CLOUDWATCHGROUP | sed 's/CLOUDWATCHGROUP=//g'`
+    export CWG=`curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/user-data/ | grep CLOUDWATCHGROUP | sed 's/CLOUDWATCHGROUP=//g'`
     echo "file = $BASTION_LOGFILE_SHADOW" >> /tmp/groupname.txt
     echo "log_group_name = $CWG" >> /tmp/groupname.txt
 
@@ -168,7 +168,7 @@ EOF
     cat ~/cloudwatchlog.conf >> /etc/awslogs/awslogs.conf
     cat /tmp/groupname.txt >> /etc/awslogs/awslogs.conf
     export TMPREGION=`cat /etc/awslogs/awscli.conf | grep region`
-    export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
+    export Region=`curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
     sed -i.back "s/$TMPREGION/region = $Region/g" /etc/awslogs/awscli.conf
 
     #Restart awslogs service
@@ -212,7 +212,7 @@ EOF
     touch /tmp/messages
     chown root:ubuntu /tmp/messages
     #Install CloudWatch logs on Ubuntu
-    export CWG=`curl http://169.254.169.254/latest/user-data/ | grep CLOUDWATCHGROUP | sed 's/CLOUDWATCHGROUP=//g'`
+    export CWG=`curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/user-data/ | grep CLOUDWATCHGROUP | sed 's/CLOUDWATCHGROUP=//g'`
     echo "file = $BASTION_LOGFILE_SHADOW" >> /tmp/groupname.txt
     echo "log_group_name = $CWG" >> /tmp/groupname.txt
 
@@ -224,7 +224,7 @@ state_file = /var/awslogs/state/agent-state
 log_stream_name = {instance_id}
 datetime_format = %b %d %H:%M:%S
 EOF
-    export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
+    export Region=`curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
     cat /tmp/groupname.txt >> ~/cloudwatchlog.conf
 
     curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
@@ -298,7 +298,7 @@ EOF
 
 
     # Install CloudWatch Log service on Centos Linux
-    export CWG=`curl http://169.254.169.254/latest/user-data/ | grep CLOUDWATCHGROUP | sed 's/CLOUDWATCHGROUP=//g'`
+    export CWG=`curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/user-data/ | grep CLOUDWATCHGROUP | sed 's/CLOUDWATCHGROUP=//g'`
     centos=`cat /etc/os-release | grep VERSION_ID | tr -d \VERSION_ID=\"`
     if [ "$centos" == "7" ]; then
         echo "file = $BASTION_LOGFILE_SHADOW" >> /tmp/groupname.txt
@@ -317,7 +317,7 @@ buffer_duration = 5000
 log_stream_name = {instance_id}
 initial_position = start_of_file
 EOF
-    export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
+    export Region=`curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
     cat /tmp/groupname.txt >> ~/cloudwatchlog.conf
 
     curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
@@ -345,10 +345,10 @@ EOF
         chown root:centos /var/log/bastion
         yum update -y
         yum install -y awslogs
-        export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
+        export Region=`curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
         export TMPREGION=`cat /etc/awslogs/awscli.conf | grep region`
         sed -i.back "s/$TMPREGION/region = $Region/g" /etc/awslogs/awscli.conf
-        export CWG=`curl http://169.254.169.254/latest/user-data/ | grep CLOUDWATCHGROUP | sed 's/CLOUDWATCHGROUP=//g'`
+        export CWG=`curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/user-data/ | grep CLOUDWATCHGROUP | sed 's/CLOUDWATCHGROUP=//g'`
         echo "file = $BASTION_LOGFILE_SHADOW" >> /tmp/groupname.txt
         echo "log_group_name = $CWG" >> /tmp/groupname.txt
 
@@ -367,7 +367,7 @@ EOF
         cat /tmp/groupname.txt >> /etc/awslogs/awslogs.conf
         yum install ec2-metadata -y
         export TMPREGION=`cat /etc/awslogs/awscli.conf | grep region`
-        export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
+        export Region=`curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
         sed -i.back "s/$TMPREGION/region = $Region/g" /etc/awslogs/awscli.conf
         sleep 3
         service awslogs stop
@@ -387,7 +387,7 @@ EOF
 
 function request_eip() {
     release=$(osrelease)
-    export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
+    export Region=`curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
 
     #Check if EIP already assigned.
     ALLOC=1
@@ -399,7 +399,7 @@ function request_eip() {
     else
         aws ec2 describe-addresses --region $Region --output text > /query.txt
         #Ensure we are only using EIPs from our Stack
-        line=`curl http://169.254.169.254/latest/user-data/ | grep EIP_LIST`
+        line=`curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/user-data/ | grep EIP_LIST`
         IFS=$':' DIRS=(${line//$','/:})       # Replace tabs with colons.
 
         for (( i=0 ; i<${#DIRS[@]} ; i++ )); do
@@ -416,7 +416,7 @@ function request_eip() {
 
         if [ "$AVAILABLE_EIPs" -gt "$ZERO" ]; then
             FIELD_COUNT="5"
-            INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+            INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/instance-id)
             echo "Running associate_eip_now"
             while read name;
             do
@@ -460,7 +460,7 @@ function request_eip() {
 }
 
 function call_request_eip() {
-    Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
+    Region=`curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
     ZERO=0
     INSTANCE_IP=`ifconfig -a | grep inet | awk {'print $2'} | sed 's/addr://g' | head -1`
     ASSIGNED=$(aws ec2 describe-addresses --region $Region --output text | grep $INSTANCE_IP | wc -l)
@@ -583,6 +583,8 @@ if [[ $X11_FORWARDING == "false" ]];then
     awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
     echo "X11Forwarding no" >> /etc/ssh/sshd_config
 fi
+
+TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"`
 
 release=$(osrelease)
 # Ubuntu Linux
