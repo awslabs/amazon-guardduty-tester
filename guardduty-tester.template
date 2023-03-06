@@ -322,19 +322,6 @@ Resources:
 
   BastionLaunchConfiguration:
     Type: 'AWS::AutoScaling::LaunchConfiguration'
-    Metadata:
-      'AWS::CloudFormation::Init':
-        config:
-          b-bootstrap:
-            command: !Join 
-              - ''
-              - - /tmp/bastion_bootstrap.sh
-                - ' --banner '
-                - >-
-                  https://raw.githubusercontent.com/awslabs/amazon-guardduty-tester/master/artifacts/banner_message.txt
-                - ' --enable true'
-                - ' --tcp-forwarding true'
-                - ' --x11-forwarding false'
     Properties:
       KeyName: !Ref KeyPairName
       IamInstanceProfile: !Ref BastionHostProfile
@@ -354,8 +341,7 @@ Resources:
             - |
               yum install nmap -y
             - >
-              easy_install
-              https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+              yum install -y aws-cfn-bootstrap
             - >
               curl -L -o /tmp/bastion_bootstrap.sh
               https://github.com/awslabs/amazon-guardduty-tester/raw/master/bastion_bootstrap.sh
@@ -502,9 +488,11 @@ Resources:
               pip install paramiko
             - |
               pip3 install paramiko
+            - |
+              TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"`
             - >
-              export privateIP=`curl
-              http://169.254.169.254/latest/meta-data/local-ipv4`
+              export privateIP=`curl -H "X-aws-ec2-metadata-token: $TOKEN"
+              -v http://169.254.169.254/latest/meta-data/local-ipv4`
             - >
               curl -L
               https://raw.githubusercontent.com/awslabs/amazon-guardduty-tester/master/guardduty_tester.sh
@@ -546,14 +534,14 @@ Resources:
             - |
               echo -n 'RED_TEAM_INSTANCE="' >> /home/ec2-user/localIps.sh
             - >
-              wget -q -O - http://169.254.169.254/latest/meta-data/instance-id
+              curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/instance-id
               >> /home/ec2-user/localIps.sh
             - |
               echo '"' >> /home/ec2-user/localIps.sh
             - |
               echo -n 'RED_TEAM_IP="' >> /home/ec2-user/localIps.sh
             - >
-              wget -q -O - http://169.254.169.254/latest/meta-data/local-ipv4 >>
+              curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/local-ipv4 >>
               /home/ec2-user/localIps.sh
             - |
               echo '"' >> /home/ec2-user/localIps.sh
