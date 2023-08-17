@@ -10,6 +10,8 @@ If you are looking to see findings for malware generated you need to enable the 
 
 You must generate a new or use an existing EC2 key pair in each region where you want to run these scripts. This EC2 keypair is used as a parameter in the guardduty-tester.template script that you use in Step 1 to create a new CloudFormation stack. For more information about generating EC2 key pairs, see https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html.
 
+If the account has enabled default EBS encryption with KMS CMK(Customer-Managed Key), you will need to update the key policy to allow the Auto-Scaling Group service role to use the key for encryption, otherwise the Auto Scaling Group will fail to launch any instance. Please see https://docs.aws.amazon.com/autoscaling/ec2/userguide/key-policy-requirements-EBS-encryption.html#overview.
+
 ## Step 1
 
 Create a new CloudFormation stack using guardduty-tester.template. For detailed directions about creating a stack, see https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-console-create-stack.html.
