@@ -27,19 +27,21 @@ Navigate to the EC2 console and locate the EC2 instance running with the name of
 You will need the bastion host and RedTeam EC2 instance IP addresses in order to ssh into the tester EC2 instance.
 
 Create the following entry in your ~/.ssh/config file to login to your instance through the bastion host:</br>
-</br>
-Host bastion</br>
-&nbsp;&nbsp;&nbsp;&nbsp;HostName {Elastic IP Address of Bastion}</br>
-&nbsp;&nbsp;&nbsp;&nbsp;User ec2-user</br>
-&nbsp;&nbsp;&nbsp;&nbsp;IdentityFile ~/.ssh/{your-ssh-key.pem}</br>
-Host tester</br>
-&nbsp;&nbsp;&nbsp;&nbsp;ForwardAgent yes</br>
-&nbsp;&nbsp;&nbsp;&nbsp;HostName {Local IP Address of RedTeam Instance}</br>
-&nbsp;&nbsp;&nbsp;&nbsp;User ec2-user</br>
-&nbsp;&nbsp;&nbsp;&nbsp;IdentityFile ~/.ssh/{your-ssh-key.pem</br>
-&nbsp;&nbsp;&nbsp;&nbsp;ProxyCommand ssh -W %h:%p bastion</br>
-&nbsp;&nbsp;&nbsp;&nbsp;ServerAliveInterval 240</br>
-</br>
+
+```
+Host bastion
+    HostName {Elastic IP Address of Bastion}
+    User ec2-user
+    IdentityFile ~/.ssh/{your-ssh-key.pem}
+Host tester
+    ForwardAgent yes
+    HostName {Local IP Address of RedTeam Instance}
+    User ec2-user
+    IdentityFile ~/.ssh/{your-ssh-key.pem
+    ProxyCommand ssh -W %h:%p bastion
+    ServerAliveInterval 240
+```
+
 You would simply call $ ssh tester to login at that point. </br>
 </br>
 For more details on configuring and connecting through bastion hosts you can check out this article:
