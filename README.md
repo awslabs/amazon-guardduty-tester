@@ -37,7 +37,7 @@ Host tester
     ForwardAgent yes
     HostName {Local IP Address of RedTeam Instance}
     User ec2-user
-    IdentityFile ~/.ssh/{your-ssh-key.pem
+    IdentityFile ~/.ssh/{your-ssh-key.pem}
     ProxyCommand ssh -W %h:%p bastion
     ServerAliveInterval 240
 ```
