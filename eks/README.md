@@ -29,7 +29,7 @@ An IAM Policy listing the minimal permissions for deploying and deleting the res
 #### 2a. Create EKS cluster
 This step will create the EKS cluster that is used for both the audit logs and runtime activity findings. 
 
-* cd to the amazon-guardduty-tester/eks directory
+* cd to the **amazon-guardduty-tester/eks** directory
 * Run the **create-gd-eks-cluster.sh** script to install tools and create the cluster.   This script will take 20-30 minutes to deploy and configure the initial EKS cluster.
 ```
 usage: create-gd-eks-cluster.sh <CLUSTER-NAME> <AWS-REGION>
@@ -68,7 +68,7 @@ Below is a list of the GuardDuty finding types that are expected to be generated
 * Policy:Kubernetes/AnonymousAccessGranted
 
 #### 2c. Generate EKS runtime findings
-* cd to the amazon-guardduty-tester/eks directory
+* cd to the **amazon-guardduty-tester/eks** directory
 * Run the **build-deploy-eks-runtime-tests.sh** script to create a docker image and deply it to the EKS cluster.  This script will build the docker image, create a repository in Amazon ECR, store the image in ECR, and deploy the image to a pod in the EKS test cluster.  The docker image contains commands that will result in GuardDuty findings related to threats happening within the container.
 
 ```
