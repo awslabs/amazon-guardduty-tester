@@ -91,10 +91,8 @@ Runtime findings are applicable to EC2, ECS, and EKS workloads provided the Guar
 - DefenseEvasion:Runtime/ProcessInjection.VirtualMemoryWrite
 - Discovery:Kubernetes/MaliciousIPCaller.Custom
 - Discovery:Kubernetes/SuccessfulAnonymousAccess
-- Discovery:Kubernetes/TorIPCaller
 - Discovery:Runtime/RawSocketCreated
 - Discovery:S3/MaliciousIPCaller.Custom
-- Discovery:S3/TorIPCaller
 - Execution:Kubernetes/ExecInKubeSystemPod
 - Execution:Runtime/MemoryMarkedExecutable
 - Execution:Runtime/ReverseShell
@@ -121,7 +119,6 @@ Runtime findings are applicable to EC2, ECS, and EKS workloads provided the Guar
 - PrivilegeEscalation:Runtime/DockerSocketAccessed
 - Recon:EC2/Portscan
 - Recon:IAMUser/MaliciousIPCaller.Custom
-- Recon:IAMUser/TorIPCaller
 - Stealth:IAMUser/CloudTrailLoggingDisabled
 - Stealth:IAMUser/PasswordPolicyChange
 - Stealth:S3/ServerAccessLoggingDisabled
@@ -139,11 +136,8 @@ Runtime findings are applicable to EC2, ECS, and EKS workloads provided the Guar
 - UnauthorizedAccess:EC2/MaliciousIPCaller.Custom
 - UnauthorizedAccess:EC2/RDPBruteForce
 - UnauthorizedAccess:EC2/SSHBruteForce
-- UnauthorizedAccess:IAMUser/InstanceCredentialExfiltration.OutsideAWS
 - UnauthorizedAccess:IAMUser/MaliciousIPCaller.Custom
-- UnauthorizedAccess:IAMUser/TorIPCaller
 - UnauthorizedAccess:Lambda/MaliciousIPCaller.Custom
 - UnauthorizedAccess:Runtime/MaliciousIPCaller.Custom
 - UnauthorizedAccess:S3/MaliciousIPCaller.Custom
-- UnauthorizedAccess:S3/TorIPCaller
 ```
