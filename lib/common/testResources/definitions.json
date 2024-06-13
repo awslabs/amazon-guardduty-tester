@@ -636,6 +636,16 @@
         {
             "resource": "eks",
             "tactic": "discovery",
+            "findingType": "Discovery:Kubernetes/TorIPCaller",
+            "alias": "eks/TorIPCaller.sh",
+            "logSource": "eks-audit-logs",
+            "local": "false",
+            "description": "echo \"Test #$TEST_NUM - TOR IP calling get API\"",
+            "expectedFinding": "\"Test #$TEST_NUM - TOR IP calling get API\" \"Expected Finding: Kubernetes API commonly used in Discovery tactics was invoked on cluster GD-TEST-CLUSTER from Tor exit node IP address\" \"Finding Type : Discovery:Kubernetes/TorIPCaller\" \"\""
+        },
+        {
+            "resource": "eks",
+            "tactic": "discovery",
             "findingType": "Discovery:Kubernetes/SuccessfulAnonymousAccess",
             "alias": "eks/SuccessfulAnonymousAccess.sh",
             "logSource": "eks-audit-logs",
@@ -888,6 +898,16 @@
         },
         {
             "resource": "iam",
+            "tactic": "recon",
+            "findingType": "Recon:IAMUser/TorIPCaller",
+            "alias": "iam/ReconTorIPCaller.sh",
+            "description": "echo \"Test #$TEST_NUM - Anonymous Recon\"",
+            "expectedFinding": "\"Test #$TEST_NUM: Anonymous Recon\" \"Expected Finding: API ListBuckets, commonly used in reconnaissance attacks, was invoked from a Tor exit node IP address $IP\" \"Finding Type : Recon:IAMUser/TorIPCaller\" \"\"",
+            "logSource": "cloudtrail",
+            "local": "false"
+        },
+        {
+            "resource": "iam",
             "tactic": "stealth",
             "findingType": "Stealth:IAMUser/CloudTrailLoggingDisabled",
             "alias": "iam/CloudTrailLoggingDisabled.sh",
@@ -909,6 +929,26 @@
         {
             "resource": "iam",
             "tactic": "unauthorized-access",
+            "findingType": "UnauthorizedAccess:IAMUser/TorIPCaller",
+            "alias": "iam/InstanceCredentialExfiltration-OutsideAWS.sh",
+            "description": "echo \"Test #$TEST_NUM - Log in Attempts with Tor\"",
+            "expectedFinding": "\"Test #$TEST_NUM: Log in Attempts with Tor\" \"Expected Finding: API ConsoleLogin was invoked from a Tor exit node IP address\" \"Finding Type : UnauthorizedAccess:IAMUser/TorIPCaller\" \"Expected Finding: Credentials created exclusively for an EC2 instance using instance role $ROLE_NAME have been used from external IP address\" \"Finding Type : UnauthorizedAccess:IAMUser/InstanceCredentialExfiltration.OutsideAWS\" \"\"",
+            "logSource": "cloudtrail",
+            "local": "false"
+        },
+        {
+            "resource": "iam",
+            "tactic": "unauthorized-access",
+            "findingType": "UnauthorizedAccess:IAMUser/InstanceCredentialExfiltration.OutsideAWS",
+            "alias": "iam/InstanceCredentialExfiltration-OutsideAWS.sh",
+            "description": "echo \"Test #$TEST_NUM - Log in Attempts with Tor\"",
+            "expectedFinding": "\"Test #$TEST_NUM: Log in Attempts with Tor\" \"Expected Finding: API ConsoleLogin was invoked from a Tor exit node IP address\" \"Finding Type : UnauthorizedAccess:IAMUser/TorIPCaller\" \"Expected Finding: Credentials created exclusively for an EC2 instance using instance role $ROLE_NAME have been used from external IP address\" \"Finding Type : UnauthorizedAccess:IAMUser/InstanceCredentialExfiltration.OutsideAWS\" \"\"",
+            "logSource": "cloudtrail",
+            "local": "false"
+        },
+        {
+            "resource": "iam",
+            "tactic": "unauthorized-access",
             "findingType": "UnauthorizedAccess:IAMUser/MaliciousIPCaller.Custom",
             "alias": "iam/UnauthMaliciousIPCaller-Custom.sh",
             "description": "echo \"Test #$TEST_NUM - Custom Malicious Caller\"",
@@ -923,6 +963,16 @@
             "alias": "s3/DiscoveryMaliciousIPCaller-Custom.sh",
             "description": "echo \"Test #$TEST_NUM Discovery Custom Malicious Caller\"",
             "expectedFinding": "\"Test #$TEST_NUM Discovery Custom Malicious Caller\" \"Expected Finding: An API commonly used in resource discovery was used to access a bucket from an IP address on a custom threat list.\" \"Finding Type : Discovery:S3/MaliciousIPCaller.Custom\" \"\"",
+            "local": "false",
+            "logSource": "s3-logs"
+        },
+        {
+            "resource": "s3",
+            "tactic": "discovery",
+            "findingType": "Discovery:S3/TorIPCaller",
+            "alias": "s3/DiscoveryTorIPCaller.sh",
+            "description": "echo \"Test #$TEST_NUM - Anonymous Resource Discovery\"",
+            "expectedFinding": "\"Test #$TEST_NUM - Anonymous Resource Discovery\" \"Expected Finding: An API commonly used in resource discovery was used to access a bucket from a Tor exit node IP address.\" \"Finding Type : Discovery:S3/TorIPCaller\" \"\"",
             "local": "false",
             "logSource": "s3-logs"
         },
@@ -993,6 +1043,16 @@
             "alias": "s3/UnauthMaliciousIPCaller-Custom.sh",
             "description": "echo \"Test #$TEST_NUM - Custom Malicious IP Resource Collection\"",
             "expectedFinding": "\"Test #$TEST_NUM - Custom Malicious IP Resource Collection\" \"Expected Finding: An API was used to access a bucket from an IP address on a custom threat list.\" \"Finding Type : UnauthorizedAccess:S3/MaliciousIPCaller.Custom\" \"\"",
+            "local": "false",
+            "logSource": "s3-logs"
+        },
+        {
+            "resource": "s3",
+            "tactic": "unauthorized-access",
+            "findingType": "UnauthorizedAccess:S3/TorIPCaller",
+            "alias": "s3/UnauthTorIPCaller.sh",
+            "description": "echo \"Test #$TEST_NUM - Anonymous Resource Collection\"",
+            "expectedFinding": "\"Test #$TEST_NUM - Anonymous Resource Collection\" \"Expected Finding: An API was used to access a bucket from a Tor exit node IP address.\" \"Finding Type : UnauthorizedAccess:S3/TorIPCaller\" \"\"",
             "local": "false",
             "logSource": "s3-logs"
         }
