@@ -11,6 +11,7 @@
 //  express or implied. See the License for the specific language governing
 //  permissions and limitations under the License.
 
+import { Tag } from 'aws-cdk-lib';
 import { CfnLaunchTemplate, type Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Cluster, EndpointAccess, KubernetesVersion, NodegroupAmiType } from 'aws-cdk-lib/aws-eks';
 import { type Role } from 'aws-cdk-lib/aws-iam';
@@ -24,6 +25,7 @@ export interface EksProps {
   kubectlRole: Role;
   name: string;
   instanceName: string;
+  tag: Tag;
 }
 
 /**
@@ -61,6 +63,10 @@ export class TesterEksCluster extends Construct {
               {
                 key: 'Name',
                 value: props.instanceName,
+              },
+              {
+                key: props.tag.key,
+                value: props.tag.value,
               },
             ],
           },

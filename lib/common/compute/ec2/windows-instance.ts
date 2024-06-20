@@ -11,6 +11,7 @@
 //  express or implied. See the License for the specific language governing
 //  permissions and limitations under the License.
 
+import { Tags } from 'aws-cdk-lib';
 import { Instance, SubnetType, WindowsImage, WindowsVersion } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 
@@ -40,5 +41,7 @@ export class BasicWindowsInstance extends Construct {
       associatePublicIpAddress: false,
       instanceName: props.instanceName,
     });
+
+    Tags.of(this.ec2).add(props.tag.key, props.tag.value);
   }
 }

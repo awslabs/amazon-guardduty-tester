@@ -11,6 +11,7 @@
 //  express or implied. See the License for the specific language governing
 //  permissions and limitations under the License.
 
+import { Tag } from 'aws-cdk-lib';
 import { type InstanceType, type Vpc } from 'aws-cdk-lib/aws-ec2';
 /**
  * Defining base props for EC2/ECS parameters
@@ -21,4 +22,5 @@ export interface Ec2Props {
   instanceType: InstanceType;
   securityGroupIngress?: string;
   region?: string;
+  tag: Tag;
 }

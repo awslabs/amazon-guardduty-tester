@@ -11,6 +11,7 @@
 //  express or implied. See the License for the specific language governing
 //  permissions and limitations under the License.
 
+import { Tag } from 'aws-cdk-lib';
 import { InstanceClass, InstanceSize, InstanceType } from 'aws-cdk-lib/aws-ec2';
 
 // Constant hard coded names of testing environment resources
@@ -24,3 +25,4 @@ export const WINDOWS_INSTANCE_NAME: string = 'Windows-GuardDutyTester';
 export const ECS_INSTANCE_NAME: string = 'Driver-GuardDutyTester';
 export const EKS_INSTANCE_NAME: string = 'Kube-GuardDutyTester';
 export const EC2_INSTANCE_TYPE: InstanceType = InstanceType.of(InstanceClass.T3, InstanceSize.MICRO);
+export const INSTANCE_TAG: Tag = new Tag('CreatedBy', 'GuardDuty Test Script');

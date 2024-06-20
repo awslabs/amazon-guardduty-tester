@@ -34,6 +34,7 @@ import {
   ECS_INSTANCE_NAME,
   EKS_CLUSTER_NAME,
   EKS_INSTANCE_NAME,
+  INSTANCE_TAG,
   KALI_INSTANCE_NAME,
   TRAIL_NAME,
   WINDOWS_INSTANCE_NAME,
@@ -84,6 +85,7 @@ export class GuardDutyTesterStack extends Stack {
       eksCluster: EKS_CLUSTER_NAME,
       tempRole: tempRole.arn,
       instanceType: EC2_INSTANCE_TYPE,
+      tag: INSTANCE_TAG,
     });
 
     // private subnet resources
@@ -91,6 +93,7 @@ export class GuardDutyTesterStack extends Stack {
       vpc: testerVpc.vpc,
       instanceName: WINDOWS_INSTANCE_NAME,
       instanceType: EC2_INSTANCE_TYPE,
+      tag: INSTANCE_TAG,
     });
     const driverCluster = new TestDriverEcsCluster(this, 'driverCluster', {
       accountId: this.account,
@@ -116,6 +119,7 @@ export class GuardDutyTesterStack extends Stack {
       tempRole: tempRole.arn,
       stepFuncArn: stepFunction.machineArn,
       emptyBucketName: emptyBucket.bucketName,
+      tag: INSTANCE_TAG,
     });
     new TesterEksCluster(this, 'eksCluster', {
       vpc: testerVpc.vpc,
@@ -123,6 +127,7 @@ export class GuardDutyTesterStack extends Stack {
       kubectlRole: kaliInstance.instanceRole.role,
       name: EKS_CLUSTER_NAME,
       instanceName: EKS_INSTANCE_NAME,
+      tag: INSTANCE_TAG,
     });
 
     // Lambda requires Test VPC

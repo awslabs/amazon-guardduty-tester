@@ -100,6 +100,7 @@ export class TestDriverEcsCluster extends Construct {
 
     // host instance name
     Tags.of(launchTemplate).add('Name', props.instanceName);
+    Tags.of(launchTemplate).add(props.tag.key, props.tag.value);
 
     // Define cluster capacity provider with defined launch template
     cluster.addAsgCapacityProvider(

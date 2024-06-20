@@ -11,6 +11,7 @@
 //  express or implied. See the License for the specific language governing
 //  permissions and limitations under the License.
 
+import { Tags } from 'aws-cdk-lib';
 import { GenericLinuxImage, Instance, SubnetType, UserData } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 
@@ -68,6 +69,8 @@ export class KaliLinuxInstance extends Construct {
       securityGroup: securityGroup.sg,
       instanceName: props.instanceName,
     });
+
+    Tags.of(this.ec2).add(props.tag.key, props.tag.value);
   }
 
   /**
