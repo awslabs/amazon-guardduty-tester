@@ -181,7 +181,7 @@ class SettingsManager:
                 self.accnt_state['detector_info'].pop('ResponseMetadata')
                 break
 
-        if not self.accnt_state['detector_id']:
+        if 'detector_id' not in self.accnt_state:
             print()
             print('***********************************************************************')
             print('* ---------------------------   ERROR    ---------------------------  *')
