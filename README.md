@@ -67,14 +67,14 @@ EXAMPLES:
 ```
 
 ### Important Callout
-GuardDuty has many features that can be enabled/disabled on an account level such as EKS/ECS/EC2 Runtime Monitoring, Lambda protection, etc. The tester will check these and other account level settings required for the tests requested by the given parameters. Before any account level change is made, the tester will request user permission and after the tests are completed, the account will be restored to its original state. It is important to note that any changes to GuardDuty protections may begin the 30 day free trial.
+GuardDuty has many features that can be enabled/disabled on an account level such as EKS/ECS/EC2 Runtime Monitoring, Lambda protection, etc. The tester will check these and other account level settings required for the tests requested by the given parameters. Before any account level change is made, the tester will requets user permission and after the tests are completed, the account will be restored to its original state. It is important to note that any changes to GuardDuty protections may begin the 30 day free trial.
 
 ## Cleanup Test Resources
 When finished testing, run `cdk destroy` or delete the CloudFormation stack on the console in order to delete the resources created by the above deployment steps
 
 ## Troubleshooting
 Common issues:
-- `Cloud assembly schema version mismatch` ->  update the AWS CDK CLI to a compatible version. For more info see https://docs.aws.amazon.com/cdk/v2/guide/versioning.html#cdk_toolkit_versioning
+- `Cloud assembly schema version mismatch` ->  update the AWS CDK CLI to a version. For more info see https://docs.aws.amazon.com/cdk/v2/guide/versioning.html#cdk_toolkit_versioning
 - `Docker permission denied` -> Add the current user to the docker group to be able to run in rootless mode
 - Deployment can fails due to Availability Zone incompatibility, if you encounter this error see [this post](https://repost.aws/knowledge-center/ec2-instance-type-not-supported-az-error) from knowledge AWS share, and either choose a new region or hardcode the region/AZ you wish to deploy in. For region edit the `bin/cdk-gd-tester.ts` file to reflect your desired region and for AZ edit the `lib/common/network/vpc.ts` file and replace `maxAzs: 2,` with `availabilityZones: ['<Your-AZ-Here>', '<Your-Other-AZ>' ... ],`
 
@@ -92,11 +92,9 @@ Runtime findings are applicable to EC2, ECS, and EKS workloads provided the Guar
 - Discovery:Kubernetes/MaliciousIPCaller.Custom
 - Discovery:Kubernetes/SuccessfulAnonymousAccess
 - Discovery:Kubernetes/TorIPCaller
-- Discovery:Runtime/RawSocketCreated
 - Discovery:S3/MaliciousIPCaller.Custom
 - Discovery:S3/TorIPCaller
 - Execution:Kubernetes/ExecInKubeSystemPod
-- Execution:Runtime/MemoryMarkedExecutable
 - Execution:Runtime/ReverseShell
 - Impact:EC2/AbusedDomainRequest.Reputation
 - Impact:EC2/BitcoinDomainRequest.Reputation
@@ -143,7 +141,6 @@ Runtime findings are applicable to EC2, ECS, and EKS workloads provided the Guar
 - UnauthorizedAccess:IAMUser/MaliciousIPCaller.Custom
 - UnauthorizedAccess:IAMUser/TorIPCaller
 - UnauthorizedAccess:Lambda/MaliciousIPCaller.Custom
-- UnauthorizedAccess:Runtime/MaliciousIPCaller.Custom
 - UnauthorizedAccess:S3/MaliciousIPCaller.Custom
 - UnauthorizedAccess:S3/TorIPCaller
 ```

@@ -19,8 +19,11 @@ import { InstanceProfile } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 
 import { DriverRole } from '../../access/iam/driver-role';
+import { EcsTaskExecutionRole } from '../../access/iam/ecs-task-execution-role';
+import { EcsTaskRole } from '../../access/iam/ecs-task-role';
 import { ClusterSecurityGroup } from '../../access/securityGroup/cluster-security-group';
 import { type Ec2Props } from '../ec2/ec2-props';
+import { TesterFargateService } from './fargate-service';
 import { TesterEcsService } from './tester-service';
 
 export interface EcsProps extends Ec2Props {
@@ -58,12 +61,26 @@ export class TestDriverEcsCluster extends Construct {
       clusterName: props.ecsCluster,
     });
 
+    const executionRole = new EcsTaskExecutionRole(this, 'ExecRole', {
+      region: props.region!,
+      accountId: props.accountId,
+    });
+    const taskRole = new EcsTaskRole(this, 'TaskRole', {
+      bucketName: props.bucketName,
+    });
+
     // ECS service with task for ECS runtime tests
     const service = new TesterEcsService(this, 'Service', {
       cluster,
-      bucketName: props.bucketName,
-      accountId: props.accountId,
-      region: props.region!,
+      executionRole: executionRole.role,
+      taskRole: taskRole.role,
+    });
+
+    // ECS service with task for ECS runtime tests
+    const fargateService = new TesterFargateService(this, 'FargateService', {
+      cluster,
+      executionRole: executionRole.role,
+      taskRole: taskRole.role,
     });
 
     // role to be assumed by host instance
@@ -79,6 +96,7 @@ export class TestDriverEcsCluster extends Construct {
       eks: props.eksCluster,
       stepFuncArn: props.stepFuncArn,
       taskArn: service.taskArn,
+      fargateTaskArn: fargateService.taskArn,
       clusterName: props.ecsCluster,
     });
 

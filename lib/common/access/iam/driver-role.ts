@@ -26,6 +26,7 @@ export interface DriverRoleProps {
   eks: string;
   stepFuncArn: string;
   taskArn: string;
+  fargateTaskArn: string;
   clusterName: string;
 }
 
@@ -132,6 +133,7 @@ export class DriverRole extends Construct {
               actions: ['ecs:ListTasks'],
               resources: [
                 props.taskArn,
+                props.fargateTaskArn,
                 `arn:aws:ecs:${props.region}:${props.accountId}:container-instance/${props.clusterName}/*`,
               ],
             }),

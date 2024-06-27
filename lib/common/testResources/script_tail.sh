@@ -11,12 +11,21 @@
 #  express or implied. See the License for the specific language governing 
 #  permissions and limitations under the License.
 
+function execute_ecs_command(){
+  FILE_NAME=$1
+  LAUNCH_TYPE=$2
 
+  aws s3 cp $FILE_NAME s3://$S3_BUCKET_NAME/remote/$FILE_NAME
+  COMMAND="/bin/bash -c 'aws s3 cp s3://$S3_BUCKET_NAME/remote/$FILE_NAME . && bash $FILE_NAME'"
 
-# check ecs, ec2, and eks remote scripts
-if [ -f ecs.sh ]; then
-  aws s3 cp ecs.sh s3://$S3_BUCKET_NAME/remote/ecs.sh
-  COMMAND="/bin/bash -c 'aws s3 cp s3://$S3_BUCKET_NAME/remote/ecs.sh . && bash ecs.sh'"
+  TASKS=$(aws ecs list-tasks --cluster $ECS_CLUSTER --region $REGION | jq -r '.taskArns')
+
+  for ARN in $(echo "${TASKS}" | jq -r '.[]') ; do 
+    CURR=$(aws ecs describe-tasks --region $REGION --tasks $ARN --cluster $ECS_CLUSTER | jq -r '.tasks[].launchType')
+    if [ "$CURR" = "$LAUNCH_TYPE" ] ; then 
+      TASK_ARN=$ARN
+    fi
+  done;
 
   aws ecs execute-command \
       --cluster $ECS_CLUSTER \
@@ -24,13 +33,18 @@ if [ -f ecs.sh ]; then
       --region $REGION \
       --interactive \
       --command "$COMMAND" \
-      --task $(aws ecs list-tasks \
-          --cluster $ECS_CLUSTER \
-          --region $REGION \
-          --query "taskArns[0]" \
-          --output text)
+      --task $TASK_ARN
   
-  rm ecs.sh
+  rm $FILE_NAME
+}
+
+# check ecs, ec2, and eks remote scripts
+if [ -f ecs-ec2.sh ]; then
+  execute_ecs_command ecs-ec2.sh EC2
+fi
+
+if [ -f ecs-fargate.sh ]; then
+  execute_ecs_command ecs-fargate.sh FARGATE
 fi
 
 if [ -f ec2.sh ]; then

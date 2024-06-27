@@ -270,7 +270,7 @@ class SettingsManager:
                 'feature': 'LAMBDA_NETWORK_LOGS',
             },
             {   # runtime monitoring
-                'resource': ['ec2', 'ecs', 'eks'],
+                'resource': ['ec2', 'ecs-ec2', 'ecs-fargate', 'eks'],
                 'setting': 'resources',
                 'substr': 'Runtime',
                 'log_source':['runtime-monitoring'],

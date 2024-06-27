@@ -338,18 +338,6 @@
         },
         {
             "resource": "ec2",
-            "tactic": "unauthorized-access",
-            "findingType": "UnauthorizedAccess:Runtime/MaliciousIPCaller.Custom",
-            "alias": "threatIntel/request.sh",
-            "indicator": "",
-            "logSource": "runtime-monitoring",
-            "local": "true",
-            "description": "echo \"Test #$TEST_NUM - Malicious IP Caller\"",
-            "expectedFinding": "\"Test #$TEST_NUM: EC2 Malicious IP Caller\" \"Expected Finding: Process curl from EC2 instance $RED_TEAM_INSTANCE is communicating with an IP address $MALICIOUS_IP on your threat list\" \"Finding Type : UnauthorizedAccess:Runtime/MaliciousIPCaller.Custom \" \"\"",
-            "port": "8009"
-        },
-        {
-            "resource": "ec2",
             "tactic": "execution",
             "findingType": "Execution:Runtime/ReverseShell",
             "alias": "runtime/ReverseShell.sh",
@@ -359,17 +347,7 @@
             "expectedFinding": "\"Test #$TEST_NUM: EC2 Reverse Shell\" \"Expected Finding: Process in EC2 instance $RED_TEAM_INSTANCE has created a reverse shell\" \"Finding Type : Execution:Runtime/ReverseShell \" \"\""
         },
         {
-            "resource": "ec2",
-            "tactic": "execution",
-            "findingType": "Execution:Runtime/MemoryMarkedExecutable",
-            "alias": "runtime/MemoryMarkedExecutable.sh",
-            "logSource": "runtime-monitoring",
-            "local": "true",
-            "description": "echo \"Test #$TEST_NUM - Memory Marked Executable\"",
-            "expectedFinding": "\"Test #$TEST_NUM: EC2 Memory Marked Executable\" \"Expected Finding: Process in EC2 instance $RED_TEAM_INSTANCE has marked memory executable\" \"Finding Type : Execution:Runtime/MemoryMarkedExecutable \" \"\""
-        },
-        {
-            "resource": "ecs",
+            "resource": "ecs-fargate",
             "tactic": "backdoor",
             "findingType": "Backdoor:Runtime/C&CActivity.B!DNS",
             "alias": "threatIntel/request.sh",
@@ -380,7 +358,18 @@
             "indicator": "c2.guarddutyc2activityb.com"
         },
         {
-            "resource": "ecs",
+            "resource": "ecs-ec2",
+            "tactic": "backdoor",
+            "findingType": "Backdoor:Runtime/C&CActivity.B!DNS",
+            "alias": "threatIntel/request.sh",
+            "logSource": "runtime-monitoring",
+            "local": "false",
+            "description": "echo \"Test #$TEST_NUM - C&C Activity\"",
+            "expectedFinding": "\"Test #\"$TEST_NUM\": EC2 C&C Activity\" \"Expected Finding: A process is querying a domain name associated with a known Command & Control server.\" \"Finding Type : Backdoor:Runtime/C&CActivity.B!DNS\" \"\"",
+            "indicator": "c2.guarddutyc2activityb.com"
+        },
+        {
+            "resource": "ecs-fargate",
             "tactic": "crypto",
             "findingType": "CryptoCurrency:Runtime/BitcoinTool.B!DNS",
             "alias": "threatIntel/request.sh",
@@ -391,7 +380,18 @@
             "indicator": "crypto.guarddutyc2activityb.com"
         },
         {
-            "resource": "ecs",
+            "resource": "ecs-ec2",
+            "tactic": "crypto",
+            "findingType": "CryptoCurrency:Runtime/BitcoinTool.B!DNS",
+            "alias": "threatIntel/request.sh",
+            "logSource": "runtime-monitoring",
+            "local": "false",
+            "description": "echo \"Test #$TEST_NUM - Bitcoin Domain\"",
+            "expectedFinding": "\"Test #\"$TEST_NUM\": EC2 Bitcoin Tool DNS\" \"Expected Finding: Process curl from EC2 instance \"$RED_TEAM_INSTANCE\" is querying a domain name that is associated with Bitcoin-related activity.\" \"Finding Type : CryptoCurrency:Runtime/BitcoinTool.B!DNS \" \"\"",
+            "indicator": "crypto.guarddutyc2activityb.com"
+        },
+        {
+            "resource": "ecs-fargate",
             "tactic": "defense-evasion",
             "findingType": "DefenseEvasion:Runtime/ProcessInjection.Ptrace",
             "alias": "runtime/ProcessInjection-Ptrace.sh",
@@ -401,7 +401,17 @@
             "expectedFinding": "\"Test #$TEST_NUM: ECS Process Injection Proc\" \"Expected Finding: Process in EC2 instance $RED_TEAM_INSTANCE  has attempted to inject code in process using PTRACE\" \"Finding Type : DefenseEvasion:Runtime/ProcessInjection.Ptrace \" \"\""
         },
         {
-            "resource": "ecs",
+            "resource": "ecs-ec2",
+            "tactic": "defense-evasion",
+            "findingType": "DefenseEvasion:Runtime/ProcessInjection.Ptrace",
+            "alias": "runtime/ProcessInjection-Ptrace.sh",
+            "logSource": "runtime-monitoring",
+            "local": "false",
+            "description": "echo \"Test #$TEST_NUM - Process Injection Ptrace\"",
+            "expectedFinding": "\"Test #$TEST_NUM: ECS Process Injection Proc\" \"Expected Finding: Process in EC2 instance $RED_TEAM_INSTANCE  has attempted to inject code in process using PTRACE\" \"Finding Type : DefenseEvasion:Runtime/ProcessInjection.Ptrace \" \"\""
+        },
+        {
+            "resource": "ecs-fargate",
             "tactic": "defense-evasion",
             "findingType": "DefenseEvasion:Runtime/ProcessInjection.VirtualMemoryWrite",
             "alias": "runtime/ProcessInjection-VirtualMemoryWrite.sh",
@@ -411,17 +421,17 @@
             "expectedFinding": "\"Test #$TEST_NUM: ECS Process Injection VMW\" \"Expected Finding: Process in EC2 instance $RED_TEAM_INSTANCE  has attempted to inject code in process using PROCESS_VM_WRITE\" \"Finding Type : DefenseEvasion:Runtime/ProcessInjection.VirtualMemoryWrite \" \"\""
         },
         {
-            "resource": "ecs",
-            "tactic": "discovery",
-            "findingType": "Discovery:Runtime/RawSocketCreated",
-            "alias": "runtime/RawSocketCreated.sh",
+            "resource": "ecs-ec2",
+            "tactic": "defense-evasion",
+            "findingType": "DefenseEvasion:Runtime/ProcessInjection.VirtualMemoryWrite",
+            "alias": "runtime/ProcessInjection-VirtualMemoryWrite.sh",
             "logSource": "runtime-monitoring",
             "local": "false",
-            "description": "echo \"Test #$TEST_NUM - Raw Socket Created\"",
-            "expectedFinding": "\"Test #$TEST_NUM: ECS Raw Socket Created\" \"Expected Finding: Process in container has created a raw socket.\" \"Finding Type : Discovery:Runtime/RawSocketCreated \" \"\""
+            "description": "echo \"Test #$TEST_NUM - Process Injection Virtual Memory Write\"",
+            "expectedFinding": "\"Test #$TEST_NUM: ECS Process Injection VMW\" \"Expected Finding: Process in EC2 instance $RED_TEAM_INSTANCE  has attempted to inject code in process using PROCESS_VM_WRITE\" \"Finding Type : DefenseEvasion:Runtime/ProcessInjection.VirtualMemoryWrite \" \"\""
         },
         {
-            "resource": "ecs",
+            "resource": "ecs-fargate",
             "tactic": "impact",
             "findingType": "Impact:Runtime/AbusedDomainRequest.Reputation",
             "alias": "threatIntel/request.sh",
@@ -432,7 +442,18 @@
             "indicator": "abused-rep.guarddutyc2activityb.com"
         },
         {
-            "resource": "ecs",
+            "resource": "ecs-ec2",
+            "tactic": "impact",
+            "findingType": "Impact:Runtime/AbusedDomainRequest.Reputation",
+            "alias": "threatIntel/request.sh",
+            "logSource": "runtime-monitoring",
+            "local": "false",
+            "description": "echo \"Test #$TEST_NUM - Abused Domain Reputation\"",
+            "expectedFinding": "\"Test #$TEST_NUM: ECS Abused Domain Reputation\" \"Expected Finding: Process curl from EC2 instance $RED_TEAM_INSTANCE is querying a low reputation domain that is associated with known abused domains\" \"Finding Type : Impact:Runtime/AbusedDomainRequest.Reputation \" \"\"",
+            "indicator": "abused-rep.guarddutyc2activityb.com"
+        },
+        {
+            "resource": "ecs-fargate",
             "tactic": "impact",
             "findingType": "Impact:Runtime/BitcoinDomainRequest.Reputation",
             "alias": "threatIntel/request.sh",
@@ -443,7 +464,18 @@
             "indicator": "crypto-rep.guarddutyc2activityb.com"
         },
         {
-            "resource": "ecs",
+            "resource": "ecs-ec2",
+            "tactic": "impact",
+            "findingType": "Impact:Runtime/BitcoinDomainRequest.Reputation",
+            "alias": "threatIntel/request.sh",
+            "logSource": "runtime-monitoring",
+            "local": "false",
+            "description": "echo \"Test #$TEST_NUM - Bitcoin Domain Reputation\"",
+            "expectedFinding": "\"Test #$TEST_NUM: ECS Bitcoin Domain Reputation\" \"Expected Finding: Process curl from EC2 instance $RED_TEAM_INSTANCE is querying a low reputation and is associated with bitcoin mining domains\" \"Finding Type : Impact:Runtime/BitcoinDomainRequest.Reputation \" \"\"",
+            "indicator": "crypto-rep.guarddutyc2activityb.com"
+        },
+        {
+            "resource": "ecs-fargate",
             "tactic": "impact",
             "findingType": "Impact:Runtime/MaliciousDomainRequest.Reputation",
             "alias": "threatIntel/request.sh",
@@ -454,7 +486,18 @@
             "indicator": "malicious-rep.guarddutyc2activityb.com"
         },
         {
-            "resource": "ecs",
+            "resource": "ecs-ec2",
+            "tactic": "impact",
+            "findingType": "Impact:Runtime/MaliciousDomainRequest.Reputation",
+            "alias": "threatIntel/request.sh",
+            "logSource": "runtime-monitoring",
+            "local": "false",
+            "description": "echo \"Test #$TEST_NUM - Malicious Domain Reputation\"",
+            "expectedFinding": "\"Test #$TEST_NUM: ECS Malicious Domain Reputation\" \"Expected Finding: Process curl from EC2 instance $RED_TEAM_INSTANCE is querying a low reputation domain that is associated with malicious activity\" \"Finding Type : Impact:Runtime/MaliciousDomainRequest.Reputation \" \"\"",
+            "indicator": "malicious-rep.guarddutyc2activityb.com"
+        },
+        {
+            "resource": "ecs-fargate",
             "tactic": "impact",
             "findingType": "Impact:Runtime/SuspiciousDomainRequest.Reputation",
             "alias": "threatIntel/request.sh",
@@ -465,7 +508,18 @@
             "indicator": "suspicious-rep.guarddutyc2activityb.com"
         },
         {
-            "resource": "ecs",
+            "resource": "ecs-ec2",
+            "tactic": "impact",
+            "findingType": "Impact:Runtime/SuspiciousDomainRequest.Reputation",
+            "alias": "threatIntel/request.sh",
+            "logSource": "runtime-monitoring",
+            "local": "false",
+            "description": "echo \"Test #$TEST_NUM - Suspicious Domain Reputation\"",
+            "expectedFinding": "\"Test #$TEST_NUM: ECS Suspicious Domain Reputation\" \"Expected Finding: Process curl from EC2 instance $RED_TEAM_INSTANCE is querying a low reputation domain that is suspicious in nature due to its age, low popularity, or similarity to other known malicious domains.\" \"Finding Type : Impact:Runtime/SuspiciousDomainRequest.Reputation \" \"\"",
+            "indicator": "suspicious-rep.guarddutyc2activityb.com"
+        },
+        {
+            "resource": "ecs-ec2",
             "tactic": "privilege-escalation",
             "findingType": "PrivilegeEscalation:Runtime/ContainerMountsHostDirectory",
             "alias": "runtime/ContainerMountsHostDirectory.sh",
@@ -475,7 +529,7 @@
             "expectedFinding": "\"Test #$TEST_NUM: ECS Container Mount Host Directory\" \"Expected Finding: Container has mounted a host directory.\" \"Finding Type : PrivilegeEscalation:Runtime/ContainerMountsHostDirectory \" \"\""
         },
         {
-            "resource": "ecs",
+            "resource": "ecs-ec2",
             "tactic": "privilege-escalation",
             "findingType": "PrivilegeEscalation:Runtime/DockerSocketAccessed",
             "alias": "runtime/DockerSocketAccessed.sh",
@@ -485,7 +539,7 @@
             "expectedFinding": "\"Test #$TEST_NUM: ECS Docker Socket Accessed\" \"Expected Finding: Process in container is communicating with docker socket using unix socket.\" \"Finding Type : PrivilegeEscalation:Runtime/DockerSocketAccessed \" \"\""
         },
         {
-            "resource": "ecs",
+            "resource": "ecs-fargate",
             "tactic": "trojan",
             "findingType": "Trojan:Runtime/BlackholeTraffic!DNS",
             "alias": "threatIntel/request.sh",
@@ -496,7 +550,18 @@
             "indicator": "guarddutyblackholeactivity.com"
         },
         {
-            "resource": "ecs",
+            "resource": "ecs-ec2",
+            "tactic": "trojan",
+            "findingType": "Trojan:Runtime/BlackholeTraffic!DNS",
+            "alias": "threatIntel/request.sh",
+            "logSource": "runtime-monitoring",
+            "local": "false",
+            "description": "echo \"Test #$TEST_NUM - BlackholeTraffic Attack\"",
+            "expectedFinding": "\"Test #$TEST_NUM: ECS BlackholeTraffic DNS\" \"Expected Finding: Process curl from EC2 instance $RED_TEAM_INSTANCE is querying a blackholed domain name\" \"Finding Type : Trojan:Runtime/BlackholeTraffic!DNS \" \"\"",
+            "indicator": "guarddutyblackholeactivity.com"
+        },
+        {
+            "resource": "ecs-fargate",
             "tactic": "trojan",
             "findingType": "Trojan:Runtime/DGADomainRequest.C!DNS",
             "alias": "threatIntel/request.sh",
@@ -507,7 +572,18 @@
             "indicator": "guarddutydgaactivity.com"
         },
         {
-            "resource": "ecs",
+            "resource": "ecs-ec2",
+            "tactic": "trojan",
+            "findingType": "Trojan:Runtime/DGADomainRequest.C!DNS",
+            "alias": "threatIntel/request.sh",
+            "logSource": "runtime-monitoring",
+            "local": "false",
+            "description": "echo \"Test #$TEST_NUM - DGA Domain Request\"",
+            "expectedFinding": "\"Test #$TEST_NUM: ECS DGA Domain Request\" \"Expected Finding: Process curl from EC2 instance $RED_TEAM_INSTANCE is querying algorithmically generated domains. Such domains are commonly used by malware and could be an indication of a compromised EC2 instance.\" \"Finding Type : Trojan:Runtime/DGADomainRequest.C!DNS \" \"\"",
+            "indicator": "guarddutydgaactivity.com"
+        },
+        {
+            "resource": "ecs-fargate",
             "tactic": "trojan",
             "findingType": "Trojan:Runtime/DriveBySourceTraffic!DNS",
             "alias": "threatIntel/request.sh",
@@ -518,7 +594,18 @@
             "indicator": "guarddutydrivebyactivity.com"
         },
         {
-            "resource": "ecs",
+            "resource": "ecs-ec2",
+            "tactic": "trojan",
+            "findingType": "Trojan:Runtime/DriveBySourceTraffic!DNS",
+            "alias": "threatIntel/request.sh",
+            "logSource": "runtime-monitoring",
+            "local": "false",
+            "description": "echo \"Test #$TEST_NUM - DGA Request\"",
+            "expectedFinding": "\"Test #$TEST_NUM: ECS DGA\" \"Expected Finding: Process curl from EC2 instance $RED_TEAM_INSTANCE is querying algorithmically generated domains. Such domains are commonly used by malware and could be an indication of a compromised EC2 instance.\" \"Finding Type : Trojan:Runtime/DGADomainRequest.C!DNS \" \"\"",
+            "indicator": "guarddutydrivebyactivity.com"
+        },
+        {
+            "resource": "ecs-fargate",
             "tactic": "trojan",
             "findingType": "Trojan:Runtime/DropPoint!DNS",
             "alias": "threatIntel/request.sh",
@@ -529,7 +616,18 @@
             "indicator": "guarddutydroppointactivity.com"
         },
         {
-            "resource": "ecs",
+            "resource": "ecs-ec2",
+            "tactic": "trojan",
+            "findingType": "Trojan:Runtime/DropPoint!DNS",
+            "alias": "threatIntel/request.sh",
+            "logSource": "runtime-monitoring",
+            "local": "false",
+            "description": "echo \"Test #$TEST_NUM - DropPoint DNS\"",
+            "expectedFinding": "\"Test #$TEST_NUM: ECS DropPoint DNS\" \"Expected Finding: Process curl from EC2 instance $RED_TEAM_INSTANCE is querying a domain name of a remote host that is known to hold credentials and other stolen data captured by malware.\" \"Finding Type : Trojan:Runtime/DropPoint!DNS \" \"\"",
+            "indicator": "guarddutydroppointactivity.com"
+        },
+        {
+            "resource": "ecs-fargate",
             "tactic": "trojan",
             "findingType": "Trojan:Runtime/PhishingDomainRequest!DNS",
             "alias": "threatIntel/request.sh",
@@ -540,19 +638,18 @@
             "indicator": "guarddutyphishingactivity.com"
         },
         {
-            "resource": "ecs",
-            "tactic": "unauthorized-access",
-            "findingType": "UnauthorizedAccess:Runtime/MaliciousIPCaller.Custom",
+            "resource": "ecs-ec2",
+            "tactic": "trojan",
+            "findingType": "Trojan:Runtime/PhishingDomainRequest!DNS",
             "alias": "threatIntel/request.sh",
-            "indicator": "",
             "logSource": "runtime-monitoring",
             "local": "false",
-            "description": "echo \"Test #$TEST_NUM - Malicious IP Caller\"",
-            "expectedFinding": "\"Test #$TEST_NUM: ECS Malicious IP Caller\" \"Expected Finding: Process curl from EC2 instance $RED_TEAM_INSTANCE is communicating with an IP address $MALICIOUS_IP on your threat list\" \"Finding Type : UnauthorizedAccess:Runtime/MaliciousIPCaller.Custom \" \"\"",
-            "port": "8009"
+            "description": "echo \"Test #$TEST_NUM - Phishing Domain\"",
+            "expectedFinding": "\"Test #$TEST_NUM: ECS Phishing Domain Request\" \"Expected Finding: Process curl from EC2 instance $RED_TEAM_INSTANCE has attempted to communicate with a domain name associated with phishing activities.\" \"Finding Type : Trojan:Runtime/PhishingDomainRequest!DNS \" \"\"",
+            "indicator": "guarddutyphishingactivity.com"
         },
         {
-            "resource": "ecs",
+            "resource": "ecs-fargate",
             "tactic": "execution",
             "findingType": "Execution:Runtime/ReverseShell",
             "alias": "runtime/ReverseShell.sh",
@@ -562,14 +659,14 @@
             "expectedFinding": "\"Test #$TEST_NUM: ECS Reverse Shell\" \"Expected Finding: Process in EC2 instance $RED_TEAM_INSTANCE has created a reverse shell\" \"Finding Type : Execution:Runtime/ReverseShell \" \"\""
         },
         {
-            "resource": "ecs",
+            "resource": "ecs-ec2",
             "tactic": "execution",
-            "findingType": "Execution:Runtime/MemoryMarkedExecutable",
-            "alias": "runtime/MemoryMarkedExecutable.sh",
+            "findingType": "Execution:Runtime/ReverseShell",
+            "alias": "runtime/ReverseShell.sh",
             "logSource": "runtime-monitoring",
             "local": "false",
-            "description": "echo \"Test #$TEST_NUM - Memory Marked Executable\"",
-            "expectedFinding": "\"Test #$TEST_NUM: ECS Memory Marked Executable\" \"Expected Finding: Process in EC2 instance $RED_TEAM_INSTANCE has marked memory executable\" \"Finding Type : Execution:Runtime/MemoryMarkedExecutable \" \"\""
+            "description": "echo \"Test #$TEST_NUM - Reverse Shell\"",
+            "expectedFinding": "\"Test #$TEST_NUM: ECS Reverse Shell\" \"Expected Finding: Process in EC2 instance $RED_TEAM_INSTANCE has created a reverse shell\" \"Finding Type : Execution:Runtime/ReverseShell \" \"\""
         },
         {
             "resource": "eks",
@@ -612,16 +709,6 @@
             "local": "false",
             "description": "echo \"Test #$TEST_NUM - Process Injection Virtual Memory Write\"",
             "expectedFinding": "\"Test #$TEST_NUM: EKS Process Injection VMW\" \"Expected Finding: Process in EC2 instance   has attempted to inject code in process using PROCESS_VM_WRITE\" \"Finding Type : DefenseEvasion:Runtime/ProcessInjection.VirtualMemoryWrite \" \"\""
-        },
-        {
-            "resource": "eks",
-            "tactic": "discovery",
-            "findingType": "Discovery:Runtime/RawSocketCreated",
-            "alias": "runtime/RawSocketCreated.sh",
-            "logSource": "runtime-monitoring",
-            "local": "false",
-            "description": "echo \"Test #$TEST_NUM - Raw Socket Created\"",
-            "expectedFinding": "\"Test #$TEST_NUM: ECS Raw Socket Created\" \"Expected Finding: Process in container has created a raw socket.\" \"Finding Type : Discovery:Runtime/RawSocketCreated \" \"\""
         },
         {
             "resource": "eks",
@@ -804,18 +891,6 @@
         },
         {
             "resource": "eks",
-            "tactic": "unauthorized-access",
-            "findingType": "UnauthorizedAccess:Runtime/MaliciousIPCaller.Custom",
-            "alias": "threatIntel/request.sh",
-            "indicator": "",
-            "logSource": "runtime-monitoring",
-            "local": "false",
-            "description": "echo \"Test #$TEST_NUM - Malicious IP Caller\"",
-            "expectedFinding": "\"Test #$TEST_NUM: EKS Malicious IP Caller\" \"Expected Finding: Process curl from EC2 instance  is communicating with an IP address $MALICIOUS_IP on your threat list\" \"Finding Type : UnauthorizedAccess:Runtime/MaliciousIPCaller.Custom \" \"\"",
-            "port": "8009"
-        },
-        {
-            "resource": "eks",
             "tactic": "execution",
             "findingType": "Execution:Runtime/ReverseShell",
             "alias": "runtime/ReverseShell.sh",
@@ -823,16 +898,6 @@
             "local": "false",
             "description": "echo \"Test #$TEST_NUM - Reverse Shell\"",
             "expectedFinding": "\"Test #$TEST_NUM: EKS Reverse Shell\" \"Expected Finding: Process in EC2 instance  has created a reverse shell\" \"Finding Type : Execution:Runtime/ReverseShell \" \"\""
-        },
-        {
-            "resource": "eks",
-            "tactic": "execution",
-            "findingType": "Execution:Runtime/MemoryMarkedExecutable",
-            "alias": "runtime/MemoryMarkedExecutable.sh",
-            "logSource": "runtime-monitoring",
-            "local": "false",
-            "description": "echo \"Test #$TEST_NUM - Memory Marked Executable\"",
-            "expectedFinding": "\"Test #$TEST_NUM: EKS Memory Marked Executable\" \"Expected Finding: Process in EC2 instance  has marked memory executable\" \"Finding Type : Execution:Runtime/MemoryMarkedExecutable \" \"\""
         },
         {
             "resource": "eks",

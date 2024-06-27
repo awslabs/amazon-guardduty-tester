@@ -54,7 +54,8 @@ EXAMPLES:
     # lists of all resources/tactics available to tester
     resources = [
         'ec2', 
-        'ecs', 
+        'ecs-ec2',
+        'ecs-fargate',
         'eks', 
         'iam', 
         'lambda', 

@@ -11,25 +11,10 @@
 //  express or implied. See the License for the specific language governing
 //  permissions and limitations under the License.
 
-import {
-  Capability,
-  type Cluster,
-  ContainerImage,
-  Ec2Service,
-  Ec2TaskDefinition,
-  LinuxParameters,
-} from 'aws-cdk-lib/aws-ecs';
+import { Capability, ContainerImage, Ec2Service, Ec2TaskDefinition, LinuxParameters } from 'aws-cdk-lib/aws-ecs';
 import { Construct } from 'constructs';
 
-import { EcsTaskExecutionRole } from '../../access/iam/ecs-task-execution-role';
-import { EcsTaskRole } from '../../access/iam/ecs-task-role';
-
-export interface ServiceProps {
-  cluster: Cluster;
-  bucketName: string;
-  region: string;
-  accountId: string;
-}
+import { ServiceProps } from './service-props';
 
 /**
  * Container definitions for ECS Task running as a Service to allow command execution
@@ -41,13 +26,8 @@ export class TesterEcsService extends Construct {
     super(scope, id);
 
     const taskDefinition = new Ec2TaskDefinition(this, 'TaskDef', {
-      executionRole: new EcsTaskExecutionRole(this, 'TaskExecutionRole', {
-        region: props.region,
-        accountId: props.accountId,
-      }).role,
-      taskRole: new EcsTaskRole(this, 'TaskRole', {
-        bucketName: props.bucketName,
-      }).role,
+      executionRole: props.executionRole,
+      taskRole: props.taskRole,
     });
 
     // include kernel capabilities for certain runtime finding tests
