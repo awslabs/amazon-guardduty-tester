@@ -207,7 +207,7 @@ class Tests:
             'curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip && ./aws/install',
             "echo -n 'X5O!P%@AP[4\\PZX54(P^)7CC)7}\\$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!\\$H+H*' >/tmp/eicar.com && cp /tmp/eicar.com /tmp/eicar.com.txt && zip -j /tmp/eicar_com.zip /tmp/eicar.com && zip -j /tmp/eicarcom2.zip /tmp/eicar_com.zip",
             f'aws s3 cp s3://{vars.S3_BUCKET_NAME}/remote/{resource}.sh . && bash {resource}.sh', 
-            'echo "done!"'
+            'echo "done!"',
             'sleep 60',
         ])
 
