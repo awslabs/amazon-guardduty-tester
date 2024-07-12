@@ -12,6 +12,7 @@
 #  permissions and limitations under the License.
 
 import json
+import boto3
 import operator
 import itertools
 import subprocess
@@ -66,6 +67,7 @@ class TestBuilder:
     def run_test_script(self) -> None:
         final_script = self.tests.host_script + self.tests.script_end
         self.tests.write_file('test.sh', final_script)
+        self.tests.run_ecs_tasks()
         subprocess.run('bash test.sh && rm test.sh', shell=True)
 
 
@@ -90,6 +92,9 @@ class Tests:
             'contains':self.contains,
             'does not contain':self.does_not_contain
         }
+
+        self.ecs = boto3.client('ecs', region_name=vars.REGION)
+        self.task_defs = []
 
 
     '''
@@ -169,11 +174,94 @@ class Tests:
                     remote_script += temp_script
 
             if remote_script:
-                remote_script = self.script_header + remote_script
-                self.write_file(f'{resource}.sh', remote_script)
+                self.write_file(f'{resource}.sh', self.script_header + remote_script)
+                if 'ecs' in resource:
+                    self.upload_file(resource)
+                    self.build_ecs_task(resource)
         
         if self.kali_script:
             self.write_file('ec2.sh', self.kali_script)
+            self.upload_file('ec2')
+
+    '''
+    Simple helper method to upload remote script file to s3 for remote execution
+    '''
+    def upload_file(self, resource: str) -> None:
+        boto3.client('s3', region_name=vars.REGION).upload_file(f'{resource}.sh', vars.S3_BUCKET_NAME, f'remote/{resource}.sh')
+
+    '''
+    Builds the task definition for the given ecs launch type and commands to run
+    '''
+    def build_ecs_task(self, resource: str) -> None:
+
+        is_ec2 = True if 'ec2' in resource else False
+
+        kernel_capabilites = ['SYS_PTRACE']
+        if is_ec2:
+            kernel_capabilites.append('SYS_ADMIN')
+
+        task_commands = ';'.join([
+            'sleep 30',
+            'apt update -y',
+            'apt install python3 gcc netcat-openbsd g++ sudo zip -y',
+            'curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip && ./aws/install',
+            "echo -n 'X5O!P%@AP[4\\PZX54(P^)7CC)7}\\$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!\\$H+H*' >/tmp/eicar.com && cp /tmp/eicar.com /tmp/eicar.com.txt && zip -j /tmp/eicar_com.zip /tmp/eicar.com && zip -j /tmp/eicarcom2.zip /tmp/eicar_com.zip",
+            f'aws s3 cp s3://{vars.S3_BUCKET_NAME}/remote/{resource}.sh . && bash {resource}.sh', 
+            'echo "done!"'
+            'sleep 60',
+        ])
+
+        self.task_defs.append(self.ecs.register_task_definition(
+            family=vars.EC2_TASK_FAM if is_ec2 else vars.FARGATE_TASK_FAM,
+            taskRoleArn=vars.TASK_ROLE_ARN,
+            executionRoleArn=vars.TASK_EXEC_ROLE_ARN,
+            networkMode='awsvpc',
+            requiresCompatibilities=['EC2'] if is_ec2 else ['FARGATE'],
+            cpu='256' if is_ec2 else '1 vCPU',
+            memory='512' if is_ec2 else '2 GB',
+            containerDefinitions=[{
+                'name':vars.CONTAINER,
+                'image':'public.ecr.aws/ecs-sample-image/amazon-ecs-sample:latest',
+                'privileged':is_ec2,
+                'linuxParameters':{
+                    'capabilities': {
+                        'add': kernel_capabilites
+                    }
+                },
+                'entryPoint': ['sh', '-c'],
+                'command':[task_commands],
+                'logConfiguration': {
+                    'logDriver': 'awslogs',
+                    'options': {
+                        'awslogs-create-group': 'true',
+                        'awslogs-group': 'GuardDuty-Tester-Ecs-Task-Logs',
+                        'awslogs-region': vars.REGION,
+                        'awslogs-stream-prefix': 'app'
+                    }
+                },
+            }],
+        )['taskDefinition']['taskDefinitionArn'])
+
+
+    '''
+    Runs the tasks that have been registered for the user specified tests
+    '''
+    def run_ecs_tasks(self) -> None:
+        for task in self.task_defs:
+            is_ec2 = 'ec2' in task.lower()
+            self.ecs.run_task(
+                cluster=vars.CLUSTER,
+                taskDefinition=task,
+                launchType='EC2' if is_ec2 else 'FARGATE',
+                count=1,
+                networkConfiguration={
+                    'awsvpcConfiguration': {
+                        'subnets': vars.SUBNETS,
+                        'securityGroups': vars.SEC_GROUP,
+                        'assignPublicIp': 'DISABLED' if is_ec2 else 'ENABLED'
+                    }
+                }
+            )
 
     '''
     Helper method to write to a file
@@ -209,8 +297,6 @@ class Tests:
             f'MALICIOUS_IP=\'{vars.MALICIOUS_IP}\'',
             f'LAMBDA_NAME=\'{vars.LAMBDA_NAME}\'',
             f'EKS_CLUSTER_NAME=\'{vars.EKS_CLUSTER_NAME}\'',
-            f'ECS_CLUSTER=\'{vars.CLUSTER}\'',
-            f'CONTAINER=\'{vars.CONTAINER}\'',
             'TEST_NUM=1',
             'EXPECTED_FINDINGS=()',
         ]

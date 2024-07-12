@@ -23,8 +23,6 @@ import { EcsTaskExecutionRole } from '../../access/iam/ecs-task-execution-role';
 import { EcsTaskRole } from '../../access/iam/ecs-task-role';
 import { ClusterSecurityGroup } from '../../access/securityGroup/cluster-security-group';
 import { type Ec2Props } from '../ec2/ec2-props';
-import { TesterFargateService } from './fargate-service';
-import { TesterEcsService } from './tester-service';
 
 export interface EcsProps extends Ec2Props {
   ingressSecurityGroup: string;
@@ -46,6 +44,8 @@ export interface EcsProps extends Ec2Props {
   ecsCluster: string;
   stepFuncArn: string;
   emptyBucketName: string;
+  fargateTaskFamily: string;
+  ec2TaskFamily: string;
 }
 
 /**
@@ -66,21 +66,7 @@ export class TestDriverEcsCluster extends Construct {
       accountId: props.accountId,
     });
     const taskRole = new EcsTaskRole(this, 'TaskRole', {
-      bucketName: props.bucketName,
-    });
-
-    // ECS service with task for ECS runtime tests
-    const service = new TesterEcsService(this, 'Service', {
-      cluster,
-      executionRole: executionRole.role,
-      taskRole: taskRole.role,
-    });
-
-    // ECS service with task for ECS runtime tests
-    const fargateService = new TesterFargateService(this, 'FargateService', {
-      cluster,
-      executionRole: executionRole.role,
-      taskRole: taskRole.role,
+      bucketName: props.bucketName
     });
 
     // role to be assumed by host instance
@@ -95,10 +81,17 @@ export class TestDriverEcsCluster extends Construct {
       cluster: cluster.clusterName,
       eks: props.eksCluster,
       stepFuncArn: props.stepFuncArn,
-      taskArn: service.taskArn,
-      fargateTaskArn: fargateService.taskArn,
+      ec2TaskFamily: props.ec2TaskFamily,
+      taskRole: taskRole.role.roleArn,
+      execRole: executionRole.role.roleArn,
+      fargateTaskFamily: props.fargateTaskFamily,
       clusterName: props.ecsCluster,
     });
+
+    const cluster_sg = new ClusterSecurityGroup(this, 'ClusterSecurityGroup', {
+      vpc: props.vpc,
+      ingressSgId: props.ingressSecurityGroup,
+    }).sg;
 
     // launch template for cluster
     const launchTemplate = new LaunchTemplate(this, 'LaunchTemplate', {
@@ -106,11 +99,8 @@ export class TestDriverEcsCluster extends Construct {
       machineImage: MachineImage.fromSsmParameter(
         '/aws/service/ecs/optimized-ami/amazon-linux-2023/recommended/image_id',
       ),
-      userData: this.getUserData(props),
-      securityGroup: new ClusterSecurityGroup(this, 'ClusterSecurityGroup', {
-        vpc: props.vpc,
-        ingressSgId: props.ingressSecurityGroup,
-      }).sg,
+      userData: this.getUserData(props, taskRole.role.roleArn, executionRole.role.roleArn, cluster_sg.securityGroupId),
+      securityGroup: cluster_sg,
       instanceProfile: new InstanceProfile(this, 'InstanceProfile', {
         role: this.instanceRole.role,
       }),
@@ -144,10 +134,16 @@ export class TestDriverEcsCluster extends Construct {
    * @param clusterName
    * @returns UserData for instance
    */
-  private getUserData(props: EcsProps): UserData {
+  private getUserData(props: EcsProps, taskRoleArn: string, taskExecRoleArn: string, cluster_sg: string): UserData {
     const region = props.region!;
     const homeDir = '/home/ssm-user';
     const install = 'yum install -y';
+
+    let subnets = '[';
+    for (const subnet of props.vpc.privateSubnets) {
+      subnets += `'${subnet.subnetId}',`;
+    }
+    subnets += ']';
 
     const userData = UserData.forLinux();
     userData.addCommands(
@@ -197,6 +193,12 @@ export class TestDriverEcsCluster extends Construct {
       `echo "CLUSTER = '${props.ecsCluster}'" >> ${homeDir}/py_tester/tester_vars.py`,
       `echo "CONTAINER = 'amazon-linux'" >> ${homeDir}/py_tester/tester_vars.py`,
       `echo "STEP_FUNCTION = '${props.stepFuncArn}'" >> ${homeDir}/py_tester/tester_vars.py`,
+      `echo "TASK_ROLE_ARN = '${taskRoleArn}'" >> ${homeDir}/py_tester/tester_vars.py`,
+      `echo "TASK_EXEC_ROLE_ARN = '${taskExecRoleArn}'" >> ${homeDir}/py_tester/tester_vars.py`,
+      `echo "EC2_TASK_FAM = '${props.ec2TaskFamily}'" >> ${homeDir}/py_tester/tester_vars.py`,
+      `echo "FARGATE_TASK_FAM = '${props.fargateTaskFamily}'" >> ${homeDir}/py_tester/tester_vars.py`,
+      `echo "SUBNETS = ${subnets}" >> ${homeDir}/py_tester/tester_vars.py`,
+      `echo "SEC_GROUP = ['${cluster_sg}']" >> ${homeDir}/py_tester/tester_vars.py`,
       `echo ${props.maliciousIp} >> ${homeDir}/py_tester/tester_script_custom_threat.txt`,
       'pip3 install cmake',
       `wget -q -O ${homeDir}/libssh.tar.xz https://www.libssh.org/files/0.9/libssh-0.9.4.tar.xz`,

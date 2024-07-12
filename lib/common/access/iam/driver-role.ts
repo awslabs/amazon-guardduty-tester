@@ -25,9 +25,11 @@ export interface DriverRoleProps {
   cluster: string;
   eks: string;
   stepFuncArn: string;
-  taskArn: string;
-  fargateTaskArn: string;
+  ec2TaskFamily: string;
+  fargateTaskFamily: string;
   clusterName: string;
+  taskRole: string;
+  execRole: string;
 }
 
 /**
@@ -66,7 +68,7 @@ export class DriverRole extends Construct {
               sid: 'IAMPasswordPolicyAccess',
               effect: Effect.ALLOW,
               actions: ['iam:GetAccountPasswordPolicy', 'iam:UpdateAccountPasswordPolicy'],
-              resources: ['*'], //Selected actions only support the all resources wildcard('*').
+              resources: ['*'], // Selected actions only support the all resources wildcard('*').
             }),
             new PolicyStatement({
               sid: 'CloudTrail',
@@ -119,23 +121,25 @@ export class DriverRole extends Construct {
               ],
             }),
             new PolicyStatement({
-              sid: 'EcsExec',
+              sid: 'RunEcsTask',
               effect: Effect.ALLOW,
-              actions: ['ecs:DescribeTasks', 'ecs:ExecuteCommand'],
+              actions: ['ecs:RunTask'],
               resources: [
-                `arn:aws:ecs:${props.region}:${props.accountId}:task/${props.cluster}/*`,
-                `arn:aws:ecs:${props.region}:${props.accountId}:cluster/${props.cluster}`,
+                `arn:aws:ecs:${props.region}:${props.accountId}:task-definition/${props.fargateTaskFamily}:*`,
+                `arn:aws:ecs:${props.region}:${props.accountId}:task-definition/${props.ec2TaskFamily}:*`,
               ],
             }),
             new PolicyStatement({
-              sid: 'ListEcsTasksToExec',
+              sid: 'PassEcsTaskRole',
               effect: Effect.ALLOW,
-              actions: ['ecs:ListTasks'],
-              resources: [
-                props.taskArn,
-                props.fargateTaskArn,
-                `arn:aws:ecs:${props.region}:${props.accountId}:container-instance/${props.clusterName}/*`,
-              ],
+              actions: ['iam:PassRole'],
+              resources: [props.taskRole, props.execRole],
+            }),
+            new PolicyStatement({
+              sid: 'RegisterEcsTask',
+              effect: Effect.ALLOW,
+              actions: ['ecs:RegisterTaskDefinition'],
+              resources: ['*'], // Selected actions only support the all resources wildcard('*').
             }),
             new PolicyStatement({
               sid: 'EksImageUploadToRepo',

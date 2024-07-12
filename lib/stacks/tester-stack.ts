@@ -29,11 +29,13 @@ import { TesterBucket } from '../common/storage/s3/tester-bucket';
 import {
   ASG_NAME,
   EC2_INSTANCE_TYPE,
+  EC2_TASK_FAMILY,
   ECR_REPO_NAME,
   ECS_CLUSTER_NAME,
   ECS_INSTANCE_NAME,
   EKS_CLUSTER_NAME,
   EKS_INSTANCE_NAME,
+  FARGATE_TASK_FAMILY,
   INSTANCE_TAG,
   KALI_INSTANCE_NAME,
   TRAIL_NAME,
@@ -120,6 +122,8 @@ export class GuardDutyTesterStack extends Stack {
       stepFuncArn: stepFunction.machineArn,
       emptyBucketName: emptyBucket.bucketName,
       tag: INSTANCE_TAG,
+      ec2TaskFamily: EC2_TASK_FAMILY,
+      fargateTaskFamily: FARGATE_TASK_FAMILY,
     });
     new TesterEksCluster(this, 'eksCluster', {
       vpc: testerVpc.vpc,
