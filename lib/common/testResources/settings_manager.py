@@ -532,6 +532,12 @@ class SettingsManager:
     created/replaced
     '''
     def check_eks_agent(self) -> None:
+        if ((self.test_settings['resources'] and 
+            'eks' not in self.test_settings['resources']) or 
+            (self.test_settings['findings'] and 
+            not [x for x in self.test_settings['findings'] if 'Kubernetes' in x])):
+            return
+        
         guard_duty_agent = 'aws-guardduty-agent'
         try:
             status = self.eks.describe_addon(

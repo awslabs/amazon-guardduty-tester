@@ -18,6 +18,11 @@ import { Construct } from 'constructs';
 
 import { FindingLambdaRole } from '../../access/iam/finding-lambda-role';
 
+export interface FindingLambdaProps {
+  accountId: string;
+  region: string;
+}
+
 /**
  * TesterLambda class defines a lambda function that is used
  * to generate findings to demonstrate GuardDuty Lambda protection
@@ -25,7 +30,7 @@ import { FindingLambdaRole } from '../../access/iam/finding-lambda-role';
 export class TesterLambda extends Construct {
   public readonly functionName: string;
   public readonly functionArn: string;
-  constructor(scope: Construct, id: string) {
+  constructor(scope: Construct, id: string, props: FindingLambdaProps) {
     super(scope, id);
     const func = new Function(this, id, {
       runtime: Runtime.PYTHON_3_11,
@@ -37,7 +42,7 @@ export class TesterLambda extends Construct {
         },
       }),
       timeout: Duration.seconds(900),
-      role: new FindingLambdaRole(this, 'ExecutionRole').role,
+      role: new FindingLambdaRole(this, 'ExecutionRole', props).role,
     });
 
     this.functionName = func.functionName;

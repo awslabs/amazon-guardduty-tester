@@ -26,6 +26,7 @@ export interface EksProps {
   name: string;
   instanceName: string;
   tag: Tag;
+  createdBy: Tag;
 }
 
 /**
@@ -67,6 +68,10 @@ export class TesterEksCluster extends Construct {
               {
                 key: props.tag.key,
                 value: props.tag.value,
+              },
+              {
+                key: props.createdBy.key,
+                value: props.createdBy.value,
               },
             ],
           },

@@ -37,6 +37,7 @@ import {
   EKS_INSTANCE_NAME,
   FARGATE_TASK_FAMILY,
   INSTANCE_TAG,
+  CREATED_BY_TAG,
   KALI_INSTANCE_NAME,
   TRAIL_NAME,
   WINDOWS_INSTANCE_NAME,
@@ -51,7 +52,10 @@ export class GuardDutyTesterStack extends Stack {
 
     const testerBucket = new TesterBucket(this, 'testerBucket');
     const emptyBucket = new EmptyBucket(this, 'emptyBucket');
-    const testerLambda = new TesterLambda(this, 'testerLambda');
+    const testerLambda = new TesterLambda(this, 'testerLambda', {
+      accountId: this.account,
+      region: this.region,
+    });
     const cloudtrail = new TesterCloudTrail(this, 'testerCloudTrail', {
       bucket: testerBucket.bucket,
       name: TRAIL_NAME,
@@ -88,6 +92,7 @@ export class GuardDutyTesterStack extends Stack {
       tempRole: tempRole.arn,
       instanceType: EC2_INSTANCE_TYPE,
       tag: INSTANCE_TAG,
+      createdBy: CREATED_BY_TAG,
     });
 
     // private subnet resources
@@ -96,6 +101,7 @@ export class GuardDutyTesterStack extends Stack {
       instanceName: WINDOWS_INSTANCE_NAME,
       instanceType: EC2_INSTANCE_TYPE,
       tag: INSTANCE_TAG,
+      createdBy: CREATED_BY_TAG,
     });
     const driverCluster = new TestDriverEcsCluster(this, 'driverCluster', {
       accountId: this.account,
@@ -124,6 +130,7 @@ export class GuardDutyTesterStack extends Stack {
       tag: INSTANCE_TAG,
       ec2TaskFamily: EC2_TASK_FAMILY,
       fargateTaskFamily: FARGATE_TASK_FAMILY,
+      createdBy: CREATED_BY_TAG,
     });
     new TesterEksCluster(this, 'eksCluster', {
       vpc: testerVpc.vpc,
@@ -132,6 +139,7 @@ export class GuardDutyTesterStack extends Stack {
       name: EKS_CLUSTER_NAME,
       instanceName: EKS_INSTANCE_NAME,
       tag: INSTANCE_TAG,
+      createdBy: CREATED_BY_TAG,
     });
 
     // Lambda requires Test VPC

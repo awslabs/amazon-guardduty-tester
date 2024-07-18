@@ -25,6 +25,7 @@ export const WINDOWS_INSTANCE_NAME: string = 'Windows-GuardDutyTester';
 export const ECS_INSTANCE_NAME: string = 'Driver-GuardDutyTester';
 export const EKS_INSTANCE_NAME: string = 'Kube-GuardDutyTester';
 export const EC2_INSTANCE_TYPE: InstanceType = InstanceType.of(InstanceClass.T3, InstanceSize.MICRO);
+export const CREATED_BY_TAG: Tag = new Tag('CreatedBy', 'GuardDuty Test Script');
 export const INSTANCE_TAG: Tag = new Tag('GuardDutyTestFramework', 'Instance');
 export const EC2_TASK_FAMILY: string = 'EcsEc2GuardDutyTest';
 export const FARGATE_TASK_FAMILY: string = 'EcsFargateGuardDutyTest';

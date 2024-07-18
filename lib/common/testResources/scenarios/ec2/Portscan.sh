@@ -11,4 +11,4 @@
 #  express or implied. See the License for the specific language governing 
 #  permissions and limitations under the License.
 
-sudo nmap -sT $LINUX_IP > /dev/null
+sudo nmap -sT -Pn $LINUX_IP > /dev/null

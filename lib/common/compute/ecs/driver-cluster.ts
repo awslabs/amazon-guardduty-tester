@@ -66,7 +66,7 @@ export class TestDriverEcsCluster extends Construct {
       accountId: props.accountId,
     });
     const taskRole = new EcsTaskRole(this, 'TaskRole', {
-      bucketName: props.bucketName
+      bucketName: props.bucketName,
     });
 
     // role to be assumed by host instance
@@ -109,6 +109,7 @@ export class TestDriverEcsCluster extends Construct {
     // host instance name
     Tags.of(launchTemplate).add('Name', props.instanceName);
     Tags.of(launchTemplate).add(props.tag.key, props.tag.value);
+    Tags.of(launchTemplate).add(props.createdBy.key, props.createdBy.value);
 
     // Define cluster capacity provider with defined launch template
     cluster.addAsgCapacityProvider(

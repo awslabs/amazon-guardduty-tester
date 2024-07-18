@@ -43,5 +43,6 @@ export class BasicWindowsInstance extends Construct {
     });
 
     Tags.of(this.ec2).add(props.tag.key, props.tag.value);
+    Tags.of(this.ec2).add(props.createdBy.key, props.createdBy.value);
   }
 }

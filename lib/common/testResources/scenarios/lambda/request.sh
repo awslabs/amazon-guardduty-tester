@@ -11,5 +11,5 @@
 #  express or implied. See the License for the specific language governing 
 #  permissions and limitations under the License.
 
-URL="http://$INDICATOR/"
-aws lambda invoke --function-name $LAMBDA_NAME --invocation-type Event --region $REGION --cli-binary-format raw-in-base64-out --payload '{"url":"'$URL'"}' response.json > /dev/null
+IFS=':' read -r IP PORT <<< "$INDICATOR"
+aws lambda invoke --function-name $LAMBDA_NAME --invocation-type Event --region $REGION --cli-binary-format raw-in-base64-out --payload '{"ip":"'$IP'","port":"'$PORT'"}' response.json > /dev/null

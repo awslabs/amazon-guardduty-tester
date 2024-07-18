@@ -11,8 +11,10 @@
 //  express or implied. See the License for the specific language governing
 //  permissions and limitations under the License.
 
-import { Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import { Effect, PolicyDocument, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
+
+import { FindingLambdaProps } from '../../compute/lambda/finding-lambda';
 
 /**
  * Simple IAM role with no permissions that can be assumed by lambda function
@@ -20,11 +22,22 @@ import { Construct } from 'constructs';
  */
 export class FindingLambdaRole extends Construct {
   public readonly role: Role;
-  constructor(scope: Construct, id: string) {
+  constructor(scope: Construct, id: string, props: FindingLambdaProps) {
     super(scope, id);
 
     this.role = new Role(this, id, {
       assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
+      inlinePolicies: {
+        EcsTaskExecInline: new PolicyDocument({
+          statements: [
+            new PolicyStatement({
+              effect: Effect.ALLOW,
+              actions: ['logs:CreateLogStream', 'logs:CreateLogGroup', 'logs:PutLogEvents'],
+              resources: [`arn:aws:logs:${props.region}:${props.accountId}:*`],
+            }),
+          ],
+        }),
+      },
     });
   }
 }

@@ -23,4 +23,5 @@ export interface Ec2Props {
   securityGroupIngress?: string;
   region?: string;
   tag: Tag;
+  createdBy: Tag;
 }

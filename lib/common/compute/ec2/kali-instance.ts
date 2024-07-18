@@ -71,6 +71,7 @@ export class KaliLinuxInstance extends Construct {
     });
 
     Tags.of(this.ec2).add(props.tag.key, props.tag.value);
+    Tags.of(this.ec2).add(props.createdBy.key, props.createdBy.value);
   }
 
   /**
@@ -105,7 +106,7 @@ export class KaliLinuxInstance extends Construct {
       'export PATH=$PATH:/usr/local/bin:/usr/sbin:/root/.local/bin',
       `echo 'export PATH=/root/.local/bin:/usr/sbin:/home/kali/.local/bin:$PATH' >> /home/kali/.bash_profile`,
       'apt-get update -y',
-      `${install} nmap hydra jq python3-pip python3 tor freerdp2-dev libssl-dev postgresql-common libpq-dev`,
+      `${install} nmap hydra jq python3-pip python3 tor freerdp2-dev libssl-dev postgresql-common libpq-dev autoconf libtool automake gcc`,
       'curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"',
       'unzip awscliv2.zip',
       './aws/install',
@@ -130,8 +131,17 @@ export class KaliLinuxInstance extends Construct {
       'dpkg -i amazon-ssm-agent.deb',
       'systemctl enable amazon-ssm-agent',
       'systemctl start amazon-ssm-agent',
+      'git clone https://gitlab.torproject.org/tpo/core/torsocks.git',
+      'cd torsocks',
+      './autogen.sh',
+      './configure',
+      'make',
+      'make install',
+      `bash -c 'echo "ControlPort 9051" >> /etc/tor/torsocks.conf'`,
+      `bash -c 'echo "CookieAuthentication 0" >> /etc/tor/torsocks.conf'`,
       `bash -c 'echo "ControlPort 9051" >> /etc/tor/torrc'`,
       `bash -c 'echo "CookieAuthentication 0" >> /etc/tor/torrc'`,
+      'cd ..',
       'pip3 install awscurl aws-consoler',
       'service tor start',
       `chown -R ssm-user: ${homeDir}`,
