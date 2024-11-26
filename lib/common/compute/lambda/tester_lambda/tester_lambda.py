@@ -19,5 +19,5 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 def lambda_handler(event: dict, context: LambdaContext) -> int:
     payload = ''.join(random.choice(string.ascii_uppercase) for _ in range(1024))
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto(bytes(payload, "utf-8"), (event['ip'], event['port']))
+    sock.sendto(bytes(payload, "utf-8"), (event['ip'], int(event['port'])))
     return 0 

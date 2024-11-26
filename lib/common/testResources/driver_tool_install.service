@@ -1,0 +1,10 @@
+[Unit]
+Description=Installation of testing tools
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/ssm-user/py_tester/driver_tool_install.sh
+
+[Install]
+WantedBy=multi-user.target

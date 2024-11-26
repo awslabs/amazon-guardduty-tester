@@ -28,6 +28,7 @@ import { EmptyBucket } from '../common/storage/s3/empty-bucket';
 import { TesterBucket } from '../common/storage/s3/tester-bucket';
 import {
   ASG_NAME,
+  DRIVER_INSTANCE_TYPE,
   EC2_INSTANCE_TYPE,
   EC2_TASK_FAMILY,
   ECR_REPO_NAME,
@@ -110,7 +111,7 @@ export class GuardDutyTesterStack extends Stack {
       eksCluster: EKS_CLUSTER_NAME,
       ecsCluster: ECS_CLUSTER_NAME,
       instanceName: ECS_INSTANCE_NAME,
-      instanceType: EC2_INSTANCE_TYPE,
+      instanceType: DRIVER_INSTANCE_TYPE,
       bucketName: testerBucket.bucketName,
       vpc: testerVpc.vpc,
       maliciousIp: kaliInstance.ec2.instancePublicIp,

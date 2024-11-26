@@ -67,7 +67,11 @@ export class DriverRole extends Construct {
             new PolicyStatement({
               sid: 'IAMPasswordPolicyAccess',
               effect: Effect.ALLOW,
-              actions: ['iam:GetAccountPasswordPolicy', 'iam:UpdateAccountPasswordPolicy'],
+              actions: [
+                  'iam:DeleteAccountPasswordPolicy', // Required to restore password policy to default if not previously set
+                  'iam:GetAccountPasswordPolicy',
+                  'iam:UpdateAccountPasswordPolicy'
+              ],
               resources: ['*'], // Selected actions only support the all resources wildcard('*').
             }),
             new PolicyStatement({
@@ -75,6 +79,12 @@ export class DriverRole extends Construct {
               effect: Effect.ALLOW,
               actions: ['cloudtrail:StopLogging'],
               resources: [props.trailArn],
+            }),
+            new PolicyStatement({
+              sid: 'EC2EIPList',
+              effect: Effect.ALLOW,
+              actions: ['ec2:DescribeAddresses'],
+              resources: ['*'], // Selected actions only support the all resources wildcard('*')
             }),
             new PolicyStatement({
               sid: 'GuardDuty',

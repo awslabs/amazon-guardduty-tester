@@ -158,7 +158,7 @@ class Tests:
                 
                 with open(f"scenarios/{d['alias']}") as f:
                     temp_script += f.read() + '\n'
-                
+
                 # scripts that are marked as "local" run on ECS host
                 if d['local'] == 'true':
                     self.host_script += temp_script
