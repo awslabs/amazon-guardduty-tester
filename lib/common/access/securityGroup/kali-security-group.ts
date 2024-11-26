@@ -11,7 +11,7 @@
 //  express or implied. See the License for the specific language governing
 //  permissions and limitations under the License.
 
-import { Peer, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
+import { CfnEIP, Peer, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 
 import { type SecGroupProps } from './security-group-props';
@@ -27,6 +27,18 @@ export class KaliSecurityGroup extends Construct {
     this.sg = new SecurityGroup(this, id, {
       vpc: props.vpc,
       allowAllOutbound: true,
+    });
+
+    // Add ingress rules for NAT Gateway EIPs
+    props.vpc.publicSubnets.forEach((subnet, index) => {
+      const eipAllocation = subnet.node.findChild('EIP') as CfnEIP;
+      if (eipAllocation) {
+        this.sg.addIngressRule(
+            Peer.ipv4(eipAllocation.attrPublicIp + '/32'),
+            Port.allTraffic(),
+            `Allow traffic from NAT Gateway ${index + 1}`
+        );
+      }
     });
 
     // allow TCP, UDP from within the VPC

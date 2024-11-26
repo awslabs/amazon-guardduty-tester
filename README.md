@@ -75,15 +75,20 @@ When finished testing, run `cdk destroy` or delete the CloudFormation stack on t
 ## Troubleshooting
 Common issues:
 - `Cloud assembly schema version mismatch` ->  update the AWS CDK CLI to a version. For more info see https://docs.aws.amazon.com/cdk/v2/guide/versioning.html#cdk_toolkit_versioning
-- `Docker permission denied` -> Add the current user to the docker group to be able to run in rootless mode
-- Deployment can fails due to Availability Zone incompatibility, if you encounter this error see [this post](https://repost.aws/knowledge-center/ec2-instance-type-not-supported-az-error) from knowledge AWS share, and either choose a new region or hardcode the region/AZ you wish to deploy in. For region edit the `bin/cdk-gd-tester.ts` file to reflect your desired region and for AZ edit the `lib/common/network/vpc.ts` file and replace `maxAzs: 2,` with `availabilityZones: ['<Your-AZ-Here>', '<Your-Other-AZ>' ... ],`
+- `Docker permission denied` -> Add the current user to the docker group to be able to run in rootless mode. Example: `sudo usermod -aG docker $USER`
+- Deployment can fail due to Availability Zone incompatibility, if you encounter this error see [this post](https://repost.aws/knowledge-center/ec2-instance-type-not-supported-az-error) from knowledge AWS share, and either choose a new region or hardcode the region/AZ you wish to deploy in. For region edit the `bin/cdk-gd-tester.ts` file to reflect your desired region and for AZ edit the `lib/common/network/vpc.ts` file and replace `maxAzs: 2,` with `availabilityZones: ['<Your-AZ-Here>', '<Your-Other-AZ>' ... ],`
+- AMI updates may result in unexpected failures during testing due to changes in available tools or installation procedures
+- When findings are missing, validate that the SSM Run Command for document `AWS-RunShellScript` executed successfully
+- Some EC2 finding tests generate large amounts of traffic, if findings are missing it is recommended to run the test for that specific finding again
+- If issues persist please delete the stack and redeploy
 
 ## Findings Tester Can Generate
-Runtime findings are applicable to EC2, ECS, and EKS workloads provided the GuardDuty security agent is installed and operating properly. However some container findings such as `PrivilegeEscalation:Runtime/RuncContainerEscape` are for containers only and as such are only ECS and EKS applicable. Malware findings are also expected to be generated (depending on tests run), but no manual scanning capabilities have been included in the tester at this time because such scans are not free tier eligible.
+Runtime findings are applicable to EC2, ECS, and EKS workloads provided the GuardDuty security agent is installed and operating properly. However, some container findings such as `PrivilegeEscalation:Runtime/RuncContainerEscape` are for containers only and as such are only ECS and EKS applicable. 
+
 ```
 - Backdoor:EC2/C&CActivity.B!DNS
-- Backdoor:EC2/DenialOfService.DNS
-- Backdoor:EC2/DenialOfService.UDP
+- Backdoor:EC2/DenialOfService.Dns
+- Backdoor:EC2/DenialOfService.Udp
 - Backdoor:Runtime/C&CActivity.B!DNS
 - CryptoCurrency:EC2/BitcoinTool.B!DNS
 - CryptoCurrency:Runtime/BitcoinTool.B!DNS
@@ -144,3 +149,8 @@ Runtime findings are applicable to EC2, ECS, and EKS workloads provided the Guar
 - UnauthorizedAccess:S3/MaliciousIPCaller.Custom
 - UnauthorizedAccess:S3/TorIPCaller
 ```
+
+## Additional Findings Expected
+If Malware Protection is enabled then Malware findings are expected to be generated depending on tests run. No manual scanning capabilities have been included in the tester at this time because such scans are not free trial eligible.
+
+UnauthorizedAccess:EC2/TorClient findings are expected during infrastructure deployment and are likely to occur during many TorIPCaller finding tests.

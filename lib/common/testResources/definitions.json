@@ -14,23 +14,23 @@
         {
             "resource": "ec2",
             "tactic": "backdoor",
-            "findingType": "Backdoor:EC2/DenialOfService.UDP",
+            "findingType": "Backdoor:EC2/DenialOfService.Udp",
             "alias": "ec2/DenialOfService-UDP.sh",
             "logSource": "vpc-flowlogs",
             "local": "true",
             "description": "echo \"Test #$TEST_NUM - Denial Of Service UDP\"",
-            "expectedFinding": "\"Test #\"$TEST_NUM\": Denial Of Service UDP\" \"Expected Finding: EC2 instance \"$RED_TEAM_INSTANCE\" is behaving in a manner that may indicate it is being used to perform a Denial of Service (DoS) attack using UDP protocol.\" \"Finding Type : Backdoor:EC2/DenialOfService.UDP\" \"\"",
+            "expectedFinding": "\"Test #\"$TEST_NUM\": Denial Of Service UDP\" \"Expected Finding: EC2 instance \"$RED_TEAM_INSTANCE\" is behaving in a manner that may indicate it is being used to perform a Denial of Service (DoS) attack using the UDP protocol.\" \"Finding Type : Backdoor:EC2/DenialOfService.Udp\" \"\"",
             "port": "80"
         },
         {
             "resource": "ec2",
             "tactic": "backdoor",
-            "findingType": "Backdoor:EC2/DenialOfService.DNS",
+            "findingType": "Backdoor:EC2/DenialOfService.Dns",
             "alias": "ec2/DenialOfService-DNS.sh",
             "logSource": "vpc-flowlogs",
             "local": "true",
             "description": "echo \"Test #$TEST_NUM - Denial Of Service DNS\"",
-            "expectedFinding": "\"Test #\"$TEST_NUM\": Denial Of Service DNS\" \"Expected Finding: EC2 instance \"$RED_TEAM_INSTANCE\" is behaving in a manner that may indicate it is being used to perform a Denial of Service (DoS) attack using DNS protocol.\" \"Finding Type : Backdoor:EC2/DenialOfService.DNS\" \"\"",
+            "expectedFinding": "\"Test #\"$TEST_NUM\": Denial Of Service DNS\" \"Expected Finding: EC2 instance \"$RED_TEAM_INSTANCE\" is behaving in a manner that may indicate it is being used to perform a Denial of Service (DoS) attack using the UDP protocol against a port typically used for DNS.\" \"Finding Type : Backdoor:EC2/DenialOfService.Dns\" \"\"",
             "port": "53"
         },
         {
@@ -94,9 +94,9 @@
             "findingType": "Recon:EC2/Portscan",
             "alias": "ec2/Portscan.sh",
             "logSource": "vpc-flowlogs",
-            "local": "true",
+            "local": "false",
             "description": "echo \"Test #$TEST_NUM - Internal port scanning\"",
-            "expectedFinding": "\"Test #\"$TEST_NUM\": Internal Port Scanning\" \"Expected Finding: EC2 Instance \"$RED_TEAM_INSTANCE\" is performing outbound port scans against remote host. $LINUX_IP\" \"Finding Type: Recon:EC2/Portscan\" \"\""
+            "expectedFinding": "\"Test #\"$TEST_NUM\": Internal Port Scanning\" \"Expected Finding: EC2 Instance \"$LINUX_INSTANCE\" is performing outbound port scans against remote host. $RED_TEAM_IP\" \"Finding Type: Recon:EC2/Portscan\" \"\""
         },
         {
             "resource": "ec2",
@@ -1026,8 +1026,8 @@
             "tactic": "discovery",
             "findingType": "Discovery:S3/MaliciousIPCaller.Custom",
             "alias": "s3/DiscoveryMaliciousIPCaller-Custom.sh",
-            "description": "echo \"Test #$TEST_NUM Discovery Custom Malicious Caller\"",
-            "expectedFinding": "\"Test #$TEST_NUM Discovery Custom Malicious Caller\" \"Expected Finding: An API commonly used in resource discovery was used to access a bucket from an IP address on a custom threat list.\" \"Finding Type : Discovery:S3/MaliciousIPCaller.Custom\" \"\"",
+            "description": "echo \"Test #$TEST_NUM - Discovery Custom Malicious Caller\"",
+            "expectedFinding": "\"Test #$TEST_NUM - Discovery Custom Malicious Caller\" \"Expected Finding: An API commonly used in resource discovery was used to access a bucket from an IP address on a custom threat list.\" \"Finding Type : Discovery:S3/MaliciousIPCaller.Custom\" \"\"",
             "local": "false",
             "logSource": "s3-logs"
         },
@@ -1037,7 +1037,7 @@
             "findingType": "Discovery:S3/TorIPCaller",
             "alias": "s3/DiscoveryTorIPCaller.sh",
             "description": "echo \"Test #$TEST_NUM - Anonymous Resource Discovery\"",
-            "expectedFinding": "\"Test #$TEST_NUM - Anonymous Resource Discovery\" \"Expected Finding: An API commonly used in resource discovery was used to access a bucket from a Tor exit node IP address.\" \"Finding Type : Discovery:S3/TorIPCaller\" \"\"",
+            "expectedFinding": "\"Test #$TEST_NUM: Anonymous Resource Discovery\" \"Expected Finding: An API commonly used in resource discovery was used to access a bucket from a Tor exit node IP address.\" \"Finding Type : Discovery:S3/TorIPCaller\" \"\"",
             "local": "false",
             "logSource": "s3-logs"
         },
@@ -1047,7 +1047,7 @@
             "findingType": "PenTest:S3/KaliLinux",
             "alias": "s3/KaliLinux.sh",
             "description": "echo \"Test #$TEST_NUM - Pentest Resource Discovery\"",
-            "expectedFinding": "\"Test #$TEST_NUM - Pentest Resource Discovery\" \"Expected Finding: An API was used to access an S3 Bucket from a remote host that is potentially running the Kali Linux penetration testing tool.\" \"Finding Type : PenTest:S3/KaliLinux\" \"\"",
+            "expectedFinding": "\"Test #$TEST_NUM: Pentest Resource Discovery\" \"Expected Finding: An API was used to access an S3 Bucket from a remote host that is potentially running the Kali Linux penetration testing tool.\" \"Finding Type : PenTest:S3/KaliLinux\" \"\"",
             "local": "false",
             "logSource": "s3-logs"
         },
@@ -1057,7 +1057,7 @@
             "findingType": "Policy:S3/AccountBlockPublicAccessDisabled",
             "alias": "s3/AccountBlockPublicAccessDisabled.sh",
             "description": "echo \"Test #$TEST_NUM - Public Access Blocking Turned off at Account Level\"",
-            "expectedFinding": "\"Test #$TEST_NUM - Public Access Blocking Turned off at Account Level\" \"Expected Finding: Amazon S3 Block Public Access was disabled for account $ACCNT_ID by $ROLE_NAME by calling PutAccountPublicAccessBlock\" \"Finding Type : Policy:S3/AccountBlockPublicAccessDisabled\" \"\"",
+            "expectedFinding": "\"Test #$TEST_NUM: Public Access Blocking Turned off at Account Level\" \"Expected Finding: Amazon S3 Block Public Access was disabled for account $ACCNT_ID by $ROLE_NAME by calling PutAccountPublicAccessBlock\" \"Finding Type : Policy:S3/AccountBlockPublicAccessDisabled\" \"\"",
             "local": "true",
             "logSource": "cloudtrail"
         },
@@ -1067,7 +1067,7 @@
             "findingType": "Policy:S3/BucketBlockPublicAccessDisabled",
             "alias": "s3/BucketBlockPublicAccessDisabled.sh",
             "description": "echo \"Test #$TEST_NUM - Public Access Blocking Turned off at Bucket Level\"",
-            "expectedFinding": "\"Test #$TEST_NUM - Public Access Blocking Turned off at Bucket Level\" \"Expected Finding: Amazon S3 Block Public Access was disabled for account $ACCNT_ID by $ROLE_NAME by calling PutBucketPublicAccessBlock\" \"Finding Type : Policy:S3/BucketBlockPublicAccessDisabled\" \"\"",
+            "expectedFinding": "\"Test #$TEST_NUM: Public Access Blocking Turned off at Bucket Level\" \"Expected Finding: Amazon S3 Block Public Access was disabled for account $ACCNT_ID by $ROLE_NAME by calling PutBucketPublicAccessBlock\" \"Finding Type : Policy:S3/BucketBlockPublicAccessDisabled\" \"\"",
             "local": "true",
             "logSource": "cloudtrail"
         },
@@ -1077,7 +1077,7 @@
             "findingType": "Policy:S3/BucketPublicAccessGranted",
             "alias": "s3/BucketPublicAccessGranted.sh",
             "description": "echo \"Test #$TEST_NUM - Make Bucket Public\"",
-            "expectedFinding": "\"Test #$TEST_NUM - Make Bucket Public\" \"Expected Finding: The Amazon S3 bucket $S3_BUCKET_NAME was granted public access by $ROLE_NAME calling PutBucketAcl\" \"Finding Type : Policy:S3/BucketPublicAccessGranted\" \"\"",
+            "expectedFinding": "\"Test #$TEST_NUM: Make Bucket Public\" \"Expected Finding: The Amazon S3 bucket $S3_BUCKET_NAME was granted public access by $ROLE_NAME calling PutBucketAcl\" \"Finding Type : Policy:S3/BucketPublicAccessGranted\" \"\"",
             "local": "true",
             "logSource": "cloudtrail"
         },
@@ -1087,7 +1087,7 @@
             "findingType": "Policy:S3/BucketAnonymousAccessGranted",
             "alias": "s3/BucketAnonymousAccessGranted.sh",
             "description": "echo \"Test #$TEST_NUM - Make Bucket Anonymous\"",
-            "expectedFinding": "\"Test #$TEST_NUM - Make Bucket Anonymous\" \"Expected Finding: The Amazon S3 bucket $S3_BUCKET_NAME was granted public anonymous access by $ROLE_NAME calling PutBucketAcl\" \"Finding Type : Policy:S3/BucketAnonymousAccessGranted\" \"\"",
+            "expectedFinding": "\"Test #$TEST_NUM: Make Bucket Anonymous\" \"Expected Finding: The Amazon S3 bucket $S3_BUCKET_NAME was granted public anonymous access by $ROLE_NAME calling PutBucketAcl\" \"Finding Type : Policy:S3/BucketAnonymousAccessGranted\" \"\"",
             "local": "true",
             "logSource": "cloudtrail"
         },
@@ -1107,7 +1107,7 @@
             "findingType": "UnauthorizedAccess:S3/MaliciousIPCaller.Custom",
             "alias": "s3/UnauthMaliciousIPCaller-Custom.sh",
             "description": "echo \"Test #$TEST_NUM - Custom Malicious IP Resource Collection\"",
-            "expectedFinding": "\"Test #$TEST_NUM - Custom Malicious IP Resource Collection\" \"Expected Finding: An API was used to access a bucket from an IP address on a custom threat list.\" \"Finding Type : UnauthorizedAccess:S3/MaliciousIPCaller.Custom\" \"\"",
+            "expectedFinding": "\"Test #$TEST_NUM: Custom Malicious IP Resource Collection\" \"Expected Finding: An API was used to access a bucket from an IP address on a custom threat list.\" \"Finding Type : UnauthorizedAccess:S3/MaliciousIPCaller.Custom\" \"\"",
             "local": "false",
             "logSource": "s3-logs"
         },
@@ -1117,7 +1117,7 @@
             "findingType": "UnauthorizedAccess:S3/TorIPCaller",
             "alias": "s3/UnauthTorIPCaller.sh",
             "description": "echo \"Test #$TEST_NUM - Anonymous Resource Collection\"",
-            "expectedFinding": "\"Test #$TEST_NUM - Anonymous Resource Collection\" \"Expected Finding: An API was used to access a bucket from a Tor exit node IP address.\" \"Finding Type : UnauthorizedAccess:S3/TorIPCaller\" \"\"",
+            "expectedFinding": "\"Test #$TEST_NUM: Anonymous Resource Collection\" \"Expected Finding: An API was used to access a bucket from a Tor exit node IP address.\" \"Finding Type : UnauthorizedAccess:S3/TorIPCaller\" \"\"",
             "local": "false",
             "logSource": "s3-logs"
         }

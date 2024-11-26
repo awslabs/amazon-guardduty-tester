@@ -11,5 +11,8 @@
 #  express or implied. See the License for the specific language governing 
 #  permissions and limitations under the License.
 
+# A UUID is utilized to avoid collision with existing service account names
+UUID=$(cat /proc/sys/kernel/random/uuid)
+
 aws eks --region $REGION update-kubeconfig --name $EKS_CLUSTER_NAME
-sudo kubectl create serviceaccount tester-service-account
+sudo kubectl create serviceaccount tester-service-account-$UUID

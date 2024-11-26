@@ -11,13 +11,18 @@
 #  express or implied. See the License for the specific language governing 
 #  permissions and limitations under the License.
 
+EIP=$(aws ec2 describe-addresses \
+        --filters "Name=tag:Name,Values=GuardDutyTesterStack/vpc/vpc/public-subnetSubnet1" \
+        --query 'Addresses[0].PublicIp' \
+        --output text)
+
 echo "import socket
 import random
 import string
 
-dest_ip = '$MALICIOUS_IP'
+dest_ip = '$EIP'
 dest_port = $PORT
-payload = ''.join(random.choice(string.ascii_lowercase) for _ in range(1024)).encode()
+payload = ''.join(random.choice(string.ascii_lowercase) for _ in range(256)).encode()
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 

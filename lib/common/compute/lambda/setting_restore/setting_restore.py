@@ -59,10 +59,15 @@ def restore_accnt_pub_block_settings(event: dict, response: dict) -> None:
     s3control = boto3.client('s3control', region_name=event['region'])
     
     try:
-        s3control.put_public_access_block(
-            AccountId=event['account_id'],
-            PublicAccessBlockConfiguration=accnt_pub_block_settings
-        )
+        if "PublicAccessBlockDefault" in accnt_pub_block_settings:
+            s3control.delete_public_access_block(
+                AccountId=event['account_id']
+            )
+        else:
+            s3control.put_public_access_block(
+                AccountId=event['account_id'],
+                PublicAccessBlockConfiguration=accnt_pub_block_settings
+            )
         response['BlockPublicAccessRestore'] = SUCCESS
     except Exception as e:
         response['BlockPublicAccessRestore'] = FAILURE

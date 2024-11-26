@@ -28,18 +28,6 @@ export class EcsTaskRole extends Construct {
 
     this.role = new Role(this, id, {
       assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com'),
-      inlinePolicies: {
-        EcsTaskInline: new PolicyDocument({
-          statements: [
-            new PolicyStatement({
-              sid: 'S3PullTestingScript',
-              effect: Effect.ALLOW,
-              actions: ['s3:GetObject'],
-              resources: [`arn:aws:s3:::${props.bucketName}/*`],
-            }),
-          ],
-        }),
-      },
     });
   }
 }

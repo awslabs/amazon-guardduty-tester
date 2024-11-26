@@ -11,4 +11,4 @@
 #  express or implied. See the License for the specific language governing 
 #  permissions and limitations under the License.
 
-for j in `seq 1 20`; do sudo /home/ssm-user/crowbar/crowbar.py -b sshkey -s $LINUX_IP/32 -U /home/ssm-user/users -k /home/ssm-user/compromised_keys > /dev/null ; done
+for j in `seq 1 20`; do sudo /home/ssm-user/crowbar/crowbar.py -b sshkey -s $LINUX_IP/32 -U /home/ssm-user/users -k /home/ssm-user/compromised_keys &> /dev/null ; done

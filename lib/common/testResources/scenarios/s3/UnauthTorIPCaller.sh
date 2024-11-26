@@ -23,5 +23,7 @@ else
     URL="https://$S3_BUCKET_NAME.s3.$REGION.amazonaws.com/py_tester/script_tail.sh"
 fi
 
+source /home/ssm-user/gd_tester_pyenv/bin/activate
+
 echo -e 'AUTHENTICATE ""\r\nsignal NEWNYM\r\nQUIT' | nc 127.0.0.1 9051
 torify awscurl --access_key=$AWS_ACCESS_KEY_ID --secret_key $AWS_SECRET_ACCESS_KEY --session_token $AWS_SESSION_TOKEN --region $REGION --service s3 $URL

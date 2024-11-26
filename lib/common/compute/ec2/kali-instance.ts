@@ -11,7 +11,7 @@
 //  express or implied. See the License for the specific language governing
 //  permissions and limitations under the License.
 
-import { Tags } from 'aws-cdk-lib';
+import { Duration, Tags } from 'aws-cdk-lib';
 import { GenericLinuxImage, Instance, SubnetType, UserData } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 
@@ -68,6 +68,7 @@ export class KaliLinuxInstance extends Construct {
       role: this.instanceRole.role,
       securityGroup: securityGroup.sg,
       instanceName: props.instanceName,
+      userDataCausesReplacement: true,
     });
 
     Tags.of(this.ec2).add(props.tag.key, props.tag.value);
@@ -106,10 +107,12 @@ export class KaliLinuxInstance extends Construct {
       'export PATH=$PATH:/usr/local/bin:/usr/sbin:/root/.local/bin',
       `echo 'export PATH=/root/.local/bin:/usr/sbin:/home/kali/.local/bin:$PATH' >> /home/kali/.bash_profile`,
       'apt-get update -y',
-      `${install} nmap hydra jq python3-pip python3 tor freerdp2-dev libssl-dev postgresql-common libpq-dev autoconf libtool automake gcc`,
+      `${install} nmap hydra jq python3-pip python3 tor freerdp2-dev libssl-dev postgresql-common libpq-dev autoconf libtool automake gcc unzip python3-venv apache2`,
+      // Ensure the most recent AWS CLI is present
       'curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"',
       'unzip awscliv2.zip',
       './aws/install',
+      // Setup bruteforce test resources
       `mkdir ${homeDir}/passwords`,
       `curl -L https://raw.githubusercontent.com/awslabs/amazon-guardduty-tester/master/artifacts/password_list.txt > ${homeDir}/passwords/password_list.txt`,
       `cd ${homeDir}`,
@@ -122,15 +125,13 @@ export class KaliLinuxInstance extends Construct {
       'www',
       'nobody',
       'EOF',
+      // Kubectl for EKS tests
       'curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.27.1/bin/linux/amd64/kubectl',
       'chmod +x ./kubectl',
       'mv ./kubectl /usr/local/bin/kubectl',
-      'mkdir /tmp/ssm',
-      'cd /tmp/ssm',
-      'wget https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb',
-      'dpkg -i amazon-ssm-agent.deb',
-      'systemctl enable amazon-ssm-agent',
-      'systemctl start amazon-ssm-agent',
+      // Torsocks for EKS, IAM, and S3 tests
+      `mkdir ${homeDir}/install`,
+      `cd ${homeDir}/install`,
       'git clone https://gitlab.torproject.org/tpo/core/torsocks.git',
       'cd torsocks',
       './autogen.sh',
@@ -141,11 +142,25 @@ export class KaliLinuxInstance extends Construct {
       `bash -c 'echo "CookieAuthentication 0" >> /etc/tor/torsocks.conf'`,
       `bash -c 'echo "ControlPort 9051" >> /etc/tor/torrc'`,
       `bash -c 'echo "CookieAuthentication 0" >> /etc/tor/torrc'`,
-      'cd ..',
+      // AWS consoler for IAM and S3 tests
+      `cd ${homeDir}`,
+      'python3 -m venv gd_tester_pyenv',
+      'source gd_tester_pyenv/bin/activate',
       'pip3 install awscurl aws-consoler',
-      'service tor start',
+      'systemctl enable tor',
+      'systemctl start tor',
       `chown -R ssm-user: ${homeDir}`,
-      'nc -k -l 8009',
+      // Setup HTTPd for .Custom findings
+      `sed -i 's/80/8009/g' /etc/apache2/sites-enabled/000-default.conf`,
+      `sed -i 's/80/8009/g' /etc/apache2/ports.conf`,
+      'systemctl enable apache2',
+      'systemctl start apache2',
+      // Setup SSM agent
+      `cd ${homeDir}/install`,
+      'wget https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb',
+      'dpkg -i amazon-ssm-agent.deb',
+      'systemctl enable amazon-ssm-agent',
+      'systemctl start amazon-ssm-agent',
     );
     return userData;
   }

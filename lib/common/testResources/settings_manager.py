@@ -16,6 +16,7 @@ import json
 import time
 import boto3
 import argparse
+from botocore.exceptions import ClientError
 from typing import List, Callable
 import tester_vars as vars
 
@@ -155,10 +156,19 @@ class SettingsManager:
             log_source_condition) or 
             (self.test_settings['findings'] and 
              any('Policy:S3' in x for x in self.test_settings['findings']))):
-            
+
             self.test_settings['account_pub_acc_permission'] = self.get_user_permission('Account wide Public Access Block for S3 Buckets - NOTE: This may impact other buckets within the account!')
             if self.test_settings['account_pub_acc_permission']:
-                self.accnt_state['accnt_pub_block'] = self.s3control.get_public_access_block(AccountId=vars.ACCNT_ID)['PublicAccessBlockConfiguration']
+                try:
+                    self.accnt_state['accnt_pub_block'] = self.s3control.get_public_access_block(AccountId=vars.ACCNT_ID)['PublicAccessBlockConfiguration']
+                except ClientError as e:
+                    if e.response['Error']['Code'] == 'NoSuchPublicAccessBlockConfiguration':
+                        # Handle the case where no public access block configuration exists
+                        self.accnt_state['accnt_pub_block'] = { "PublicAccessBlockDefault": True }
+                    else:
+                        # Re-raise the exception if it's a different error
+                        raise
+
         else:
             self.test_settings['account_pub_acc_permission'] = False
 
@@ -234,7 +244,7 @@ class SettingsManager:
         if not self.test_settings['guardduty_permission']:
             return
 
-        # EBS malware findings will only be passive tests as no free tier available for manual scans
+        # EBS malware findings will only be passive tests as no free trial available for manual scans
         # S3_DATA_EVENTS'|'EKS_AUDIT_LOGS'|'EKS_RUNTIME_MONITORING'|'LAMBDA_NETWORK_LOGS'|'RUNTIME_MONITORING'
         features = [
             {   # MaliciousIPCaller.Custom findings
