@@ -86,6 +86,7 @@ Common issues:
 Runtime findings are applicable to EC2, ECS, and EKS workloads provided the GuardDuty security agent is installed and operating properly. However, some container findings such as `PrivilegeEscalation:Runtime/RuncContainerEscape` are for containers only and as such are only ECS and EKS applicable. 
 
 ```
+- AttackSequence:S3/CompromisedData
 - Backdoor:EC2/C&CActivity.B!DNS
 - Backdoor:EC2/DenialOfService.Dns
 - Backdoor:EC2/DenialOfService.Udp
