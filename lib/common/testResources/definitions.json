@@ -1022,6 +1022,16 @@
             "local": "false"
         },
         {
+            "resource": "attack-sequence",
+            "tactic": "attack-sequence",
+            "findingType": "AttackSequence:S3/CompromisedData",
+            "alias": "attack/S3CompromisedData.sh",
+            "description": "echo \"Test #$TEST_NUM - Attack Sequence S3 Compromised Data\"",
+            "expectedFinding": "\"Test #$TEST_NUM - Attack Sequence S3 Compromised Data\" \"Expected Finding: Potential data compromise of one or more S3 buckets involving a sequence of actions associated with User.\" \"Finding Type : AttackSequence:S3/CompromisedData\" \"\"",
+            "local": "false",
+            "logSource": "s3-logs"
+        },
+        {
             "resource": "s3",
             "tactic": "discovery",
             "findingType": "Discovery:S3/MaliciousIPCaller.Custom",
