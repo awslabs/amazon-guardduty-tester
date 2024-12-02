@@ -53,7 +53,8 @@ EXAMPLES:
     
     # lists of all resources/tactics available to tester
     resources = [
-        'ec2', 
+        'attack-sequence',
+        'ec2',
         'ecs-ec2',
         'ecs-fargate',
         'eks', 
@@ -62,6 +63,7 @@ EXAMPLES:
         's3'
     ]
     tactics = [
+        'attack-sequence',
         'backdoor',
         'crypto',
         'defense-evasion',

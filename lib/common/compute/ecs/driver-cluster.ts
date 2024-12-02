@@ -44,6 +44,7 @@ export interface EcsProps extends Ec2Props {
   ecsCluster: string;
   stepFuncArn: string;
   emptyBucketName: string;
+  attackBucketName: string;
   fargateTaskFamily: string;
   ec2TaskFamily: string;
 }
@@ -183,6 +184,7 @@ export class TestDriverEcsCluster extends Construct {
       `echo "WINDOWS_INSTANCE = '${props.windowsInstance}'" >> ${homeDir}/py_tester/tester_vars.py`,
       `echo "S3_BUCKET_NAME = '${props.bucketName}'" >> ${homeDir}/py_tester/tester_vars.py`,
       `echo "EMPTY_BUCKET_NAME = '${props.emptyBucketName}'" >> ${homeDir}/py_tester/tester_vars.py`,
+      `echo "ATTACK_BUCKET_NAME = '${props.attackBucketName}'" >> ${homeDir}/py_tester/tester_vars.py`,
       `echo "TEMP_ROLE_ARN = '${props.tempRole}'" >> ${homeDir}/py_tester/tester_vars.py`,
       `echo "REGION = '${region}'" >> ${homeDir}/py_tester/tester_vars.py`,
       `echo "ACCNT_ID = '${props.accountId}'" >> ${homeDir}/py_tester/tester_vars.py`,

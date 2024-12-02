@@ -12,8 +12,12 @@
 #  permissions and limitations under the License.
 
 CREDS=$(aws sts assume-role --role-arn ${TEMP_ROLE_ARN} --role-session-name s3_pentest)
-export AWS_ACCESS_KEY_ID=$(echo $CREDS | jq .AccessKeyId | xargs)
-export AWS_SECRET_ACCESS_KEY=$(echo $CREDS | jq .SecretAccessKey | xargs)
-export AWS_SESSION_TOKEN=$(echo $CREDS | jq .Token | xargs)
+export AWS_ACCESS_KEY_ID=$(echo $CREDS | jq .Credentials.AccessKeyId | xargs)
+export AWS_SECRET_ACCESS_KEY=$(echo $CREDS | jq .Credentials.SecretAccessKey | xargs)
+export AWS_SESSION_TOKEN=$(echo $CREDS | jq .Credentials.SessionToken | xargs)
 
 aws s3api list-objects-v2 --region $REGION --bucket $S3_BUCKET_NAME
+
+unset AWS_ACCESS_KEY_ID
+unset AWS_SECRET_ACCESS_KEY
+unset AWS_SESSION_TOKEN

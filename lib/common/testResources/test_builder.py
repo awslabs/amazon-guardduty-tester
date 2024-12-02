@@ -289,6 +289,7 @@ class Tests:
             f'LINUX_INSTANCE=\'{vars.LINUX_INSTANCE}\'',
             f'WINDOWS_INSTANCE=\'{vars.WINDOWS_INSTANCE}\'',
             f'S3_BUCKET_NAME=\'{vars.S3_BUCKET_NAME}\'',
+            f'ATTACK_BUCKET_NAME=\'{vars.ATTACK_BUCKET_NAME}\'',
             f'EMPTY_BUCKET_NAME=\'{vars.EMPTY_BUCKET_NAME}\'',
             f'TEMP_ROLE_ARN=\'{vars.TEMP_ROLE_ARN}\'',
             f'REGION=\'{vars.REGION}\'',

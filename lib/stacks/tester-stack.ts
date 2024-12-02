@@ -53,6 +53,7 @@ export class GuardDutyTesterStack extends Stack {
 
     const testerBucket = new TesterBucket(this, 'testerBucket');
     const emptyBucket = new EmptyBucket(this, 'emptyBucket');
+    const attackBucket = new EmptyBucket(this, 'attackBucket');
     const testerLambda = new TesterLambda(this, 'testerLambda', {
       accountId: this.account,
       region: this.region,
@@ -128,6 +129,7 @@ export class GuardDutyTesterStack extends Stack {
       tempRole: tempRole.arn,
       stepFuncArn: stepFunction.machineArn,
       emptyBucketName: emptyBucket.bucketName,
+      attackBucketName: attackBucket.bucketName,
       tag: INSTANCE_TAG,
       ec2TaskFamily: EC2_TASK_FAMILY,
       fargateTaskFamily: FARGATE_TASK_FAMILY,
