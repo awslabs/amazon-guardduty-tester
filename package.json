@@ -18,7 +18,7 @@
     "@types/node": "20.11.30",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "aws-cdk": "2.134.0",
-    "aws-cdk-lib": "2.177.0",
+    "aws-cdk-lib": "2.186.0",
     "constructs": "^10.3.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
