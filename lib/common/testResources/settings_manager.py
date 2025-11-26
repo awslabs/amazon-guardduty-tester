@@ -76,6 +76,7 @@ class SettingsManager:
         self.test_settings['runtime'] = args.runtime[0]
         self.test_settings['tactics'] = args.tactics
         self.test_settings['log_sources'] = args.log_source
+        self.test_settings['assume_yes'] = args.yes
 
         # maintain original state to be restored if any changes are made
         self.save_curr_state()
@@ -227,7 +228,7 @@ class SettingsManager:
     def get_user_permission(self, resource: str) -> bool:
         # for spacing
         print()
-        response = input(f'Allow tester to make changes to {resource}? [y/n]: ').lower()
+        response = self.input_with_assume(f'Allow tester to make changes to {resource}? [y/n]: ').lower()
         while True:
             if response in self.input_response_map:
                 return self.input_response_map[response]
@@ -582,7 +583,7 @@ class SettingsManager:
         except Exception as e:
             print(e.args)
             print('NOTE: EKS Runtime Monitoring Findings will not be generated')
-            response = input('Continue? [y/n]: ').lower()
+            response = self.input_with_assume('Continue? [y/n]: ').lower()
             while True:
                 if response in self.input_response_map:
                     if not self.input_response_map[response]: 
@@ -594,3 +595,12 @@ class SettingsManager:
                         return
                 else:
                     response = input('Please respond with \'y\' or \'n\': ').lower()
+
+    '''
+    Helper method to skip user input and always return `y` when the `assume_yes` flag is passed
+    '''
+    def input_with_assume(self, prompt: str) -> str:
+        if self.test_settings['assume_yes']:
+            return 'y'
+        else:
+            return input(prompt)

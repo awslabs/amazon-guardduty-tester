@@ -17,9 +17,9 @@ import { Construct } from 'constructs';
 import { type SecGroupProps } from './security-group-props';
 
 /**
- * Defines the permissible traffic to and from the Kali Linux Instance
+ * Defines the permissible traffic to and from the Debian Linux Instance
  */
-export class KaliSecurityGroup extends Construct {
+export class DebianSecurityGroup extends Construct {
   public readonly sg: SecurityGroup;
 
   constructor(scope: Construct, id: string, props: SecGroupProps) {
@@ -34,9 +34,9 @@ export class KaliSecurityGroup extends Construct {
       const eipAllocation = subnet.node.findChild('EIP') as CfnEIP;
       if (eipAllocation) {
         this.sg.addIngressRule(
-            Peer.ipv4(eipAllocation.attrPublicIp + '/32'),
-            Port.allTraffic(),
-            `Allow traffic from NAT Gateway ${index + 1}`
+          Peer.ipv4(eipAllocation.attrPublicIp + '/32'),
+          Port.allTraffic(),
+          `Allow traffic from NAT Gateway ${index + 1}`,
         );
       }
     });

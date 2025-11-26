@@ -20,7 +20,7 @@ export interface TempRoleProps {
 }
 
 /**
- * Temporary role to be assumed by kali instance during testing
+ * Temporary role to be assumed by Debian instance during testing
  */
 export class TempRole extends Construct {
   public readonly arn: string;

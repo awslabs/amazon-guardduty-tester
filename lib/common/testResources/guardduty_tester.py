@@ -98,6 +98,7 @@ EXAMPLES:
     parser.add_argument('--runtime', nargs=1, type=str, default=['true'], choices=['true', 'false', 'only'], help='Declare runtime flag followed by either true, false, or only. Default: true')
     parser.add_argument('--tactics', nargs='*', type=str, choices=tactics, default=tactics, help='Declare tactics flag followed by one or more of options above to specify which finding type(s) to generate')
     parser.add_argument('--log-source', nargs='*', type=str, choices=log_sources, default=None, help='Declare log-sources flag followed by one or more of options above to specify which finding type(s) to generate')
+    parser.add_argument('--yes', action='store_true', default=False, help='Assume "yes" for all configuration prompts')
 
     args = parser.parse_args()
 

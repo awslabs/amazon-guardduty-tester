@@ -81,7 +81,7 @@ class Tests:
 
         self.script_header = self.initialize_script()
         self.host_script = self.script_header
-        self.kali_script = ''
+        self.debian_script = ''
         with open('script_tail.sh') as f:
             self.script_end = f.read()
         
@@ -124,7 +124,7 @@ class Tests:
     
     '''
     Separates scripts that are to be run locally vs on remote resource
-    For some non runtime -> run on kali
+    For some non runtime -> run on debian
     For ECS/EKS runtime run on cluster containers
     For TI based findings, insert the indicator into the respective local/remote scripts
     For all, insert description and expected findings in host script to be printed to users terminal
@@ -133,7 +133,7 @@ class Tests:
         self.definitions.sort(key=operator.itemgetter('resource'))
         split_by_resource = itertools.groupby(self.definitions, key=operator.itemgetter('resource'))
 
-        # iterate over resources and write separate scripts per execution space (EC2 host, EKS pod, ECS container, and Kali host)
+        # iterate over resources and write separate scripts per execution space (EC2 host, EKS pod, ECS container, and Debian host)
         for resource, definitions in split_by_resource:
             remote_script = ''
 
@@ -163,11 +163,11 @@ class Tests:
                 if d['local'] == 'true':
                     self.host_script += temp_script
 
-                # write all non runtime remote scripts to kali script
+                # write all non runtime remote scripts to debian script
                 elif 'Runtime' not in d['findingType']:
-                    if not self.kali_script:
-                        self.kali_script = self.script_header
-                    self.kali_script += temp_script
+                    if not self.debian_script:
+                        self.debian_script = self.script_header
+                    self.debian_script += temp_script
                     
                 # else it is runtime and remote -> ECS task or EKS pod
                 else:
@@ -179,8 +179,8 @@ class Tests:
                     self.upload_file(resource)
                     self.build_ecs_task(resource)
         
-        if self.kali_script:
-            self.write_file('ec2.sh', self.kali_script)
+        if self.debian_script:
+            self.write_file('ec2.sh', self.debian_script)
             self.upload_file('ec2')
 
     '''
@@ -303,4 +303,4 @@ class Tests:
         ]
 
         return '\n'.join(script_vars)
-            
+

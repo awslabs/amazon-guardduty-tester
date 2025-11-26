@@ -16,7 +16,17 @@ export AWS_ACCESS_KEY_ID=$(echo $CREDS | jq .Credentials.AccessKeyId | xargs)
 export AWS_SECRET_ACCESS_KEY=$(echo $CREDS | jq .Credentials.SecretAccessKey | xargs)
 export AWS_SESSION_TOKEN=$(echo $CREDS | jq .Credentials.SessionToken | xargs)
 
-aws s3api list-objects-v2 --region $REGION --bucket $S3_BUCKET_NAME
+export KALI_USER_AGENT_HEADER='aws-cli/2.23.6 md/awscrt#1.0.0.dev0 ua/2.0 os/linux#6.12.13-cloud-amd64 md/arch#x86_64 lang/python#3.13.2 md/pyimpl#CPython cfg/retry-mode#standard md/installer#source md/distrib#kali.2025 md/prompt#off md/command#s3api.list-objects'
+
+source /home/ssm-user/gd_tester_pyenv/bin/activate
+
+awscurl --access_key=$AWS_ACCESS_KEY_ID \
+        --secret_key=$AWS_SECRET_ACCESS_KEY \
+        --session_token=$AWS_SESSION_TOKEN \
+        --region $REGION \
+        --service s3 \
+        --header "User-Agent: $KALI_USER_AGENT_HEADER" \
+        "https://$S3_BUCKET_NAME.s3-$REGION.amazonaws.com/" >> /dev/null 2>&1
 
 unset AWS_ACCESS_KEY_ID
 unset AWS_SECRET_ACCESS_KEY

@@ -21,7 +21,8 @@ export interface DriverRoleProps {
   trailArn: string;
   lambdaArn: string;
   region: string;
-  kaliId: string;
+  debianId: string;
+  ubuntuId: string;
   cluster: string;
   eks: string;
   stepFuncArn: string;
@@ -68,9 +69,9 @@ export class DriverRole extends Construct {
               sid: 'IAMPasswordPolicyAccess',
               effect: Effect.ALLOW,
               actions: [
-                  'iam:DeleteAccountPasswordPolicy', // Required to restore password policy to default if not previously set
-                  'iam:GetAccountPasswordPolicy',
-                  'iam:UpdateAccountPasswordPolicy'
+                'iam:DeleteAccountPasswordPolicy', // Required to restore password policy to default if not previously set
+                'iam:GetAccountPasswordPolicy',
+                'iam:UpdateAccountPasswordPolicy',
               ],
               resources: ['*'], // Selected actions only support the all resources wildcard('*').
             }),
@@ -85,6 +86,12 @@ export class DriverRole extends Construct {
               effect: Effect.ALLOW,
               actions: ['ec2:DescribeAddresses'],
               resources: ['*'], // Selected actions only support the all resources wildcard('*')
+            }),
+            new PolicyStatement({
+              sid: 'EC2DescribeInstances',
+              effect: Effect.ALLOW,
+              actions: ['ec2:DescribeInstances'],
+              resources: ['*'],
             }),
             new PolicyStatement({
               sid: 'GuardDuty',
@@ -117,9 +124,24 @@ export class DriverRole extends Construct {
               effect: Effect.ALLOW,
               actions: ['ssm:SendCommand'],
               resources: [
-                `arn:aws:ec2:${props.region}:${props.accountId}:instance/${props.kaliId}`,
+                `arn:aws:ec2:${props.region}:${props.accountId}:instance/${props.debianId}`,
                 `arn:aws:ssm:${props.region}::document/AWS-RunShellScript`,
               ],
+            }),
+	    new PolicyStatement({
+              sid: 'SsmSession',
+              effect: Effect.ALLOW,
+              actions: ['ssm:StartSession'],
+              resources: [
+                `arn:aws:ec2:${props.region}:${props.accountId}:instance/${props.ubuntuId}`,
+                `arn:aws:ssm:${props.region}::document/AWS-StartInteractiveCommand`,
+              ],
+            }),
+	    new PolicyStatement({
+              sid: 'SsmTerminateSession',
+              effect: Effect.ALLOW,
+              actions: ['ssm:TerminateSession'],
+              resources: ['*']
             }),
             new PolicyStatement({
               sid: 'InstallGuardDutyAgent',
@@ -152,10 +174,15 @@ export class DriverRole extends Construct {
               resources: ['*'], // Selected actions only support the all resources wildcard('*').
             }),
             new PolicyStatement({
-              sid: 'EksImageUploadToRepo',
+              sid: 'ECRFullAccess',
               effect: Effect.ALLOW,
               actions: [
                 'ecr:CreateRepository',
+                'ecr:DeleteRepository',
+                'ecr:DescribeRepositories',
+                'ecr:ListImages',
+                'ecr:DescribeImages',
+                'ecr:BatchDeleteImage',
                 'ecr:CompleteLayerUpload',
                 'ecr:GetAuthorizationToken',
                 'ecr:InitiateLayerUpload',
@@ -163,6 +190,12 @@ export class DriverRole extends Construct {
                 'ecr:UploadLayerPart',
               ],
               resources: [`arn:aws:ecr:${props.region}:${props.accountId}:repository/*`],
+            }),
+            new PolicyStatement({
+              sid: 'ECRListRepositories',
+              effect: Effect.ALLOW,
+              actions: ['ecr:DescribeRepositories'],
+              resources: ['*'],
             }),
             new PolicyStatement({
               sid: 'EksKubeCtlPermissions',

@@ -11,16 +11,16 @@
 //  express or implied. See the License for the specific language governing
 //  permissions and limitations under the License.
 
-import { Duration, Tags } from 'aws-cdk-lib';
-import { GenericLinuxImage, Instance, SubnetType, UserData } from 'aws-cdk-lib/aws-ec2';
+import { Tags } from 'aws-cdk-lib';
+import { GenericLinuxImage, Instance, SubnetType, UserData, CfnInstance } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 
-import { KaliLinuxRole } from '../../access/iam/kali-role';
-import { KaliSecurityGroup } from '../../access/securityGroup/kali-security-group';
+import { DebianLinuxRole } from '../../access/iam/debian-role';
+import { DebianSecurityGroup } from '../../access/securityGroup/debian-security-group';
 import { type CfnActionLambda } from '../lambda/cfn-action-lambda';
 import { type Ec2Props } from './ec2-props';
 
-export interface KaliProps extends Ec2Props {
+export interface DebianProps extends Ec2Props {
   amiLambda: CfnActionLambda;
   bucketName: string;
   accountId: string;
@@ -29,20 +29,20 @@ export interface KaliProps extends Ec2Props {
 }
 
 /**
- * Defines the resources for a Kali Linux instance in GaurdDuty
- * Tester public sunet.  Kali goes in the public subnet so that it
+ * Defines the resources for a Debian Linux instance in GaurdDuty
+ * Tester public sunet.  Debian goes in the public subnet so that it
  * has a public IP address as required by some tests
  */
-export class KaliLinuxInstance extends Construct {
+export class DebianLinuxInstance extends Construct {
   public readonly ec2: Instance;
-  public readonly instanceRole: KaliLinuxRole;
+  public readonly instanceRole: DebianLinuxRole;
   public readonly sgId: string;
 
-  constructor(scope: Construct, id: string, props: KaliProps) {
+  constructor(scope: Construct, id: string, props: DebianProps) {
     super(scope, id);
 
     // IAM role that instance will assume
-    this.instanceRole = new KaliLinuxRole(scope, 'Role', {
+    this.instanceRole = new DebianLinuxRole(scope, 'Role', {
       bucketName: props.bucketName,
       accountId: props.accountId,
       region: props.region!,
@@ -50,8 +50,8 @@ export class KaliLinuxInstance extends Construct {
       tempRoleArn: props.tempRole,
     });
 
-    // kali security group that defines permissible traffic
-    const securityGroup = new KaliSecurityGroup(this, 'SecurityGroup', {
+    // debian security group that defines permissible traffic
+    const securityGroup = new DebianSecurityGroup(this, 'SecurityGroup', {
       vpc: props.vpc,
       ingressSgId: props.securityGroupIngress!,
     });
@@ -61,7 +61,7 @@ export class KaliLinuxInstance extends Construct {
     this.ec2 = new Instance(this, id, {
       vpc: props.vpc,
       instanceType: props.instanceType,
-      machineImage: new GenericLinuxImage(this.getKaliImage(props)),
+      machineImage: new GenericLinuxImage(this.getDebianImage(props)),
       vpcSubnets: props.vpc.selectSubnets({ subnetType: SubnetType.PUBLIC }),
       associatePublicIpAddress: true,
       userData: this.getUserData(),
@@ -76,18 +76,18 @@ export class KaliLinuxInstance extends Construct {
   }
 
   /**
-   * With Custom Resource Lambda query Kali Linux Image AMI for the given region
+   * With Custom Resource Lambda query Debian Linux Image AMI for the given region
    * @param props
    * @returns map of [region] -> instance-ami
    */
-  private getKaliImage(props: KaliProps): Record<string, string> {
+  private getDebianImage(props: DebianProps): Record<string, string> {
     return {
       [props.region!]: props.amiLambda.customResourceLambda.getAtt('Id').toString(),
     };
   }
 
   /**
-   * Defines user data for Kali Linux that installs necessary libraries for testing
+   * Defines user data for Debian Linux that installs necessary libraries for testing
    * @returns
    */
   private getUserData(): UserData {
@@ -99,13 +99,12 @@ export class KaliLinuxInstance extends Construct {
       '#!/bin/bash',
       'export DEBIAN_FRONTEND=noninteractive',
       'mkdir /etc/systemd/resolved.conf.d',
-      `echo '[Resolve]\nDNS=169.254.169.253' | tee /etc/systemd/resolved.conf.d/aws.conf`,
       'adduser ssm-user',
       'echo "ssm-user ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ssm-agent-users',
       'chmod 440 /etc/sudoers.d/ssm-agent-users',
       'systemctl restart systemd-resolved',
       'export PATH=$PATH:/usr/local/bin:/usr/sbin:/root/.local/bin',
-      `echo 'export PATH=/root/.local/bin:/usr/sbin:/home/kali/.local/bin:$PATH' >> /home/kali/.bash_profile`,
+      `echo 'export PATH=/root/.local/bin:/usr/sbin:/home/debian/.local/bin:$PATH' >> /home/debian/.bash_profile`,
       'apt-get update -y',
       `${install} nmap hydra jq python3-pip python3 tor freerdp2-dev libssl-dev postgresql-common libpq-dev autoconf libtool automake gcc unzip python3-venv apache2`,
       // Ensure the most recent AWS CLI is present
