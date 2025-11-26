@@ -12,7 +12,6 @@ It is recommended that these tests be deployed in a non-production account to en
 - Session Manager Plugin [installation instructions](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
 - npm
 - Docker
-- Subscription to [Kali Linux Image](https://aws.amazon.com/marketplace/pp/prodview-fznsw3f7mq7to)
 
 ### Deploy
 
@@ -86,7 +85,6 @@ Common issues:
 Runtime findings are applicable to EC2, ECS, and EKS workloads provided the GuardDuty security agent is installed and operating properly. However, some container findings such as `PrivilegeEscalation:Runtime/RuncContainerEscape` are for containers only and as such are only ECS and EKS applicable. 
 
 ```
-- AttackSequence:S3/CompromisedData
 - Backdoor:EC2/C&CActivity.B!DNS
 - Backdoor:EC2/DenialOfService.Dns
 - Backdoor:EC2/DenialOfService.Udp

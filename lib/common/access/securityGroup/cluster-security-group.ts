@@ -18,7 +18,7 @@ import { type SecGroupProps } from './security-group-props';
 
 /**
  * ECS Security Group for GuardDuty tester
- * Allows tcp traffic from within vpc and icmp from Kali Instance
+ * Allows tcp traffic from within vpc and icmp from Debian Instance
  */
 export class ClusterSecurityGroup extends Construct {
   public readonly sg: SecurityGroup;

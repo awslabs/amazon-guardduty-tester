@@ -13,7 +13,7 @@
 
 import { Tags } from 'aws-cdk-lib';
 import { AutoScalingGroup, UpdatePolicy } from 'aws-cdk-lib/aws-autoscaling';
-import { LaunchTemplate, MachineImage, UserData } from 'aws-cdk-lib/aws-ec2';
+import { LaunchTemplate, MachineImage, UserData, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AsgCapacityProvider, Cluster } from 'aws-cdk-lib/aws-ecs';
 import { InstanceProfile } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
@@ -27,9 +27,10 @@ import { type Ec2Props } from '../ec2/ec2-props';
 export interface EcsProps extends Ec2Props {
   ingressSecurityGroup: string;
   maliciousIp: string;
-  kaliIp: string;
-  kaliInstance: string;
-  kaliRoleName: string;
+  debianIp: string;
+  debianInstance: string;
+  ubuntuInstance: string;
+  debianRoleName: string;
   windowsIp: string;
   windowsInstance: string;
   bucketName: string;
@@ -54,6 +55,7 @@ export interface EcsProps extends Ec2Props {
  */
 export class TestDriverEcsCluster extends Construct {
   public readonly instanceRole: DriverRole;
+  public readonly securityGroup: SecurityGroup;
   constructor(scope: Construct, id: string, props: EcsProps) {
     super(scope, id);
 
@@ -78,7 +80,8 @@ export class TestDriverEcsCluster extends Construct {
       trailArn: props.cloudTrailArn,
       lambdaArn: props.lambdaArn,
       region: props.region!,
-      kaliId: props.kaliInstance,
+      debianId: props.debianInstance,
+      ubuntuId: props.ubuntuInstance,
       cluster: cluster.clusterName,
       eks: props.eksCluster,
       stepFuncArn: props.stepFuncArn,
@@ -93,6 +96,8 @@ export class TestDriverEcsCluster extends Construct {
       vpc: props.vpc,
       ingressSgId: props.ingressSecurityGroup,
     }).sg;
+    
+    this.securityGroup = cluster_sg;
 
     // launch template for cluster
     const launchTemplate = new LaunchTemplate(this, 'LaunchTemplate', {
@@ -176,11 +181,13 @@ export class TestDriverEcsCluster extends Construct {
       `for FILE in {1..20}; do cp ${homeDir}/compromised_keys/compromised.pem ${homeDir}/compromised_keys/compromised$FILE.pem; done`,
       `sed -i 's/loganding123test.com/guarddutyc2activityb.com/g' ${homeDir}/domains/queries.txt`,
       `aws s3 cp --recursive s3://${props.bucketName}/py_tester ${homeDir}/py_tester`,
-      `echo "LINUX_IP = '${props.kaliIp}'" >> ${homeDir}/py_tester/tester_vars.py`,
+      `find  ${homeDir}/py_tester/runtimeScenarios -name "*.sh" -exec chmod +x {} \\;`,
+      `find  ${homeDir}/py_tester/runtimeScenarios -name "*.py" -exec chmod +x {} \\;`,
+      `echo "LINUX_IP = '${props.debianIp}'" >> ${homeDir}/py_tester/tester_vars.py`,
       `echo "WINDOWS_IP = '${props.windowsIp}'" >> ${homeDir}/py_tester/tester_vars.py`,
       `echo "RED_TEAM_INSTANCE = '\$INSTANCE_ID'" >> ${homeDir}/py_tester/tester_vars.py`,
       `echo "RED_TEAM_IP = '$(curl -H "X-aws-ec2-metadata-token: \$TOKEN" -v http://169.254.169.254/latest/meta-data/local-ipv4 | grep "172")'" >> ${homeDir}/py_tester/tester_vars.py`,
-      `echo "LINUX_INSTANCE = '${props.kaliInstance}'" >> ${homeDir}/py_tester/tester_vars.py`,
+      `echo "LINUX_INSTANCE = '${props.debianInstance}'" >> ${homeDir}/py_tester/tester_vars.py`,
       `echo "WINDOWS_INSTANCE = '${props.windowsInstance}'" >> ${homeDir}/py_tester/tester_vars.py`,
       `echo "S3_BUCKET_NAME = '${props.bucketName}'" >> ${homeDir}/py_tester/tester_vars.py`,
       `echo "EMPTY_BUCKET_NAME = '${props.emptyBucketName}'" >> ${homeDir}/py_tester/tester_vars.py`,
@@ -192,7 +199,7 @@ export class TestDriverEcsCluster extends Construct {
       `echo "EKS_CLUSTER_NAME = '${props.eksCluster}'" >> ${homeDir}/py_tester/tester_vars.py`,
       `echo "MALICIOUS_IP = '${props.maliciousIp}'" >> ${homeDir}/py_tester/tester_vars.py`,
       `echo "LAMBDA_NAME = '${props.lambdaName}'" >> ${homeDir}/py_tester/tester_vars.py`,
-      `echo "ROLE_NAME = '${props.kaliRoleName}'" >> ${homeDir}/py_tester/tester_vars.py`,
+      `echo "ROLE_NAME = '${props.debianRoleName}'" >> ${homeDir}/py_tester/tester_vars.py`,
       `echo "CLUSTER = '${props.ecsCluster}'" >> ${homeDir}/py_tester/tester_vars.py`,
       `echo "CONTAINER = 'amazon-linux'" >> ${homeDir}/py_tester/tester_vars.py`,
       `echo "STEP_FUNCTION = '${props.stepFuncArn}'" >> ${homeDir}/py_tester/tester_vars.py`,
@@ -207,7 +214,7 @@ export class TestDriverEcsCluster extends Construct {
       `chown -R ssm-user ${homeDir}/`,
       `chmod +x ${homeDir}/py_tester/driver_tool_install.sh`,
       `cp ${homeDir}/py_tester/driver_tool_install.service /etc/systemd/system/driver_tool_install.service`,
-      'systemctl start driver_tool_install'
+      'systemctl start driver_tool_install',
     );
     return userData;
   }

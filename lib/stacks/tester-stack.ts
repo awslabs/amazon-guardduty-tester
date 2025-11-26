@@ -15,7 +15,8 @@ import { Stack, type StackProps } from 'aws-cdk-lib';
 import { type Construct } from 'constructs';
 
 import { TempRole } from '../common/access/iam/tester-temp-tole';
-import { KaliLinuxInstance } from '../common/compute/ec2/kali-instance';
+import { DebianLinuxInstance } from '../common/compute/ec2/debian-instance';
+import { UbuntuInstance } from '../common/compute/ec2/ubuntu-instance';
 import { BasicWindowsInstance } from '../common/compute/ec2/windows-instance';
 import { TestDriverEcsCluster } from '../common/compute/ecs/driver-cluster';
 import { TesterEksCluster } from '../common/compute/eks/tester-eks';
@@ -28,8 +29,11 @@ import { EmptyBucket } from '../common/storage/s3/empty-bucket';
 import { TesterBucket } from '../common/storage/s3/tester-bucket';
 import {
   ASG_NAME,
+  CREATED_BY_TAG,
+  DEBIAN_INSTANCE_NAME,
   DRIVER_INSTANCE_TYPE,
   EC2_INSTANCE_TYPE,
+  UBUNTU_INSTANCE_TYPE,
   EC2_TASK_FAMILY,
   ECR_REPO_NAME,
   ECS_CLUSTER_NAME,
@@ -38,9 +42,8 @@ import {
   EKS_INSTANCE_NAME,
   FARGATE_TASK_FAMILY,
   INSTANCE_TAG,
-  CREATED_BY_TAG,
-  KALI_INSTANCE_NAME,
   TRAIL_NAME,
+  UBUNTU_INSTANCE_NAME,
   WINDOWS_INSTANCE_NAME,
 } from './constants';
 
@@ -83,11 +86,11 @@ export class GuardDutyTesterStack extends Stack {
     const testerVpc = new CdkGdTesterVPC(this, 'vpc', { region: this.region });
 
     // public subnet instance
-    const kaliInstance = new KaliLinuxInstance(this, 'kaliLinuxInstance', {
+    const debianInstance = new DebianLinuxInstance(this, 'debianLinuxInstance', {
       vpc: testerVpc.vpc,
       amiLambda: cfnLambda,
       region: this.region,
-      instanceName: KALI_INSTANCE_NAME,
+      instanceName: DEBIAN_INSTANCE_NAME,
       bucketName: testerBucket.bucketName,
       accountId: this.account,
       eksCluster: EKS_CLUSTER_NAME,
@@ -98,6 +101,16 @@ export class GuardDutyTesterStack extends Stack {
     });
 
     // private subnet resources
+    const ubuntuInstance = new UbuntuInstance(this, 'ubuntuInstance', {
+      vpc: testerVpc.vpc,
+      instanceName: UBUNTU_INSTANCE_NAME,
+      instanceType: UBUNTU_INSTANCE_TYPE,
+      region: this.region,
+      tag: INSTANCE_TAG,
+      createdBy: CREATED_BY_TAG,
+      bucketName: testerBucket.bucketName,
+      accountId: this.account,
+    });
     const windowsInstance = new BasicWindowsInstance(this, 'windowsInstance', {
       vpc: testerVpc.vpc,
       instanceName: WINDOWS_INSTANCE_NAME,
@@ -115,17 +128,18 @@ export class GuardDutyTesterStack extends Stack {
       instanceType: DRIVER_INSTANCE_TYPE,
       bucketName: testerBucket.bucketName,
       vpc: testerVpc.vpc,
-      maliciousIp: kaliInstance.ec2.instancePublicIp,
-      kaliIp: kaliInstance.ec2.instancePrivateIp,
-      kaliInstance: kaliInstance.ec2.instanceId,
-      kaliRoleName: kaliInstance.instanceRole.role.roleName,
+      maliciousIp: debianInstance.ec2.instancePublicIp,
+      debianIp: debianInstance.ec2.instancePrivateIp,
+      debianInstance: debianInstance.ec2.instanceId,
+      ubuntuInstance: ubuntuInstance.ec2.instanceId,
+      debianRoleName: debianInstance.instanceRole.role.roleName,
       windowsIp: windowsInstance.ec2.instancePrivateIp,
       windowsInstance: windowsInstance.ec2.instanceId,
       cloudTrailName: TRAIL_NAME,
       cloudTrailArn: cloudtrail.trailArn,
       lambdaName: testerLambda.functionName,
       lambdaArn: testerLambda.functionArn,
-      ingressSecurityGroup: kaliInstance.sgId,
+      ingressSecurityGroup: debianInstance.sgId,
       tempRole: tempRole.arn,
       stepFuncArn: stepFunction.machineArn,
       emptyBucketName: emptyBucket.bucketName,
@@ -135,14 +149,15 @@ export class GuardDutyTesterStack extends Stack {
       fargateTaskFamily: FARGATE_TASK_FAMILY,
       createdBy: CREATED_BY_TAG,
     });
-    new TesterEksCluster(this, 'eksCluster', {
+    const eksCluster = new TesterEksCluster(this, 'eksCluster', {
       vpc: testerVpc.vpc,
       masterRole: driverCluster.instanceRole.role,
-      kubectlRole: kaliInstance.instanceRole.role,
+      kubectlRole: debianInstance.instanceRole.role,
       name: EKS_CLUSTER_NAME,
       instanceName: EKS_INSTANCE_NAME,
       tag: INSTANCE_TAG,
       createdBy: CREATED_BY_TAG,
+      ecsSecurityGroup: driverCluster.securityGroup,
     });
 
     // Lambda requires Test VPC

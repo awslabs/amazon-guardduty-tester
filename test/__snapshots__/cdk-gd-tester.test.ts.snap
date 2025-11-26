@@ -78,7 +78,7 @@ exports[`Check All Test Resources 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-test-account-us-west-2",
-          "S3Key": "dd4d716a75222275803dbbf987ca1ee6014ddb69ea2ffe959e39fe718b94427a.zip",
+          "S3Key": "2d56e153cac88d3e0c2f842e8e6f6783b8725bf91f95e0673b4725448a56e96d.zip",
         },
         "Environment": {
           "Variables": {
@@ -376,7 +376,7 @@ exports[`Check All Test Resources 1`] = `
               ],
               "Version": "2012-10-17",
             },
-            "PolicyName": "KaliInlinePolicy",
+            "PolicyName": "DebianInlinePolicy",
           },
         ],
       },
@@ -389,7 +389,7 @@ exports[`Check All Test Resources 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-test-account-us-west-2",
-          "S3Key": "1d0e5cd54f3c47b4102694328a74ce9be561892f296d812197826958eac82a08.zip",
+          "S3Key": "aa4c1af5f7ca508b4f57b489be5edf47e57a0f93600dc41192ef1077da685df1.zip",
         },
         "Handler": "setting_restore.lambda_handler",
         "Role": {
@@ -614,6 +614,139 @@ exports[`Check All Test Resources 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
+    "attackBucketAutoDeleteObjectsCustomResource3407E7A3": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "attackBucketPolicy5C95FF97",
+      ],
+      "Properties": {
+        "BucketName": {
+          "Ref": "attackBucketC9BA3DF1",
+        },
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "Custom::S3AutoDeleteObjects",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "attackBucketC9BA3DF1": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true,
+        },
+        "Tags": [
+          {
+            "Key": "aws-cdk:auto-delete-objects",
+            "Value": "true",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "attackBucketPolicy5C95FF97": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "attackBucketC9BA3DF1",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:*",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*",
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "attackBucketC9BA3DF1",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "attackBucketC9BA3DF1",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "s3:PutBucketPolicy",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::GetAtt": [
+                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+                    "Arn",
+                  ],
+                },
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "attackBucketC9BA3DF1",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "attackBucketC9BA3DF1",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
+    },
     "awscdkawseksClusterResourceProviderNestedStackawscdkawseksClusterResourceProviderNestedStackResource9827C454": {
       "DeletionPolicy": "Delete",
       "Properties": {
@@ -625,7 +758,7 @@ exports[`Check All Test Resources 1`] = `
               {
                 "Ref": "AWS::URLSuffix",
               },
-              "/cdk-hnb659fds-assets-test-account-us-west-2/6c8b5ff9882a2a1cb8b8266f39a73df342641cd124a1009ffd0033c82c292c98.json",
+              "/cdk-hnb659fds-assets-test-account-us-west-2/25f25b94c4a436a5af21687dea26a44ef267cf202877c2b6e5eb3415a2079131.json",
             ],
           ],
         },
@@ -656,13 +789,239 @@ exports[`Check All Test Resources 1`] = `
               {
                 "Ref": "AWS::URLSuffix",
               },
-              "/cdk-hnb659fds-assets-test-account-us-west-2/3bb3127518d31527d12e5a06c577bcf8cae636f3709ced1da3fbe79b52a46f65.json",
+              "/cdk-hnb659fds-assets-test-account-us-west-2/5736571c8e2996e419cb9d5c051e3970b01cec0adb9d05c207d155627f05733f.json",
             ],
           ],
         },
       },
       "Type": "AWS::CloudFormation::Stack",
       "UpdateReplacePolicy": "Delete",
+    },
+    "debianLinuxInstanceA7F598BBef542029a1ab7312": {
+      "DependsOn": [
+        "Role8C6B06EB",
+        "vpcpublicsubnetSubnet1DefaultRoute924AA571",
+        "vpcpublicsubnetSubnet1RouteTableAssociationD4256712",
+        "vpcpublicsubnetSubnet2DefaultRoute37E815F1",
+        "vpcpublicsubnetSubnet2RouteTableAssociation77ED478A",
+      ],
+      "Properties": {
+        "AvailabilityZone": "dummy1a",
+        "IamInstanceProfile": {
+          "Ref": "debianLinuxInstanceInstanceProfile1242EB71",
+        },
+        "ImageId": {
+          "Fn::GetAtt": [
+            "testerCfnLambdaCfnGdTesterLambdaD43A9FEB",
+            "Id",
+          ],
+        },
+        "InstanceType": "t3.micro",
+        "NetworkInterfaces": [
+          {
+            "AssociatePublicIpAddress": true,
+            "DeviceIndex": "0",
+            "GroupSet": [
+              {
+                "Fn::GetAtt": [
+                  "debianLinuxInstanceSecurityGroup04BD15BA",
+                  "GroupId",
+                ],
+              },
+            ],
+            "SubnetId": {
+              "Ref": "vpcpublicsubnetSubnet1SubnetD27BC2F5",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "CreatedBy",
+            "Value": "GuardDuty Test Script",
+          },
+          {
+            "Key": "GuardDutyTestFramework",
+            "Value": "Instance",
+          },
+          {
+            "Key": "Name",
+            "Value": "Debian-GuardDutyTester",
+          },
+        ],
+        "UserData": {
+          "Fn::Base64": "#!/bin/bash
+#!/bin/bash
+export DEBIAN_FRONTEND=noninteractive
+mkdir /etc/systemd/resolved.conf.d
+adduser ssm-user
+echo "ssm-user ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ssm-agent-users
+chmod 440 /etc/sudoers.d/ssm-agent-users
+systemctl restart systemd-resolved
+export PATH=$PATH:/usr/local/bin:/usr/sbin:/root/.local/bin
+echo 'export PATH=/root/.local/bin:/usr/sbin:/home/debian/.local/bin:$PATH' >> /home/debian/.bash_profile
+apt-get update -y
+apt-get install -y nmap hydra jq python3-pip python3 tor freerdp2-dev libssl-dev postgresql-common libpq-dev autoconf libtool automake gcc unzip python3-venv apache2
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+./aws/install
+mkdir /home/ssm-user/passwords
+curl -L https://raw.githubusercontent.com/awslabs/amazon-guardduty-tester/master/artifacts/password_list.txt > /home/ssm-user/passwords/password_list.txt
+cd /home/ssm-user
+cat << EOF >> users
+ec2-user
+root
+admin
+administrator
+ftp
+www
+nobody
+EOF
+curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.27.1/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+mv ./kubectl /usr/local/bin/kubectl
+mkdir /home/ssm-user/install
+cd /home/ssm-user/install
+git clone https://gitlab.torproject.org/tpo/core/torsocks.git
+cd torsocks
+./autogen.sh
+./configure
+make
+make install
+bash -c 'echo "ControlPort 9051" >> /etc/tor/torsocks.conf'
+bash -c 'echo "CookieAuthentication 0" >> /etc/tor/torsocks.conf'
+bash -c 'echo "ControlPort 9051" >> /etc/tor/torrc'
+bash -c 'echo "CookieAuthentication 0" >> /etc/tor/torrc'
+cd /home/ssm-user
+python3 -m venv gd_tester_pyenv
+source gd_tester_pyenv/bin/activate
+pip3 install awscurl aws-consoler
+systemctl enable tor
+systemctl start tor
+chown -R ssm-user: /home/ssm-user
+sed -i 's/80/8009/g' /etc/apache2/sites-enabled/000-default.conf
+sed -i 's/80/8009/g' /etc/apache2/ports.conf
+systemctl enable apache2
+systemctl start apache2
+cd /home/ssm-user/install
+wget https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb
+dpkg -i amazon-ssm-agent.deb
+systemctl enable amazon-ssm-agent
+systemctl start amazon-ssm-agent",
+        },
+      },
+      "Type": "AWS::EC2::Instance",
+    },
+    "debianLinuxInstanceInstanceProfile1242EB71": {
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "Role8C6B06EB",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::InstanceProfile",
+    },
+    "debianLinuxInstanceSecurityGroup04BD15BA": {
+      "Properties": {
+        "GroupDescription": "MyTestStack/debianLinuxInstance/SecurityGroup/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Fn::GetAtt": [
+                      "vpcpublicsubnetSubnet1EIPB981524A",
+                      "PublicIp",
+                    ],
+                  },
+                  "/32",
+                ],
+              ],
+            },
+            "Description": "Allow traffic from NAT Gateway 1",
+            "IpProtocol": "-1",
+          },
+          {
+            "CidrIp": {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Fn::GetAtt": [
+                      "vpcpublicsubnetSubnet2EIP84113908",
+                      "PublicIp",
+                    ],
+                  },
+                  "/32",
+                ],
+              ],
+            },
+            "Description": "Allow traffic from NAT Gateway 2",
+            "IpProtocol": "-1",
+          },
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "vpc4346410E",
+                "CidrBlock",
+              ],
+            },
+            "Description": "allow tcp connection from within vpc",
+            "FromPort": 8009,
+            "IpProtocol": "tcp",
+            "ToPort": 8009,
+          },
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "vpc4346410E",
+                "CidrBlock",
+              ],
+            },
+            "Description": "allow ssh connection from within vpc",
+            "FromPort": 22,
+            "IpProtocol": "tcp",
+            "ToPort": 22,
+          },
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "vpc4346410E",
+                "CidrBlock",
+              ],
+            },
+            "Description": "allow udp port 80 connection from within vpc",
+            "FromPort": 80,
+            "IpProtocol": "udp",
+            "ToPort": 80,
+          },
+          {
+            "CidrIp": {
+              "Fn::GetAtt": [
+                "vpc4346410E",
+                "CidrBlock",
+              ],
+            },
+            "Description": "allow udp port 53 connection from within vpc",
+            "FromPort": 53,
+            "IpProtocol": "udp",
+            "ToPort": 53,
+          },
+        ],
+        "VpcId": {
+          "Ref": "vpc4346410E",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
     },
     "driverClusterAE6F201C": {
       "Properties": {
@@ -684,39 +1043,84 @@ exports[`Check All Test Resources 1`] = `
       },
       "Type": "AWS::ECS::ClusterCapacityProviderAssociations",
     },
-    "driverClusterASGDrainECSHookFunction0FCA4EC6": {
+    "driverClusterCapacityProvider56E9EC1F": {
+      "Properties": {
+        "AutoScalingGroupProvider": {
+          "AutoScalingGroupArn": {
+            "Ref": "driverClusterGuardDutyTestASGFA8391AA",
+          },
+          "ManagedScaling": {
+            "Status": "ENABLED",
+            "TargetCapacity": 100,
+          },
+          "ManagedTerminationProtection": "DISABLED",
+        },
+      },
+      "Type": "AWS::ECS::CapacityProvider",
+    },
+    "driverClusterClusterSecurityGroup11D80937": {
+      "Properties": {
+        "GroupDescription": "MyTestStack/driverCluster/ClusterSecurityGroup/ClusterSecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "vpc4346410E",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "driverClusterExecRole679B3ACD": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
+        ],
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:CreateLogGroup",
+                    "logs:PutLogEvents",
+                  ],
+                  "Effect": "Allow",
+                  "Resource": "arn:aws:logs:us-west-2:test-account:*",
+                },
+              ],
+              "Version": "2012-10-17",
+            },
+            "PolicyName": "EcsTaskExecInline",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "driverClusterGuardDutyTestASGDrainECSHookFunction15046552": {
       "DependsOn": [
-        "driverClusterASGDrainECSHookFunctionServiceRoleDefaultPolicy6611E026",
-        "driverClusterASGDrainECSHookFunctionServiceRoleE4FE875D",
+        "driverClusterGuardDutyTestASGDrainECSHookFunctionServiceRoleDefaultPolicy7C67437E",
+        "driverClusterGuardDutyTestASGDrainECSHookFunctionServiceRoleF915C617",
       ],
       "Properties": {
         "Code": {
-          "ZipFile": "#Copyright 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-#  
-#  Licensed under the Apache License, Version 2.0 (the "License").
-#  You may not use this file except in compliance with the License.
-#  A copy of the License is located at
-#  
-#      http://www.apache.org/licenses/LICENSE-2.0
-#  
-#  or in the "license" file accompanying this file. This file is distributed 
-#  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
-#  express or implied. See the License for the specific language governing 
-#  permissions and limitations under the License.
-
-#Copyright 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-#  
-#  Licensed under the Apache License, Version 2.0 (the "License").
-#  You may not use this file except in compliance with the License.
-#  A copy of the License is located at
-#  
-#      http://www.apache.org/licenses/LICENSE-2.0
-#  
-#  or in the "license" file accompanying this file. This file is distributed 
-#  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
-#  express or implied. See the License for the specific language governing 
-#  permissions and limitations under the License.
-import boto3, json, os, time
+          "ZipFile": "import boto3, json, os, time
 
 ecs = boto3.client('ecs')
 autoscaling = boto3.client('autoscaling')
@@ -818,7 +1222,7 @@ def pick(dct, *keys):
         "Handler": "index.lambda_handler",
         "Role": {
           "Fn::GetAtt": [
-            "driverClusterASGDrainECSHookFunctionServiceRoleE4FE875D",
+            "driverClusterGuardDutyTestASGDrainECSHookFunctionServiceRoleF915C617",
             "Arn",
           ],
         },
@@ -827,23 +1231,23 @@ def pick(dct, *keys):
       },
       "Type": "AWS::Lambda::Function",
     },
-    "driverClusterASGDrainECSHookFunctionAllowInvokeMyTestStackdriverClusterASGLifecycleHookDrainHookTopic8A0FE3AEA555CEBF": {
+    "driverClusterGuardDutyTestASGDrainECSHookFunctionAllowInvokeMyTestStackdriverClusterGuardDutyTestASGLifecycleHookDrainHookTopic5E76ADDBACC38F27": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
           "Fn::GetAtt": [
-            "driverClusterASGDrainECSHookFunction0FCA4EC6",
+            "driverClusterGuardDutyTestASGDrainECSHookFunction15046552",
             "Arn",
           ],
         },
         "Principal": "sns.amazonaws.com",
         "SourceArn": {
-          "Ref": "driverClusterASGLifecycleHookDrainHookTopic6AFF34CD",
+          "Ref": "driverClusterGuardDutyTestASGLifecycleHookDrainHookTopic42E6E61D",
         },
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "driverClusterASGDrainECSHookFunctionServiceRoleDefaultPolicy6611E026": {
+    "driverClusterGuardDutyTestASGDrainECSHookFunctionServiceRoleDefaultPolicy7C67437E": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -870,7 +1274,7 @@ def pick(dct, *keys):
                     },
                     ":autoscaling:us-west-2:test-account:autoScalingGroup:*:autoScalingGroupName/",
                     {
-                      "Ref": "driverClusterASGF1EDEC5C",
+                      "Ref": "driverClusterGuardDutyTestASGFA8391AA",
                     },
                   ],
                 ],
@@ -929,16 +1333,16 @@ def pick(dct, *keys):
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "driverClusterASGDrainECSHookFunctionServiceRoleDefaultPolicy6611E026",
+        "PolicyName": "driverClusterGuardDutyTestASGDrainECSHookFunctionServiceRoleDefaultPolicy7C67437E",
         "Roles": [
           {
-            "Ref": "driverClusterASGDrainECSHookFunctionServiceRoleE4FE875D",
+            "Ref": "driverClusterGuardDutyTestASGDrainECSHookFunctionServiceRoleF915C617",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "driverClusterASGDrainECSHookFunctionServiceRoleE4FE875D": {
+    "driverClusterGuardDutyTestASGDrainECSHookFunctionServiceRoleF915C617": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -969,24 +1373,23 @@ def pick(dct, *keys):
       },
       "Type": "AWS::IAM::Role",
     },
-    "driverClusterASGDrainECSHookFunctionTopic1F026FBF": {
+    "driverClusterGuardDutyTestASGDrainECSHookFunctionTopic1F8A0017": {
       "Properties": {
         "Endpoint": {
           "Fn::GetAtt": [
-            "driverClusterASGDrainECSHookFunction0FCA4EC6",
+            "driverClusterGuardDutyTestASGDrainECSHookFunction15046552",
             "Arn",
           ],
         },
         "Protocol": "lambda",
         "TopicArn": {
-          "Ref": "driverClusterASGLifecycleHookDrainHookTopic6AFF34CD",
+          "Ref": "driverClusterGuardDutyTestASGLifecycleHookDrainHookTopic42E6E61D",
         },
       },
       "Type": "AWS::SNS::Subscription",
     },
-    "driverClusterASGF1EDEC5C": {
+    "driverClusterGuardDutyTestASGFA8391AA": {
       "Properties": {
-        "AutoScalingGroupName": "GuardDutyTesterASG",
         "DesiredCapacity": "1",
         "LaunchTemplate": {
           "LaunchTemplateId": {
@@ -1012,36 +1415,39 @@ def pick(dct, *keys):
       },
       "Type": "AWS::AutoScaling::AutoScalingGroup",
       "UpdatePolicy": {
+        "AutoScalingReplacingUpdate": {
+          "WillReplace": true,
+        },
         "AutoScalingScheduledAction": {
           "IgnoreUnmodifiedGroupSizeProperties": true,
         },
       },
     },
-    "driverClusterASGLifecycleHookDrainHook19151D8B": {
+    "driverClusterGuardDutyTestASGLifecycleHookDrainHook8F293D3D": {
       "DependsOn": [
-        "driverClusterASGLifecycleHookDrainHookRoleDefaultPolicy5BCBA6BF",
-        "driverClusterASGLifecycleHookDrainHookRole5DB37189",
+        "driverClusterGuardDutyTestASGLifecycleHookDrainHookRoleDefaultPolicyB9613EB9",
+        "driverClusterGuardDutyTestASGLifecycleHookDrainHookRoleCD0CB446",
       ],
       "Properties": {
         "AutoScalingGroupName": {
-          "Ref": "driverClusterASGF1EDEC5C",
+          "Ref": "driverClusterGuardDutyTestASGFA8391AA",
         },
         "DefaultResult": "CONTINUE",
         "HeartbeatTimeout": 300,
         "LifecycleTransition": "autoscaling:EC2_INSTANCE_TERMINATING",
         "NotificationTargetARN": {
-          "Ref": "driverClusterASGLifecycleHookDrainHookTopic6AFF34CD",
+          "Ref": "driverClusterGuardDutyTestASGLifecycleHookDrainHookTopic42E6E61D",
         },
         "RoleARN": {
           "Fn::GetAtt": [
-            "driverClusterASGLifecycleHookDrainHookRole5DB37189",
+            "driverClusterGuardDutyTestASGLifecycleHookDrainHookRoleCD0CB446",
             "Arn",
           ],
         },
       },
       "Type": "AWS::AutoScaling::LifecycleHook",
     },
-    "driverClusterASGLifecycleHookDrainHookRole5DB37189": {
+    "driverClusterGuardDutyTestASGLifecycleHookDrainHookRoleCD0CB446": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -1058,7 +1464,7 @@ def pick(dct, *keys):
       },
       "Type": "AWS::IAM::Role",
     },
-    "driverClusterASGLifecycleHookDrainHookRoleDefaultPolicy5BCBA6BF": {
+    "driverClusterGuardDutyTestASGLifecycleHookDrainHookRoleDefaultPolicyB9613EB9": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1066,68 +1472,23 @@ def pick(dct, *keys):
               "Action": "sns:Publish",
               "Effect": "Allow",
               "Resource": {
-                "Ref": "driverClusterASGLifecycleHookDrainHookTopic6AFF34CD",
+                "Ref": "driverClusterGuardDutyTestASGLifecycleHookDrainHookTopic42E6E61D",
               },
             },
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "driverClusterASGLifecycleHookDrainHookRoleDefaultPolicy5BCBA6BF",
+        "PolicyName": "driverClusterGuardDutyTestASGLifecycleHookDrainHookRoleDefaultPolicyB9613EB9",
         "Roles": [
           {
-            "Ref": "driverClusterASGLifecycleHookDrainHookRole5DB37189",
+            "Ref": "driverClusterGuardDutyTestASGLifecycleHookDrainHookRoleCD0CB446",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "driverClusterASGLifecycleHookDrainHookTopic6AFF34CD": {
+    "driverClusterGuardDutyTestASGLifecycleHookDrainHookTopic42E6E61D": {
       "Type": "AWS::SNS::Topic",
-    },
-    "driverClusterCapacityProvider56E9EC1F": {
-      "Properties": {
-        "AutoScalingGroupProvider": {
-          "AutoScalingGroupArn": {
-            "Ref": "driverClusterASGF1EDEC5C",
-          },
-          "ManagedScaling": {
-            "Status": "ENABLED",
-            "TargetCapacity": 100,
-          },
-          "ManagedTerminationProtection": "DISABLED",
-        },
-      },
-      "Type": "AWS::ECS::CapacityProvider",
-    },
-    "driverClusterClusterSecurityGroup11D80937": {
-      "Properties": {
-        "GroupDescription": "MyTestStack/driverCluster/ClusterSecurityGroup/ClusterSecurityGroup",
-        "SecurityGroupEgress": [
-          {
-            "CidrIp": "0.0.0.0/0",
-            "Description": "Allow all outbound traffic by default",
-            "IpProtocol": "-1",
-          },
-        ],
-        "SecurityGroupIngress": [
-          {
-            "CidrIp": {
-              "Fn::GetAtt": [
-                "vpc4346410E",
-                "CidrBlock",
-              ],
-            },
-            "Description": "allow tcp traffic from within vpc",
-            "FromPort": 0,
-            "IpProtocol": "tcp",
-            "ToPort": 65535,
-          },
-        ],
-        "VpcId": {
-          "Ref": "vpc4346410E",
-        },
-      },
-      "Type": "AWS::EC2::SecurityGroup",
     },
     "driverClusterInstanceProfile5DB6C41B": {
       "Properties": {
@@ -1238,6 +1599,7 @@ def pick(dct, *keys):
                 },
                 {
                   "Action": [
+                    "iam:DeleteAccountPasswordPolicy",
                     "iam:GetAccountPasswordPolicy",
                     "iam:UpdateAccountPasswordPolicy",
                   ],
@@ -1255,6 +1617,12 @@ def pick(dct, *keys):
                     ],
                   },
                   "Sid": "CloudTrail",
+                },
+                {
+                  "Action": "ec2:DescribeAddresses",
+                  "Effect": "Allow",
+                  "Resource": "*",
+                  "Sid": "EC2EIPList",
                 },
                 {
                   "Action": [
@@ -1300,7 +1668,7 @@ def pick(dct, *keys):
                         [
                           "arn:aws:ec2:us-west-2:test-account:instance/",
                           {
-                            "Ref": "kaliLinuxInstance328E3459",
+                            "Ref": "debianLinuxInstanceA7F598BBef542029a1ab7312",
                           },
                         ],
                       ],
@@ -1319,48 +1687,38 @@ def pick(dct, *keys):
                   "Sid": "InstallGuardDutyAgent",
                 },
                 {
-                  "Action": [
-                    "ecs:DescribeTasks",
-                    "ecs:ExecuteCommand",
-                  ],
+                  "Action": "ecs:RunTask",
                   "Effect": "Allow",
                   "Resource": [
-                    {
-                      "Fn::Join": [
-                        "",
-                        [
-                          "arn:aws:ecs:us-west-2:test-account:task/",
-                          {
-                            "Ref": "driverClusterAE6F201C",
-                          },
-                          "/*",
-                        ],
-                      ],
-                    },
-                    {
-                      "Fn::Join": [
-                        "",
-                        [
-                          "arn:aws:ecs:us-west-2:test-account:cluster/",
-                          {
-                            "Ref": "driverClusterAE6F201C",
-                          },
-                        ],
-                      ],
-                    },
+                    "arn:aws:ecs:us-west-2:test-account:task-definition/EcsFargateGuardDutyTest:*",
+                    "arn:aws:ecs:us-west-2:test-account:task-definition/EcsEc2GuardDutyTest:*",
                   ],
-                  "Sid": "EcsExec",
+                  "Sid": "RunEcsTask",
                 },
                 {
-                  "Action": "ecs:ListTasks",
+                  "Action": "iam:PassRole",
                   "Effect": "Allow",
                   "Resource": [
                     {
-                      "Ref": "driverClusterServiceTaskDefBC4B807F",
+                      "Fn::GetAtt": [
+                        "driverClusterTaskRoleA1AFB062",
+                        "Arn",
+                      ],
                     },
-                    "arn:aws:ecs:us-west-2:test-account:container-instance/EcsGuardDutyTester/*",
+                    {
+                      "Fn::GetAtt": [
+                        "driverClusterExecRole679B3ACD",
+                        "Arn",
+                      ],
+                    },
                   ],
-                  "Sid": "ListEcsTasksToExec",
+                  "Sid": "PassEcsTaskRole",
+                },
+                {
+                  "Action": "ecs:RegisterTaskDefinition",
+                  "Effect": "Allow",
+                  "Resource": "*",
+                  "Sid": "RegisterEcsTask",
                 },
                 {
                   "Action": [
@@ -1494,7 +1852,7 @@ def pick(dct, *keys):
           "ImageId": {
             "Ref": "SsmParameterValueawsserviceecsoptimizedamiamazonlinux2023recommendedimageidC96584B6F00A464EAD1953AFF4B05118Parameter",
           },
-          "InstanceType": "t3.micro",
+          "InstanceType": "m6i.large",
           "SecurityGroupIds": [
             {
               "Fn::GetAtt": [
@@ -1508,6 +1866,14 @@ def pick(dct, *keys):
               "ResourceType": "instance",
               "Tags": [
                 {
+                  "Key": "CreatedBy",
+                  "Value": "GuardDuty Test Script",
+                },
+                {
+                  "Key": "GuardDutyTestFramework",
+                  "Value": "Instance",
+                },
+                {
                   "Key": "Name",
                   "Value": "Driver-GuardDutyTester",
                 },
@@ -1516,6 +1882,14 @@ def pick(dct, *keys):
             {
               "ResourceType": "volume",
               "Tags": [
+                {
+                  "Key": "CreatedBy",
+                  "Value": "GuardDuty Test Script",
+                },
+                {
+                  "Key": "GuardDutyTestFramework",
+                  "Value": "Instance",
+                },
                 {
                   "Key": "Name",
                   "Value": "Driver-GuardDutyTester",
@@ -1563,7 +1937,7 @@ aws s3 cp --recursive s3://",
 echo "LINUX_IP = '",
                   {
                     "Fn::GetAtt": [
-                      "kaliLinuxInstance328E3459",
+                      "debianLinuxInstanceA7F598BBef542029a1ab7312",
                       "PrivateIp",
                     ],
                   },
@@ -1580,7 +1954,7 @@ echo "RED_TEAM_INSTANCE = '$INSTANCE_ID'" >> /home/ssm-user/py_tester/tester_var
 echo "RED_TEAM_IP = '$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/local-ipv4 | grep "172")'" >> /home/ssm-user/py_tester/tester_vars.py
 echo "LINUX_INSTANCE = '",
                   {
-                    "Ref": "kaliLinuxInstance328E3459",
+                    "Ref": "debianLinuxInstanceA7F598BBef542029a1ab7312",
                   },
                   "'" >> /home/ssm-user/py_tester/tester_vars.py
 echo "WINDOWS_INSTANCE = '",
@@ -1598,6 +1972,11 @@ echo "EMPTY_BUCKET_NAME = '",
                     "Ref": "emptyBucketCF828118",
                   },
                   "'" >> /home/ssm-user/py_tester/tester_vars.py
+echo "ATTACK_BUCKET_NAME = '",
+                  {
+                    "Ref": "attackBucketC9BA3DF1",
+                  },
+                  "'" >> /home/ssm-user/py_tester/tester_vars.py
 echo "TEMP_ROLE_ARN = '",
                   {
                     "Fn::GetAtt": [
@@ -1613,7 +1992,7 @@ echo "EKS_CLUSTER_NAME = 'EksGuardDutyTester'" >> /home/ssm-user/py_tester/teste
 echo "MALICIOUS_IP = '",
                   {
                     "Fn::GetAtt": [
-                      "kaliLinuxInstance328E3459",
+                      "debianLinuxInstanceA7F598BBef542029a1ab7312",
                       "PublicIp",
                     ],
                   },
@@ -1635,53 +2014,54 @@ echo "STEP_FUNCTION = '",
                     "Ref": "StepFunctionStateMachineBFD673C9",
                   },
                   "'" >> /home/ssm-user/py_tester/tester_vars.py
+echo "TASK_ROLE_ARN = '",
+                  {
+                    "Fn::GetAtt": [
+                      "driverClusterTaskRoleA1AFB062",
+                      "Arn",
+                    ],
+                  },
+                  "'" >> /home/ssm-user/py_tester/tester_vars.py
+echo "TASK_EXEC_ROLE_ARN = '",
+                  {
+                    "Fn::GetAtt": [
+                      "driverClusterExecRole679B3ACD",
+                      "Arn",
+                    ],
+                  },
+                  "'" >> /home/ssm-user/py_tester/tester_vars.py
+echo "EC2_TASK_FAM = 'EcsEc2GuardDutyTest'" >> /home/ssm-user/py_tester/tester_vars.py
+echo "FARGATE_TASK_FAM = 'EcsFargateGuardDutyTest'" >> /home/ssm-user/py_tester/tester_vars.py
+echo "SUBNETS = ['",
+                  {
+                    "Ref": "vpcprivatesubnetSubnet1SubnetC88AC256",
+                  },
+                  "','",
+                  {
+                    "Ref": "vpcprivatesubnetSubnet2Subnet132207E3",
+                  },
+                  "',]" >> /home/ssm-user/py_tester/tester_vars.py
+echo "SEC_GROUP = ['",
+                  {
+                    "Fn::GetAtt": [
+                      "driverClusterClusterSecurityGroup11D80937",
+                      "GroupId",
+                    ],
+                  },
+                  "']" >> /home/ssm-user/py_tester/tester_vars.py
 echo ",
                   {
                     "Fn::GetAtt": [
-                      "kaliLinuxInstance328E3459",
+                      "debianLinuxInstanceA7F598BBef542029a1ab7312",
                       "PublicIp",
                     ],
                   },
                   " >> /home/ssm-user/py_tester/tester_script_custom_threat.txt
-pip3 install cmake
-wget -q -O /home/ssm-user/libssh.tar.xz https://www.libssh.org/files/0.9/libssh-0.9.4.tar.xz
-cd /home/ssm-user
-cat << EOF >> users
-ec2-user
-root
-admin
-administrator
-ftp
-www
-nobody
-EOF
-tar -xvf /home/ssm-user/libssh.tar.xz
-cd /home/ssm-user/libssh-0.9.4
-mkdir build
-cd build
-cmake3 -DUNIT_TESTING=OFF -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
-make && make install
-cd /home/ssm-user
-git clone https://github.com/vanhauser-thc/thc-hydra
-cd thc-hydra
-./configure
-make && make install
-cd /home/ssm-user
-git clone https://github.com/galkan/crowbar /home/ssm-user/crowbar
-cd /home/ssm-user
-curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.27.1/bin/linux/amd64/kubectl
-chmod +x ./kubectl
-mv ./kubectl /usr/local/bin/kubectl
-curl --silent --location https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_Linux_amd64.tar.gz | tar xz -C /tmp
-mv /tmp/eksctl /usr/local/bin/
-chown -R ssm-user: /home/ssm-user
-chmod +x /home/ssm-user/crowbar/crowbar.py
-yum install -y https://s3.amazonaws.com/session-manager-downloads/plugin/latest/linux_64bit/session-manager-plugin.rpm
-wget https://secure.eicar.org/eicar.com
-wget https://secure.eicar.org/eicar.com.txt
-wget https://secure.eicar.org/eicar_com.zip
-wget https://secure.eicar.org/eicarcom2.zip
-echo DONE
+mkdir /home/ssm-user/install
+chown -R ssm-user /home/ssm-user/
+chmod +x /home/ssm-user/py_tester/driver_tool_install.sh
+cp /home/ssm-user/py_tester/driver_tool_install.service /etc/systemd/system/driver_tool_install.service
+systemctl start driver_tool_install
 echo ECS_CLUSTER=",
                   {
                     "Ref": "driverClusterAE6F201C",
@@ -1700,6 +2080,14 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
             "ResourceType": "launch-template",
             "Tags": [
               {
+                "Key": "CreatedBy",
+                "Value": "GuardDuty Test Script",
+              },
+              {
+                "Key": "GuardDutyTestFramework",
+                "Value": "Instance",
+              },
+              {
                 "Key": "Name",
                 "Value": "Driver-GuardDutyTester",
               },
@@ -1709,82 +2097,7 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
       },
       "Type": "AWS::EC2::LaunchTemplate",
     },
-    "driverClusterServiceA5B0754C": {
-      "DependsOn": [
-        "driverClusterServiceTaskRoleDefaultPolicyF8C1AFC2",
-        "driverClusterServiceTaskRole9644692C",
-      ],
-      "Properties": {
-        "Cluster": {
-          "Ref": "driverClusterAE6F201C",
-        },
-        "DeploymentConfiguration": {
-          "Alarms": {
-            "AlarmNames": [],
-            "Enable": false,
-            "Rollback": false,
-          },
-          "MaximumPercent": 200,
-          "MinimumHealthyPercent": 50,
-        },
-        "EnableECSManagedTags": false,
-        "EnableExecuteCommand": true,
-        "LaunchType": "EC2",
-        "SchedulingStrategy": "REPLICA",
-        "TaskDefinition": {
-          "Ref": "driverClusterServiceTaskDefBC4B807F",
-        },
-      },
-      "Type": "AWS::ECS::Service",
-    },
-    "driverClusterServiceTaskDefBC4B807F": {
-      "Properties": {
-        "ContainerDefinitions": [
-          {
-            "Command": [
-              "sleep 30;apt update -y;apt install python3 gcc netcat-openbsd g++ sudo zip -y;curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip && ./aws/install;echo -n 'X5O!P%@AP[4\\PZX54(P^)7CC)7}\\$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!\\$H+H*' >/tmp/eicar.com && cp /tmp/eicar.com /tmp/eicar.com.txt && zip -j /tmp/eicar_com.zip /tmp/eicar.com && zip -j /tmp/eicarcom2.zip /tmp/eicar_com.zip;sleep 3600",
-            ],
-            "Cpu": 256,
-            "EntryPoint": [
-              "sh",
-              "-c",
-            ],
-            "Essential": true,
-            "Image": "public.ecr.aws/ecs-sample-image/amazon-ecs-sample:latest",
-            "LinuxParameters": {
-              "Capabilities": {
-                "Add": [
-                  "SYS_PTRACE",
-                  "SYS_ADMIN",
-                ],
-              },
-            },
-            "Memory": 512,
-            "Name": "amazon-linux",
-            "Privileged": true,
-          },
-        ],
-        "ExecutionRoleArn": {
-          "Fn::GetAtt": [
-            "driverClusterServiceTaskExecutionRole3E1A62E7",
-            "Arn",
-          ],
-        },
-        "Family": "MyTestStackdriverClusterServiceTaskDefC24BD03A",
-        "NetworkMode": "bridge",
-        "RequiresCompatibilities": [
-          "EC2",
-        ],
-        "TaskRoleArn": {
-          "Fn::GetAtt": [
-            "driverClusterServiceTaskRole9644692C",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::ECS::TaskDefinition",
-    },
-    "driverClusterServiceTaskExecutionRole3E1A62E7": {
+    "driverClusterTaskRoleA1AFB062": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -1798,114 +2111,8 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
           ],
           "Version": "2012-10-17",
         },
-        "ManagedPolicyArns": [
-          "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
-        ],
-        "Policies": [
-          {
-            "PolicyDocument": {
-              "Statement": [
-                {
-                  "Action": [
-                    "logs:CreateLogStream",
-                    "logs:CreateLogGroup",
-                    "logs:PutLogEvents",
-                  ],
-                  "Effect": "Allow",
-                  "Resource": "arn:aws:logs:us-west-2:test-account:*",
-                },
-              ],
-              "Version": "2012-10-17",
-            },
-            "PolicyName": "EcsTaskExecInline",
-          },
-        ],
       },
       "Type": "AWS::IAM::Role",
-    },
-    "driverClusterServiceTaskRole9644692C": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "ecs-tasks.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "Policies": [
-          {
-            "PolicyDocument": {
-              "Statement": [
-                {
-                  "Action": "s3:GetObject",
-                  "Effect": "Allow",
-                  "Resource": {
-                    "Fn::Join": [
-                      "",
-                      [
-                        "arn:aws:s3:::",
-                        {
-                          "Ref": "testerBucket1B6270A3",
-                        },
-                        "/*",
-                      ],
-                    ],
-                  },
-                  "Sid": "S3PullTestingScript",
-                },
-              ],
-              "Version": "2012-10-17",
-            },
-            "PolicyName": "EcsTaskInline",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "driverClusterServiceTaskRoleDefaultPolicyF8C1AFC2": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "ssmmessages:CreateControlChannel",
-                "ssmmessages:CreateDataChannel",
-                "ssmmessages:OpenControlChannel",
-                "ssmmessages:OpenDataChannel",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-            {
-              "Action": "logs:DescribeLogGroups",
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-            {
-              "Action": [
-                "logs:CreateLogStream",
-                "logs:DescribeLogStreams",
-                "logs:PutLogEvents",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "driverClusterServiceTaskRoleDefaultPolicyF8C1AFC2",
-        "Roles": [
-          {
-            "Ref": "driverClusterServiceTaskRole9644692C",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
     },
     "eksCluster8A5F7DC4": {
       "DeletionPolicy": "Delete",
@@ -2320,6 +2527,14 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
                   "Key": "Name",
                   "Value": "Kube-GuardDutyTester",
                 },
+                {
+                  "Key": "GuardDutyTestFramework",
+                  "Value": "Instance",
+                },
+                {
+                  "Key": "CreatedBy",
+                  "Value": "GuardDuty Test Script",
+                },
               ],
             },
           ],
@@ -2616,174 +2831,6 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
       },
       "Type": "AWS::S3::BucketPolicy",
     },
-    "kaliLinuxInstance328E3459": {
-      "DependsOn": [
-        "Role8C6B06EB",
-        "vpcpublicsubnetSubnet1DefaultRoute924AA571",
-        "vpcpublicsubnetSubnet1RouteTableAssociationD4256712",
-        "vpcpublicsubnetSubnet2DefaultRoute37E815F1",
-        "vpcpublicsubnetSubnet2RouteTableAssociation77ED478A",
-      ],
-      "Properties": {
-        "AvailabilityZone": "dummy1a",
-        "IamInstanceProfile": {
-          "Ref": "kaliLinuxInstanceInstanceProfile661B33BB",
-        },
-        "ImageId": {
-          "Fn::GetAtt": [
-            "testerCfnLambdaCfnGdTesterLambdaD43A9FEB",
-            "Id",
-          ],
-        },
-        "InstanceType": "t3.micro",
-        "NetworkInterfaces": [
-          {
-            "AssociatePublicIpAddress": true,
-            "DeviceIndex": "0",
-            "GroupSet": [
-              {
-                "Fn::GetAtt": [
-                  "kaliLinuxInstanceSecurityGroup68D644C5",
-                  "GroupId",
-                ],
-              },
-            ],
-            "SubnetId": {
-              "Ref": "vpcpublicsubnetSubnet1SubnetD27BC2F5",
-            },
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "Kali-GuardDutyTester",
-          },
-        ],
-        "UserData": {
-          "Fn::Base64": "#!/bin/bash
-#!/bin/bash
-export DEBIAN_FRONTEND=noninteractive
-mkdir /etc/systemd/resolved.conf.d
-echo '[Resolve]
-DNS=169.254.169.253' | tee /etc/systemd/resolved.conf.d/aws.conf
-adduser ssm-user
-echo "ssm-user ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ssm-agent-users
-chmod 440 /etc/sudoers.d/ssm-agent-users
-systemctl restart systemd-resolved
-export PATH=$PATH:/usr/local/bin:/usr/sbin:/root/.local/bin
-echo 'export PATH=/root/.local/bin:/usr/sbin:/home/kali/.local/bin:$PATH' >> /home/kali/.bash_profile
-apt-get update -y
-apt-get install -y nmap hydra jq python3-pip python3 tor freerdp2-dev libssl-dev postgresql-common libpq-dev
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-unzip awscliv2.zip
-./aws/install
-mkdir /home/ssm-user/passwords
-curl -L https://raw.githubusercontent.com/awslabs/amazon-guardduty-tester/master/artifacts/password_list.txt > /home/ssm-user/passwords/password_list.txt
-cd /home/ssm-user
-cat << EOF >> users
-ec2-user
-root
-admin
-administrator
-ftp
-www
-nobody
-EOF
-curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.27.1/bin/linux/amd64/kubectl
-chmod +x ./kubectl
-mv ./kubectl /usr/local/bin/kubectl
-mkdir /tmp/ssm
-cd /tmp/ssm
-wget https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb
-dpkg -i amazon-ssm-agent.deb
-systemctl enable amazon-ssm-agent
-systemctl start amazon-ssm-agent
-bash -c 'echo "ControlPort 9051" >> /etc/tor/torrc'
-bash -c 'echo "CookieAuthentication 0" >> /etc/tor/torrc'
-pip3 install awscurl aws-consoler
-service tor start
-chown -R ssm-user: /home/ssm-user
-nc -k -l 8009",
-        },
-      },
-      "Type": "AWS::EC2::Instance",
-    },
-    "kaliLinuxInstanceInstanceProfile661B33BB": {
-      "Properties": {
-        "Roles": [
-          {
-            "Ref": "Role8C6B06EB",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::InstanceProfile",
-    },
-    "kaliLinuxInstanceSecurityGroup68D644C5": {
-      "Properties": {
-        "GroupDescription": "MyTestStack/kaliLinuxInstance/SecurityGroup/SecurityGroup",
-        "SecurityGroupEgress": [
-          {
-            "CidrIp": "0.0.0.0/0",
-            "Description": "Allow all outbound traffic by default",
-            "IpProtocol": "-1",
-          },
-        ],
-        "SecurityGroupIngress": [
-          {
-            "CidrIp": {
-              "Fn::GetAtt": [
-                "vpc4346410E",
-                "CidrBlock",
-              ],
-            },
-            "Description": "allow tcp connection from within vpc",
-            "FromPort": 8009,
-            "IpProtocol": "tcp",
-            "ToPort": 8009,
-          },
-          {
-            "CidrIp": {
-              "Fn::GetAtt": [
-                "vpc4346410E",
-                "CidrBlock",
-              ],
-            },
-            "Description": "allow ssh connection from within vpc",
-            "FromPort": 22,
-            "IpProtocol": "tcp",
-            "ToPort": 22,
-          },
-          {
-            "CidrIp": {
-              "Fn::GetAtt": [
-                "vpc4346410E",
-                "CidrBlock",
-              ],
-            },
-            "Description": "allow udp port 80 connection from within vpc",
-            "FromPort": 80,
-            "IpProtocol": "udp",
-            "ToPort": 80,
-          },
-          {
-            "CidrIp": {
-              "Fn::GetAtt": [
-                "vpc4346410E",
-                "CidrBlock",
-              ],
-            },
-            "Description": "allow udp port 53 connection from within vpc",
-            "FromPort": 53,
-            "IpProtocol": "udp",
-            "ToPort": 53,
-          },
-        ],
-        "VpcId": {
-          "Ref": "vpc4346410E",
-        },
-      },
-      "Type": "AWS::EC2::SecurityGroup",
-    },
     "testerBucket1B6270A3": {
       "DeletionPolicy": "Delete",
       "Properties": {
@@ -2839,7 +2886,7 @@ nc -k -l 8009",
       "Properties": {
         "Content": {
           "S3Bucket": "cdk-hnb659fds-assets-test-account-us-west-2",
-          "S3Key": "7036fe3811ee77916833b95adca51730e9f73e580adf41f5e005f163b834be12.zip",
+          "S3Key": "3322b7049fb0ed2b7cbb644a2ada8d1116ff80c32dca89e6ada846b5de26f961.zip",
         },
         "Description": "/opt/awscli/aws",
       },
@@ -2863,7 +2910,7 @@ nc -k -l 8009",
           "cdk-hnb659fds-assets-test-account-us-west-2",
         ],
         "SourceObjectKeys": [
-          "5cf518c925ab33c52e8ca9b22389df67ca5c53e0b5c556fb57131f46779c9767.zip",
+          "ad4862694a88f71a818ed8f8048954d9ecadc5a77bd4bc086d5f1957864f342d.zip",
         ],
       },
       "Type": "Custom::CDKBucketDeployment",
@@ -3114,12 +3161,6 @@ nc -k -l 8009",
                   "Sid": "GuardDutyServiceRoleThreatListCleanup",
                 },
                 {
-                  "Action": "ec2:DescribeImages",
-                  "Effect": "Allow",
-                  "Resource": "*",
-                  "Sid": "FindKaliImagePermission",
-                },
-                {
                   "Action": "ecr:DeleteRepository",
                   "Effect": "Allow",
                   "Resource": "arn:aws:ecr:us-west-2:test-account:repository/gd-eks-tester",
@@ -3166,7 +3207,7 @@ nc -k -l 8009",
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-test-account-us-west-2",
-          "S3Key": "430bf98aaae162d2d1be427b70f2b0d7e043463d868718f121e645b5efc31f25.zip",
+          "S3Key": "722b1d70d12c8c7a334fb33d404ddb2d0b5d46e1c6acfdebd42c5b2921b4864c.zip",
         },
         "Handler": "cfn_on_event.on_event",
         "MemorySize": 512,
@@ -3205,7 +3246,7 @@ nc -k -l 8009",
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-test-account-us-west-2",
-          "S3Key": "dec43a492c3f02bdb641b14c56699a600d593d1a6c09b5cad9627f8910e54848.zip",
+          "S3Key": "4993317cb64cbc86b7898a55458f7465aa5816f877643aa8ce813f6508db47d2.zip",
         },
         "Handler": "tester_lambda.lambda_handler",
         "Role": {
@@ -3233,6 +3274,25 @@ nc -k -l 8009",
           ],
           "Version": "2012-10-17",
         },
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:CreateLogGroup",
+                    "logs:PutLogEvents",
+                  ],
+                  "Effect": "Allow",
+                  "Resource": "arn:aws:logs:us-west-2:test-account:*",
+                },
+              ],
+              "Version": "2012-10-17",
+            },
+            "PolicyName": "EcsTaskExecInline",
+          },
+        ],
       },
       "Type": "AWS::IAM::Role",
     },
@@ -3754,6 +3814,14 @@ nc -k -l 8009",
         ],
         "Tags": [
           {
+            "Key": "CreatedBy",
+            "Value": "GuardDuty Test Script",
+          },
+          {
+            "Key": "GuardDutyTestFramework",
+            "Value": "Instance",
+          },
+          {
             "Key": "Name",
             "Value": "Windows-GuardDutyTester",
           },
@@ -3789,6 +3857,14 @@ nc -k -l 8009",
           "Version": "2012-10-17",
         },
         "Tags": [
+          {
+            "Key": "CreatedBy",
+            "Value": "GuardDuty Test Script",
+          },
+          {
+            "Key": "GuardDutyTestFramework",
+            "Value": "Instance",
+          },
           {
             "Key": "Name",
             "Value": "Windows-GuardDutyTester",

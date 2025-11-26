@@ -30,7 +30,7 @@ export class EmptyBucket extends Construct {
       enforceSSL: true,
       versioned: false,
       removalPolicy: RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
+      autoDeleteObjects: false,
     });
 
     this.bucketName = bucket.bucketName;

@@ -15,6 +15,11 @@ import { Peer, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 
 import { type SecGroupProps } from './security-group-props';
+import { ClusterSecurityGroup } from './cluster-security-group';
+
+export interface EksSecGroupProps extends SecGroupProps {
+  ecsSecurityGroup?: SecurityGroup;
+}
 
 /**
  * Allows TCP traffic from within VPC to the EKS cluster
@@ -22,13 +27,20 @@ import { type SecGroupProps } from './security-group-props';
 export class EksSecurityGroup extends Construct {
   public readonly sg: SecurityGroup;
 
-  constructor(scope: Construct, id: string, props: SecGroupProps) {
+  constructor(scope: Construct, id: string, props: EksSecGroupProps) {
     super(scope, id);
     this.sg = new SecurityGroup(this, id, {
       vpc: props.vpc,
       allowAllOutbound: true,
     });
 
-    this.sg.addIngressRule(Peer.ipv4(props.vpc.vpcCidrBlock), Port.allTcp(), 'allow tcp traffic from within vpc');
+    this.sg.addIngressRule(Peer.ipv4(props.vpc.vpcCidrBlock), Port.allTraffic(), 'allow tcp traffic from within vpc');
+    
+    // Allow all traffic from instances with the same security group
+    //this.sg.addIngressRule(Peer.securityGroupId(this.sg.securityGroupId), Port.allTraffic(), 'allow all traffic from same security group');
+    
+    if (props.ecsSecurityGroup) {
+      this.sg.addIngressRule(Peer.securityGroupId(props.ecsSecurityGroup.securityGroupId), Port.allTcp(), 'allow tcp traffic from ECS cluster');
+    }
   }
 }

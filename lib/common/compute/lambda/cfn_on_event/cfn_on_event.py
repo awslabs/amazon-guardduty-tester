@@ -12,37 +12,73 @@
 #  permissions and limitations under the License.
 
 import boto3
-import cfnresponse
-from aws_lambda_powertools.utilities.typing import LambdaContext
+import json
+import http.client
+import urllib.parse
 
-def on_event(event: dict, context: LambdaContext) -> None:
-    request_type = event['RequestType']
-    responseData = {}
-    ResponseStatus = cfnresponse.SUCCESS
+def send_cfn_response(event, context, response_status, response_data, physical_resource_id=None):
+    response_body = {
+        'Status': response_status,
+        'Reason': f'See details in CloudWatch Log Stream: {context.log_stream_name}',
+        'PhysicalResourceId': physical_resource_id or context.log_stream_name,
+        'StackId': event['StackId'],
+        'RequestId': event['RequestId'],
+        'LogicalResourceId': event['LogicalResourceId'],
+        'NoEcho': False,
+        'Data': response_data
+    }
+    
+    response_url = urllib.parse.urlparse(event['ResponseURL'])
+    json_response_body = json.dumps(response_body)
+    
+    headers = {
+        'content-type': 'application/json',
+        'content-length': str(len(json_response_body))
+    }
+    
+    connection = None
     try:
+        connection = http.client.HTTPSConnection(response_url.netloc)
+        connection.request('PUT', response_url.path + '?' + response_url.query,
+                        json_response_body,
+                        headers)
+        response = connection.getresponse()
+        print(f"Status code: {response.status}")
+    except Exception as e:
+        print(f"send_cfn_response failed: {e}")
+    finally:
+        if connection:
+            connection.close()
 
+
+def on_event(event: dict, context) -> None:
+    request_type = event['RequestType']
+    response_data = {}
+    response_status = 'SUCCESS'
+    
+    try:
         if request_type == 'Create':
-            # on create grab latest kali linux ami for the given region for RedTeam EC2 instance
+            # on create grab latest debian linux ami for the given region for RedTeam EC2 instance
             region = event['ResourceProperties']['region']
-            responseData['Id'] = get_ami_info(region) 
-
+            response_data['Id'] = get_ami_info(region)
+            
         elif request_type == 'Update':
             # immediately send success message on update
-            responseData['Message'] = 'Resource update successful!'
-
+            response_data['Message'] = 'Resource update successful!'
+            
         elif request_type == 'Delete':
             # remove custom threat list and clean out generated s3 bucket so cloudformation can delete it
             s3_bucket_name = event['ResourceProperties']['s3BucketName']
             region = event['ResourceProperties']['region']
             delete_custom_threat_list(s3_bucket_name, region)
             clean_ecr(event['ResourceProperties']['ecrRepoName'], region)
-            responseData['Message'] = 'Resource deletion successful!'
-
+            response_data['Message'] = 'Resource deletion successful!'
+            
     except Exception as e:
-        responseData['Message'] = e.args
-        ResponseStatus = cfnresponse.FAILED
-
-    cfnresponse.send(event, context, ResponseStatus, responseData)
+        response_data['Message'] = str(e)
+        response_status = 'FAILED'
+    
+    send_cfn_response(event, context, response_status, response_data)
 
 
 def delete_custom_threat_list(s3_bucket_name: str, region: str) -> None:
@@ -98,10 +134,10 @@ def get_ami_info(region: str) -> str:
         }
     ]
 
-    images = ec2.describe_images(Filters=filters, Owners=['aws-marketplace'])['Images']
-    kali_images = [x for x in images if 'kali-last' in x['Name'] and 'gui' not in x['Name']]
+    images = ec2.describe_images(Filters=filters, Owners=['amazon'])['Images']
+    debian_images = [x for x in images if 'debian-12-amd64' in x['Name'] and 'gui' not in x['Name']]
 
-    # Get the max (most recent) image by name. The names contain the AMI version, formatted as YYYY.MM.Ver.
-    # for example: kali-linux-2022.1-804fcc46-63fc-4eb6-85a1-50e66d6c7215
-    newest_kali = max(kali_images, key=lambda x: x['Name'])
-    return newest_kali['ImageId']
+    # Get the max (most recent) image by name. The names contain the AMI version, formatted as ...-YYYYMMDD-Ver.
+    # ex. debian-12-amd64-20240717-1811
+    newest_image = max(debian_images, key=lambda x: x['Name'])
+    return newest_image['ImageId']

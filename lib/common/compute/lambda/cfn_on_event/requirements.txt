@@ -1,3 +1,2 @@
 urllib3 == 1.26.1
-cfnresponse == 1.1.2
 aws_lambda_powertools

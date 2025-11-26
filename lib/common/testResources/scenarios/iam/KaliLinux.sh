@@ -16,8 +16,19 @@ export AWS_ACCESS_KEY_ID=$(echo $CREDS | jq .Credentials.AccessKeyId | xargs)
 export AWS_SECRET_ACCESS_KEY=$(echo $CREDS | jq .Credentials.SecretAccessKey | xargs)
 export AWS_SESSION_TOKEN=$(echo $CREDS | jq .Credentials.SessionToken | xargs)
 
-aws iam get-user --region $REGION
+export KALI_USER_AGENT_HEADER='aws-cli/2.23.6 md/awscrt#1.0.0.dev0 ua/2.0 os/linux#6.12.13-cloud-amd64 md/arch#x86_64 lang/python#3.13.2 md/pyimpl#CPython cfg/retry-mode#standard md/installer#source md/distrib#kali.2025 md/prompt#off md/command#iam.get-user'
+
+source /home/ssm-user/gd_tester_pyenv/bin/activate
+
+awscurl --access_key=$AWS_ACCESS_KEY_ID \
+        --secret_key=$AWS_SECRET_ACCESS_KEY \
+        --session_token=$AWS_SESSION_TOKEN \
+        --service iam \
+        --header "User-Agent: $KALI_USER_AGENT_HEADER" \
+        "https://iam.amazonaws.com/?Action=GetUser&Version=2010-05-08" >> /dev/null 2>&1
 
 unset AWS_ACCESS_KEY_ID
 unset AWS_SECRET_ACCESS_KEY
 unset AWS_SESSION_TOKEN
+unset IAM_REGION
+unset KALI_USER_AGENT_HEADER

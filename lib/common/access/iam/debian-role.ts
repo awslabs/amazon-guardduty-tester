@@ -14,7 +14,7 @@
 import { Effect, ManagedPolicy, PolicyDocument, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 
-export interface KaliRoleProps {
+export interface DebianRoleProps {
   bucketName: string;
   accountId: string;
   region: string;
@@ -23,20 +23,20 @@ export interface KaliRoleProps {
 }
 
 /**
- * Define IAM Role assumed by Kali Linux Instance
+ * Define IAM Role assumed by Debian Linux Instance
  * Gives permissions required to run specific subset
- * of the tests on the Kali Linux Instance
+ * of the tests on the Debian Instance
  */
-export class KaliLinuxRole extends Construct {
+export class DebianLinuxRole extends Construct {
   public readonly role: Role;
-  constructor(scope: Construct, id: string, props: KaliRoleProps) {
+  constructor(scope: Construct, id: string, props: DebianRoleProps) {
     super(scope, id);
 
     this.role = new Role(this, id, {
       assumedBy: new ServicePrincipal('ec2.amazonaws.com'),
       managedPolicies: [ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore')],
       inlinePolicies: {
-        KaliInlinePolicy: new PolicyDocument({
+        DebianInlinePolicy: new PolicyDocument({
           statements: [
             new PolicyStatement({
               sid: 'S3FindingSpecific',

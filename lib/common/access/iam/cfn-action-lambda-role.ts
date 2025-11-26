@@ -18,7 +18,7 @@ import { type CfnLambdaProps } from '../../compute/lambda/lambda-props';
 
 /**
  * IAM role for Custom Resource lambda for cleaning up the
- * environment after testing and pulling latest kali linux image
+ * environment after testing
  * The permissions needed to handle the CFN events
  * Delete objects in tester bucket
  * Delete custom threat list if uploaded
@@ -60,7 +60,7 @@ export class CfnActionLambdaRole extends Construct {
               ],
             }),
             new PolicyStatement({
-              sid: 'FindKaliImagePermission',
+              sid: 'FindDebianImagePermission',
               effect: Effect.ALLOW,
               actions: ['ec2:DescribeImages'],
               resources: ['*'], // this EC2 api is only supported with all resources wildcard('*').

@@ -21,7 +21,7 @@ import { type CfnLambdaProps } from './lambda-props';
 
 /**
  * Lambda function Custom Resource to handle Cloud Formation events
- * On create fetches Kali Linux ami
+ * On create fetches Debian Linux ami
  * On delete cleans s3 bucket and deletes resources Cloud Formation cannot
  * Also deletes custom threat list if one was uploaded during testing
  */

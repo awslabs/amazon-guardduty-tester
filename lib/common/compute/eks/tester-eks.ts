@@ -11,8 +11,8 @@
 //  express or implied. See the License for the specific language governing
 //  permissions and limitations under the License.
 
-import { Tag } from 'aws-cdk-lib';
-import { CfnLaunchTemplate, type Vpc } from 'aws-cdk-lib/aws-ec2';
+import { Tag, Fn } from 'aws-cdk-lib';
+import { CfnLaunchTemplate, type Vpc, type SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Cluster, EndpointAccess, KubernetesVersion, NodegroupAmiType } from 'aws-cdk-lib/aws-eks';
 import { type Role } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
@@ -27,6 +27,7 @@ export interface EksProps {
   instanceName: string;
   tag: Tag;
   createdBy: Tag;
+  ecsSecurityGroup?: SecurityGroup;
 }
 
 /**
@@ -37,19 +38,22 @@ export class TesterEksCluster extends Construct {
   constructor(scope: Construct, id: string, props: EksProps) {
     super(scope, id);
 
+    const eksSecurityGroup = new EksSecurityGroup(this, 'SecurityGroup', {
+      vpc: props.vpc,
+      ecsSecurityGroup: props.ecsSecurityGroup,
+    });
+
     this.eks = new Cluster(this, id, {
       version: KubernetesVersion.of('1.29'),
       defaultCapacity: 0,
       vpc: props.vpc,
-      securityGroup: new EksSecurityGroup(this, 'SecurityGroup', {
-        vpc: props.vpc,
-      }).sg,
+      securityGroup: eksSecurityGroup.sg,
       mastersRole: props.masterRole, // ecs cluster iam role as eks cluster master role for testing
       clusterName: props.name,
       endpointAccess: EndpointAccess.PUBLIC, // required for custom malicious ip caller findings
     });
 
-    // allow kali linux to make changes for testing
+    // allow Debian instance to make changes for testing
     this.eks.awsAuth.addRoleMapping(props.kubectlRole, {
       groups: ['system:masters'],
     });
@@ -57,6 +61,7 @@ export class TesterEksCluster extends Construct {
     const nodeLaunchTemplate = new CfnLaunchTemplate(this, 'LaunchTemplate', {
       launchTemplateData: {
         instanceType: 't3.medium',
+        securityGroupIds: [eksSecurityGroup.sg.securityGroupId],
         tagSpecifications: [
           {
             resourceType: 'instance',
@@ -79,7 +84,7 @@ export class TesterEksCluster extends Construct {
       },
     });
 
-    this.eks.addNodegroupCapacity('guardduty-tester-nodegroup', {
+    const nodegroup = this.eks.addNodegroupCapacity('guardduty-tester-nodegroup', {
       launchTemplateSpec: {
         id: nodeLaunchTemplate.ref,
         version: nodeLaunchTemplate.attrLatestVersionNumber,
@@ -88,5 +93,6 @@ export class TesterEksCluster extends Construct {
       maxSize: 1,
       amiType: NodegroupAmiType.AL2_X86_64,
     });
+
   }
 }
