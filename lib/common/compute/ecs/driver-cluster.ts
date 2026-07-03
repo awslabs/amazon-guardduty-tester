@@ -37,7 +37,7 @@ export interface EcsProps extends Ec2Props {
   tempRole: string;
   accountId: string;
   cloudTrailName: string;
-  cloudTrailArn: string;
+  cloudTrailArn?: string;
   lambdaName: string;
   lambdaArn: string;
   eksCluster: string;

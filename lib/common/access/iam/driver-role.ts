@@ -18,7 +18,7 @@ export interface DriverRoleProps {
   bucketName: string;
   emptyBucketName: string;
   accountId: string;
-  trailArn: string;
+  trailArn?: string;
   lambdaArn: string;
   region: string;
   debianId: string;
@@ -75,12 +75,17 @@ export class DriverRole extends Construct {
               ],
               resources: ['*'], // Selected actions only support the all resources wildcard('*').
             }),
-            new PolicyStatement({
-              sid: 'CloudTrail',
-              effect: Effect.ALLOW,
-              actions: ['cloudtrail:StopLogging'],
-              resources: [props.trailArn],
-            }),
+            // Only granted when a tester CloudTrail trail is created (deployCloudTrail context flag)
+            ...(props.trailArn
+              ? [
+                  new PolicyStatement({
+                    sid: 'CloudTrail',
+                    effect: Effect.ALLOW,
+                    actions: ['cloudtrail:StopLogging'],
+                    resources: [props.trailArn],
+                  }),
+                ]
+              : []),
             new PolicyStatement({
               sid: 'EC2EIPList',
               effect: Effect.ALLOW,
