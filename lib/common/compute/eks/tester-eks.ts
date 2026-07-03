@@ -44,7 +44,7 @@ export class TesterEksCluster extends Construct {
     });
 
     this.eks = new Cluster(this, id, {
-      version: KubernetesVersion.of('1.29'),
+      version: KubernetesVersion.of('1.32'),
       defaultCapacity: 0,
       vpc: props.vpc,
       securityGroup: eksSecurityGroup.sg,

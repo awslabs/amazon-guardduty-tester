@@ -2165,7 +2165,7 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
               "Arn",
             ],
           },
-          "version": "1.29",
+          "version": "1.32",
         },
         "ServiceToken": {
           "Fn::GetAtt": [
