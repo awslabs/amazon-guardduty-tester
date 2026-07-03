@@ -1,2 +1,2 @@
-urllib3 == 2.6.3
+urllib3 == 2.7.0
 aws_lambda_powertools
