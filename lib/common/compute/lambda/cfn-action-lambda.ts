@@ -37,7 +37,7 @@ export class CfnActionLambda extends Construct {
       code: Code.fromAsset(path.join(__dirname, 'cfn_on_event'), {
         bundling: {
           image: Runtime.PYTHON_3_11.bundlingImage,
-          command: ['bash', '-c', 'pip install -r requirements.txt -t /asset-output && cp -au . /asset-output'],
+          command: ['bash', '-c', 'pip install -r requirements.txt -t /asset-output && cp -ru . /asset-output'],
         },
       }),
       timeout: Duration.seconds(900),
