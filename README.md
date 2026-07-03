@@ -22,6 +22,8 @@ AWS credentials staged which have enough permissions for deploying all the resou
 - `cdk bootstrap #if region not bootstrapped previously`
 - `cdk deploy`
 
+> **Note:** The tester creates a dedicated CloudTrail trail to support the `Stealth:IAMUser/CloudTrailLoggingDisabled` test. If your organization blocks the CloudTrail APIs (for example `cloudtrail:CreateTrail`) via a Service Control Policy (SCP), you can skip creating the trail by deploying with `cdk deploy -c deployCloudTrail=false`. With CloudTrail creation disabled you will not be able to test the `Stealth:IAMUser/CloudTrailLoggingDisabled` finding; all other findings are unaffected.
+
 ![Alt text](GuardDutyTester.png)
 
 ## Run Tests

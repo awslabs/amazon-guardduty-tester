@@ -61,10 +61,19 @@ export class GuardDutyTesterStack extends Stack {
       accountId: this.account,
       region: this.region,
     });
-    const cloudtrail = new TesterCloudTrail(this, 'testerCloudTrail', {
-      bucket: testerBucket.bucket,
-      name: TRAIL_NAME,
-    });
+    // CloudTrail creation is optional. Some organizations block the CloudTrail APIs
+    // (e.g. cloudtrail:CreateTrail) via an SCP, which would fail deployment. Disable
+    // with `cdk deploy -c deployCloudTrail=false`. When disabled, the
+    // Stealth:IAMUser/CloudTrailLoggingDisabled finding cannot be tested.
+    const cloudTrailContext = this.node.tryGetContext('deployCloudTrail');
+    const deployCloudTrail =
+      cloudTrailContext === undefined || cloudTrailContext === true || cloudTrailContext === 'true';
+    const cloudtrail = deployCloudTrail
+      ? new TesterCloudTrail(this, 'testerCloudTrail', {
+          bucket: testerBucket.bucket,
+          name: TRAIL_NAME,
+        })
+      : undefined;
     const cfnLambda = new CfnActionLambda(this, 'testerCfnLambda', {
       accountId: this.account,
       region: this.region,
@@ -135,8 +144,8 @@ export class GuardDutyTesterStack extends Stack {
       debianRoleName: debianInstance.instanceRole.role.roleName,
       windowsIp: windowsInstance.ec2.instancePrivateIp,
       windowsInstance: windowsInstance.ec2.instanceId,
-      cloudTrailName: TRAIL_NAME,
-      cloudTrailArn: cloudtrail.trailArn,
+      cloudTrailName: deployCloudTrail ? TRAIL_NAME : '',
+      cloudTrailArn: cloudtrail?.trailArn,
       lambdaName: testerLambda.functionName,
       lambdaArn: testerLambda.functionArn,
       ingressSecurityGroup: debianInstance.sgId,
