@@ -11,6 +11,7 @@
 //  express or implied. See the License for the specific language governing
 //  permissions and limitations under the License.
 
+import { KubectlV32Layer } from '@aws-cdk/lambda-layer-kubectl-v32';
 import { Tag, Fn } from 'aws-cdk-lib';
 import { CfnLaunchTemplate, type Vpc, type SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Cluster, EndpointAccess, KubernetesVersion, NodegroupAmiType } from 'aws-cdk-lib/aws-eks';
@@ -45,6 +46,7 @@ export class TesterEksCluster extends Construct {
 
     this.eks = new Cluster(this, id, {
       version: KubernetesVersion.of('1.32'),
+      kubectlLayer: new KubectlV32Layer(this, 'KubectlLayer'), // required by aws-cdk-lib >= 2.181; matches the 1.32 cluster
       defaultCapacity: 0,
       vpc: props.vpc,
       securityGroup: eksSecurityGroup.sg,
