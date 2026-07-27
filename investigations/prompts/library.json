@@ -1,0 +1,40 @@
+{
+    "_comment": "Curated GuardDuty Investigation trigger-prompt library. Browse with `gd_investigator.py prompts`. Contributions welcome — see the Prompts section of ../README.md for the entry schema.",
+    "prompts": [
+        {
+            "id": "finding-in-account",
+            "title": "Investigate a finding in a specific account",
+            "prompt": "Investigate finding <FINDING_ID> in account <ACCOUNT_ID>",
+            "notes": "For administrators investigating a member account's finding.",
+            "contributedBy": "awslabs"
+        },
+        {
+            "id": "account-posture",
+            "title": "Assess an account's threat posture",
+            "prompt": "Analyze findings in account with id <ACCOUNT_ID>",
+            "notes": "Account-level sweep of recent findings.",
+            "contributedBy": "awslabs"
+        },
+        {
+            "id": "account-active-threats",
+            "title": "Find active threats in an account",
+            "prompt": "Analyze findings in account with id <ACCOUNT_ID> and prioritize any active, high-confidence threats that need immediate response",
+            "notes": "Useful for daily triage of a single account.",
+            "contributedBy": "awslabs"
+        },
+        {
+            "id": "org-posture",
+            "title": "Assess organization threat posture",
+            "prompt": "Analyze findings in my organization",
+            "notes": "Organization-wide analysis (up to 100 accounts in preview).",
+            "contributedBy": "awslabs"
+        },
+        {
+            "id": "org-lateral-movement",
+            "title": "Hunt for cross-account lateral movement",
+            "prompt": "Analyze findings in my organization and identify any signs of lateral movement across accounts",
+            "notes": "Correlates signals across the organization.",
+            "contributedBy": "awslabs"
+        }
+    ]
+}

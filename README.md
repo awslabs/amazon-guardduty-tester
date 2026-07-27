@@ -70,6 +70,20 @@ EXAMPLES:
 ### Important Callout
 GuardDuty has many features that can be enabled/disabled on an account level such as EKS/ECS/EC2 Runtime Monitoring, Lambda protection, etc. The tester will check these and other account level settings required for the tests requested by the given parameters. Before any account level change is made, the tester will requets user permission and after the tests are completed, the account will be restored to its original state. It is important to note that any changes to GuardDuty protections may begin the 30 day free trial.
 
+## Investigate Findings with GuardDuty AI Investigations
+Once you have generated findings (or received real ones), you can analyze them with **Amazon GuardDuty AI-Powered Investigations (Preview)**. GuardDuty Investigation uses AI to analyze a finding, account, or organization and returns a risk disposition with confidence scoring, MITRE ATT&CK® technique classification, supporting evidence, and recommended actions.
+
+The [`investigations/`](investigations/README.md) directory provides sample prompts and an agent skill to create GuardDuty Investigations. These are **independent of the CDK app**, they work against any account with your own AWS credentials, whether or not you deployed the tester.
+
+Highlights:
+- Investigate findings you generated with the tester, findings you really received, or an entire account/organization.
+- Requires an active detector with the `AI_ANALYST` feature enabled (the skill can enable it with your confirmation) and AWS CLI ≥ 2.35.11.
+- Preview is limited to 10 regions with quotas of 10 investigations/account/day (100 total); the skill enforces the region allowlist and warns before spending quota.
+
+> AI-generated analysis and recommendations may contain errors or incomplete assessments. **Human review is recommended.**
+
+See [`investigations/README.md`](investigations/README.md) for prerequisites, supported regions, and instructions.
+
 ## Cleanup Test Resources
 When finished testing, run `cdk destroy` or delete the CloudFormation stack on the console in order to delete the resources created by the above deployment steps
 
