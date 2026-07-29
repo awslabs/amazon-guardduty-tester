@@ -2,3 +2,7 @@ build
 cdk.context.json
 cdk.out/
 node_modules/
+
+# Python (investigations/)
+__pycache__/
+*.py[cod]
