@@ -1106,8 +1106,8 @@
             "tactic": "stealth",
             "findingType": "Stealth:S3/ServerAccessLoggingDisabled",
             "alias": "s3/ServerAccessLoggingDisabled.sh",
-            "description": "",
-            "expectedFinding": "",
+            "description": "echo \"Test #$TEST_NUM - Disable Server Access Logging\"",
+            "expectedFinding": "\"Test #$TEST_NUM: Disable Server Access Logging\" \"Expected Finding: Server access logging was disabled for the Amazon S3 bucket $S3_BUCKET_NAME by $ROLE_NAME calling PutBucketLogging\" \"Finding Type : Stealth:S3/ServerAccessLoggingDisabled\" \"\"",
             "local": "true",
             "logSource": "cloudtrail"
         },
