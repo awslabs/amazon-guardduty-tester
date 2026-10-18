@@ -92,21 +92,53 @@ export class DebianLinuxInstance extends Construct {
    */
   private getUserData(): UserData {
     const homeDir = '/home/ssm-user';
-    const install = 'apt-get install -y';
+    // Wait for the dpkg lock instead of failing when cloud-init or
+    // unattended-upgrades happens to hold it during first boot.
+    const aptOpts = '-o DPkg::Lock::Timeout=300';
+    const install = `apt-get ${aptOpts} install -y`;
 
     const userData = UserData.forLinux();
     userData.addCommands(
       '#!/bin/bash',
+      // Persist bootstrap output. The SSM agent is the only access path to this
+      // host, so if bootstrap breaks there is otherwise no way to diagnose it.
+      'exec > >(tee -a /var/log/gd-tester-userdata.log) 2>&1',
+      'set -x',
       'export DEBIAN_FRONTEND=noninteractive',
-      'mkdir /etc/systemd/resolved.conf.d',
-      'adduser ssm-user',
+      'export PATH=$PATH:/usr/local/bin:/usr/sbin:/root/.local/bin',
+
+      // ---------------------------------------------------------------------
+      // SSM agent first. Debian AMIs do not ship it, and the tester reaches
+      // this instance exclusively through ssm send-command. Installing it up
+      // front means a later failure in this script degrades the tests instead
+      // of making the host unreachable (and undiagnosable).
+      // ---------------------------------------------------------------------
+      `apt-get ${aptOpts} update -y`,
+      // wget and curl are NOT part of a base Debian image; wget is needed for
+      // the agent below and curl for the AWS CLI and kubectl downloads later.
+      `${install} wget curl ca-certificates`,
+      'mkdir -p /tmp/ssm-install',
+      'for i in 1 2 3; do wget -q -O /tmp/ssm-install/amazon-ssm-agent.deb https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb && break || sleep 15; done',
+      `dpkg -i /tmp/ssm-install/amazon-ssm-agent.deb || apt-get ${aptOpts} install -f -y`,
+      'systemctl enable amazon-ssm-agent',
+      'systemctl start amazon-ssm-agent',
+      'systemctl is-active --quiet amazon-ssm-agent && echo "SSM agent active" || echo "WARNING: SSM agent not active"',
+
+      'mkdir -p /etc/systemd/resolved.conf.d',
+      // adduser is interactive on Debian 12: bare `adduser <name>` prompts for a
+      // password and for confirmation, which aborts under cloud-init (no stdin)
+      // and leaves the account half-configured.
+      'adduser --disabled-password --gecos "" ssm-user',
       'echo "ssm-user ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ssm-agent-users',
       'chmod 440 /etc/sudoers.d/ssm-agent-users',
       'systemctl restart systemd-resolved',
-      'export PATH=$PATH:/usr/local/bin:/usr/sbin:/root/.local/bin',
-      `echo 'export PATH=/root/.local/bin:/usr/sbin:/home/debian/.local/bin:$PATH' >> /home/debian/.bash_profile`,
-      'apt-get update -y',
-      `${install} nmap hydra jq python3-pip python3 tor freerdp2-dev libssl-dev postgresql-common libpq-dev autoconf libtool automake gcc unzip python3-venv apache2`,
+      // Tests run as ssm-user (interactive sessions) or root (send-command), so
+      // put PATH there. The previous target, /home/debian, does not exist on
+      // this AMI and the redirect failed.
+      `echo 'export PATH=/root/.local/bin:/usr/sbin:${homeDir}/.local/bin:$PATH' >> ${homeDir}/.bash_profile`,
+      // git and make are required below (torsocks is built from source) but were
+      // absent from this list, so those steps silently no-op'd on a clean image.
+      `${install} nmap hydra jq python3-pip python3 tor freerdp2-dev libssl-dev postgresql-common libpq-dev autoconf libtool automake gcc make git unzip python3-venv apache2`,
       // Ensure the most recent AWS CLI is present
       'curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"',
       'unzip awscliv2.zip',
@@ -154,12 +186,10 @@ export class DebianLinuxInstance extends Construct {
       `sed -i 's/80/8009/g' /etc/apache2/ports.conf`,
       'systemctl enable apache2',
       'systemctl start apache2',
-      // Setup SSM agent
-      `cd ${homeDir}/install`,
-      'wget https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb',
-      'dpkg -i amazon-ssm-agent.deb',
-      'systemctl enable amazon-ssm-agent',
-      'systemctl start amazon-ssm-agent',
+      // SSM agent is installed at the top of this script, before anything that
+      // can fail, so there is deliberately no agent install here.
+      `chown -R ssm-user: ${homeDir}`,
+      'echo "gd-tester bootstrap complete"',
     );
     return userData;
   }
