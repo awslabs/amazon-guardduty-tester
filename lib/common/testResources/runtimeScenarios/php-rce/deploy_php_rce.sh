@@ -129,6 +129,7 @@ kubectl cp ./files/index.php $pod_name:/var/www/html/ > /dev/null 2>&1
 echo "Installing wget"
 kubectl exec -it $pod_name -- apt-get update > /dev/null 2>&1
 kubectl exec -it $pod_name -- apt-get install -y wget > /dev/null 2>&1
+kubectl exec -it $pod_name -- apt-get install -y cron > /dev/null 2>&1
 
 echo "Installing netcat (served to the malware download endpoint)..."
 kubectl exec -it $pod_name -- apt-get install -y netcat-openbsd > /dev/null 2>&1
