@@ -1,0 +1,743 @@
+{
+  "schemaVersion": "2.0",
+  "description": "Catalog of GuardDuty runtime-monitoring Custom Detection Rules and the tests that exercise them. A rule records the finding type its benign trigger is expected to produce. A test is the executable unit: it names the rule it exercises (ruleId), a benign trigger script, and the packages that trigger needs. Multiple tests may exercise one rule (e.g. one per watched path). Account id and region are never stored here; they are resolved at runtime.",
+  "scope": {
+    "description": "A test is in scope for a (compute type, OS) pair unless either dimension excludes its rule (default: in scope). Compute types and OS types are independent; rule exclusions key by testId and carry a reason. The compute-type reason wins if both exclude.",
+    "computeTypes": {
+      "ec2": {
+        "ruleExclusions": {}
+      }
+    },
+    "osTypes": {
+      "al2023": {
+        "ruleExclusions": {
+          "DnsTunnelingToolExecuted": "iodine/dns2tcp are not in the AL2023 repos; tested on Ubuntu only",
+          "SshFromPublicIPAddress": "the scenario logs in as the 'ubuntu' user, which Amazon Linux does not have; tested on Ubuntu only"
+        }
+      },
+      "ubuntu2204": {
+        "ruleExclusions": {}
+      }
+    }
+  },
+  "rules": [
+    {
+      "ruleId": "DnsTunnelingToolExecuted",
+      "findingType": "CommandAndControl:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "SuspiciousProtocolTunneling",
+      "findingType": "CommandAndControl:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "DumpProcessMemoryFromProc",
+      "findingType": "CredentialAccess:Runtime/SensitiveFileRead"
+    },
+    {
+      "ruleId": "FirewallConfigModified",
+      "findingType": "DefenseEvasion:Runtime/SensitiveFileModified"
+    },
+    {
+      "ruleId": "LDPreloadFunctionHijack",
+      "findingType": "DefenseEvasion:Runtime/SensitiveFileModified"
+    },
+    {
+      "ruleId": "LogManipulation",
+      "findingType": "DefenseEvasion:Runtime/SensitiveFileModified"
+    },
+    {
+      "ruleId": "AuditDisabled",
+      "findingType": "DefenseEvasion:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "Base64EncodeDecode",
+      "findingType": "DefenseEvasion:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "BpftoolProgramLoaded",
+      "findingType": "DefenseEvasion:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "DebugfsRawDiskAccess",
+      "findingType": "DefenseEvasion:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "FindCommandReconSetuidSetgidFiles",
+      "findingType": "DefenseEvasion:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "FirewallDisablement",
+      "findingType": "DefenseEvasion:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "KernelHardeningDisabled",
+      "findingType": "DefenseEvasion:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "KillCommandUsage",
+      "findingType": "DefenseEvasion:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "ServiceStoppedOrDisabled",
+      "findingType": "DefenseEvasion:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "SuspiciousExecutionPath",
+      "findingType": "DefenseEvasion:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "PasswordShadowFileDiscovery",
+      "findingType": "Discovery:Runtime/SensitiveFileRead"
+    },
+    {
+      "ruleId": "FindCommandReconCloudCredentials",
+      "findingType": "Discovery:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "FindCommandReconKeyMaterial",
+      "findingType": "Discovery:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "PromiscuousModeEnabled",
+      "findingType": "Discovery:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "SSHWithHostKeyCheckingDisabled",
+      "findingType": "Discovery:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "SqliteDatabaseDump",
+      "findingType": "Discovery:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "VirtualizationDetection",
+      "findingType": "Discovery:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "ChmodInTmpDirectory",
+      "findingType": "Execution:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "CurlWgetScriptDownload",
+      "findingType": "Execution:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "DataEncryptionUsingCommandLineUtilities",
+      "findingType": "Execution:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "InlinePythonExecution",
+      "findingType": "Execution:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "RemoteFileCopy",
+      "findingType": "Execution:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "ShellFromUtilities",
+      "findingType": "Execution:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "NetworkSnifferToolExecuted",
+      "findingType": "Execution:Runtime/SuspiciousTool"
+    },
+    {
+      "ruleId": "RawSocketCreated",
+      "findingType": "Execution:Runtime/SuspiciousTool"
+    },
+    {
+      "ruleId": "CurlWgetExfiltrateData",
+      "findingType": "Exfiltration:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "DataSplittingForExfiltration",
+      "findingType": "Exfiltration:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "S3DataExfiltrationWithRclone",
+      "findingType": "Exfiltration:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "PAMConfigModification",
+      "findingType": "Persistence:Runtime/SensitiveFileModified"
+    },
+    {
+      "ruleId": "PasswordModification",
+      "findingType": "Persistence:Runtime/SensitiveFileModified"
+    },
+    {
+      "ruleId": "SSHAuthorizedKeysModification",
+      "findingType": "Persistence:Runtime/SensitiveFileModified"
+    },
+    {
+      "ruleId": "ScheduledJobManipulation",
+      "findingType": "Persistence:Runtime/SensitiveFileModified"
+    },
+    {
+      "ruleId": "ShellRCFileManipulated",
+      "findingType": "Persistence:Runtime/SensitiveFileModified"
+    },
+    {
+      "ruleId": "SystemdServiceManipulation",
+      "findingType": "Persistence:Runtime/SensitiveFileModified"
+    },
+    {
+      "ruleId": "AuditdKeylogger",
+      "findingType": "Persistence:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "InteractiveLocalAccountCreation",
+      "findingType": "Persistence:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "NobodyUserManipulation",
+      "findingType": "Persistence:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "SshFromPublicIPAddress",
+      "findingType": "Persistence:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "SystemdTransientServiceCreated",
+      "findingType": "Persistence:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "SudoerFileLinked",
+      "findingType": "PrivilegeEscalation:Runtime/SensitiveFileModified"
+    },
+    {
+      "ruleId": "SudoerFileManipulation",
+      "findingType": "PrivilegeEscalation:Runtime/SensitiveFileModified"
+    },
+    {
+      "ruleId": "SudoerFileRenamed",
+      "findingType": "PrivilegeEscalation:Runtime/SensitiveFileModified"
+    },
+    {
+      "ruleId": "AddSetUIDCapability",
+      "findingType": "PrivilegeEscalation:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "NewUserAddedToRootGroup",
+      "findingType": "PrivilegeEscalation:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "SetUidFlagSet",
+      "findingType": "PrivilegeEscalation:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "SudoPrivilegeEnumeration",
+      "findingType": "PrivilegeEscalation:Runtime/SuspiciousCommand"
+    },
+    {
+      "ruleId": "SudoerFileRead",
+      "findingType": "PrivilegeEscalation:Runtime/SuspiciousCommand"
+    }
+  ],
+  "tests": [
+    {
+      "testId": "DnsTunnelingToolExecuted",
+      "ruleId": "DnsTunnelingToolExecuted",
+      "trigger": "DnsTunnelingToolExecuted.sh",
+      "packages": [
+        "iodine",
+        "dns2tcp"
+      ]
+    },
+    {
+      "testId": "SuspiciousProtocolTunneling",
+      "ruleId": "SuspiciousProtocolTunneling",
+      "trigger": "SuspiciousProtocolTunneling.sh",
+      "packages": {
+        "amazonlinux": [
+          "openssh-clients"
+        ],
+        "ubuntu": [
+          "openssh-client"
+        ]
+      }
+    },
+    {
+      "testId": "DumpProcessMemoryFromProc",
+      "ruleId": "DumpProcessMemoryFromProc",
+      "trigger": "DumpProcessMemoryFromProc.sh",
+      "packages": []
+    },
+    {
+      "testId": "FirewallConfigModifiedUfwDefault",
+      "ruleId": "FirewallConfigModified",
+      "trigger": "FirewallConfigModifiedUfwDefault.sh",
+      "packages": []
+    },
+    {
+      "testId": "FirewallConfigModifiedUfwConf",
+      "ruleId": "FirewallConfigModified",
+      "trigger": "FirewallConfigModifiedUfwConf.sh",
+      "packages": []
+    },
+    {
+      "testId": "FirewallConfigModifiedIptables",
+      "ruleId": "FirewallConfigModified",
+      "trigger": "FirewallConfigModifiedIptables.sh",
+      "packages": []
+    },
+    {
+      "testId": "FirewallConfigModifiedNftables",
+      "ruleId": "FirewallConfigModified",
+      "trigger": "FirewallConfigModifiedNftables.sh",
+      "packages": []
+    },
+    {
+      "testId": "FirewallConfigModifiedFirewalld",
+      "ruleId": "FirewallConfigModified",
+      "trigger": "FirewallConfigModifiedFirewalld.sh",
+      "packages": []
+    },
+    {
+      "testId": "LDPreloadFunctionHijack",
+      "ruleId": "LDPreloadFunctionHijack",
+      "trigger": "LDPreloadFunctionHijack.sh",
+      "packages": []
+    },
+    {
+      "testId": "LogManipulationVarLog",
+      "ruleId": "LogManipulation",
+      "trigger": "LogManipulationVarLog.sh",
+      "packages": []
+    },
+    {
+      "testId": "LogManipulationMailSpool",
+      "ruleId": "LogManipulation",
+      "trigger": "LogManipulationMailSpool.sh",
+      "packages": []
+    },
+    {
+      "testId": "AuditDisabled",
+      "ruleId": "AuditDisabled",
+      "trigger": "AuditDisabled.sh",
+      "packages": [
+        "systemd"
+      ]
+    },
+    {
+      "testId": "Base64EncodeDecode",
+      "ruleId": "Base64EncodeDecode",
+      "trigger": "Base64EncodeDecode.sh",
+      "packages": []
+    },
+    {
+      "testId": "BpftoolProgramLoaded",
+      "ruleId": "BpftoolProgramLoaded",
+      "trigger": "BpftoolProgramLoaded.sh",
+      "packages": [
+        "bpftool"
+      ]
+    },
+    {
+      "testId": "DebugfsRawDiskAccess",
+      "ruleId": "DebugfsRawDiskAccess",
+      "trigger": "DebugfsRawDiskAccess.sh",
+      "packages": [
+        "e2fsprogs",
+        "util-linux"
+      ]
+    },
+    {
+      "testId": "FindCommandReconSetuidSetgidFiles",
+      "ruleId": "FindCommandReconSetuidSetgidFiles",
+      "trigger": "FindCommandReconSetuidSetgidFiles.sh",
+      "packages": []
+    },
+    {
+      "testId": "FirewallDisablement",
+      "ruleId": "FirewallDisablement",
+      "trigger": "FirewallDisablement.sh",
+      "packages": [
+        "systemd"
+      ]
+    },
+    {
+      "testId": "KernelHardeningDisabled",
+      "ruleId": "KernelHardeningDisabled",
+      "trigger": "KernelHardeningDisabled.sh",
+      "packages": []
+    },
+    {
+      "testId": "KillCommandUsage",
+      "ruleId": "KillCommandUsage",
+      "trigger": "KillCommandUsage.sh",
+      "packages": {
+        "amazonlinux": [
+          "procps-ng"
+        ],
+        "ubuntu": [
+          "procps"
+        ]
+      }
+    },
+    {
+      "testId": "ServiceStoppedOrDisabled",
+      "ruleId": "ServiceStoppedOrDisabled",
+      "trigger": "ServiceStoppedOrDisabled.sh",
+      "packages": [
+        "systemd"
+      ]
+    },
+    {
+      "testId": "SuspiciousExecutionPath",
+      "ruleId": "SuspiciousExecutionPath",
+      "trigger": "SuspiciousExecutionPath.sh",
+      "packages": []
+    },
+    {
+      "testId": "PasswordShadowFileDiscoveryShadow",
+      "ruleId": "PasswordShadowFileDiscovery",
+      "trigger": "PasswordShadowFileDiscoveryShadow.sh",
+      "packages": []
+    },
+    {
+      "testId": "PasswordShadowFileDiscoveryPasswd",
+      "ruleId": "PasswordShadowFileDiscovery",
+      "trigger": "PasswordShadowFileDiscoveryPasswd.sh",
+      "packages": []
+    },
+    {
+      "testId": "FindCommandReconCloudCredentials",
+      "ruleId": "FindCommandReconCloudCredentials",
+      "trigger": "FindCommandReconCloudCredentials.sh",
+      "packages": []
+    },
+    {
+      "testId": "FindCommandReconKeyMaterial",
+      "ruleId": "FindCommandReconKeyMaterial",
+      "trigger": "FindCommandReconKeyMaterial.sh",
+      "packages": []
+    },
+    {
+      "testId": "PromiscuousModeEnabled",
+      "ruleId": "PromiscuousModeEnabled",
+      "trigger": "PromiscuousModeEnabled.sh",
+      "packages": []
+    },
+    {
+      "testId": "SSHWithHostKeyCheckingDisabled",
+      "ruleId": "SSHWithHostKeyCheckingDisabled",
+      "trigger": "SSHWithHostKeyCheckingDisabled.sh",
+      "packages": {
+        "amazonlinux": [
+          "openssh-clients"
+        ],
+        "ubuntu": [
+          "openssh-client"
+        ]
+      }
+    },
+    {
+      "testId": "SqliteDatabaseDump",
+      "ruleId": "SqliteDatabaseDump",
+      "trigger": "SqliteDatabaseDump.sh",
+      "packages": {
+        "amazonlinux": [
+          "sqlite"
+        ],
+        "ubuntu": [
+          "sqlite3"
+        ]
+      }
+    },
+    {
+      "testId": "VirtualizationDetection",
+      "ruleId": "VirtualizationDetection",
+      "trigger": "VirtualizationDetection.sh",
+      "packages": [
+        "systemd"
+      ]
+    },
+    {
+      "testId": "ChmodInTmpDirectory",
+      "ruleId": "ChmodInTmpDirectory",
+      "trigger": "ChmodInTmpDirectory.sh",
+      "packages": []
+    },
+    {
+      "testId": "CurlWgetScriptDownload",
+      "ruleId": "CurlWgetScriptDownload",
+      "trigger": "CurlWgetScriptDownload.sh",
+      "packages": [
+        "curl"
+      ]
+    },
+    {
+      "testId": "DataEncryptionUsingCommandLineUtilities",
+      "ruleId": "DataEncryptionUsingCommandLineUtilities",
+      "trigger": "DataEncryptionUsingCommandLineUtilities.sh",
+      "packages": [
+        "openssl"
+      ]
+    },
+    {
+      "testId": "InlinePythonExecution",
+      "ruleId": "InlinePythonExecution",
+      "trigger": "InlinePythonExecution.sh",
+      "packages": [
+        "python3"
+      ]
+    },
+    {
+      "testId": "RemoteFileCopy",
+      "ruleId": "RemoteFileCopy",
+      "trigger": "RemoteFileCopy.sh",
+      "packages": {
+        "amazonlinux": [
+          "openssh-clients"
+        ],
+        "ubuntu": [
+          "openssh-client"
+        ]
+      }
+    },
+    {
+      "testId": "ShellFromUtilities",
+      "ruleId": "ShellFromUtilities",
+      "trigger": "ShellFromUtilities.sh",
+      "packages": []
+    },
+    {
+      "testId": "NetworkSnifferToolExecuted",
+      "ruleId": "NetworkSnifferToolExecuted",
+      "trigger": "NetworkSnifferToolExecuted.sh",
+      "packages": [
+        "tcpdump"
+      ]
+    },
+    {
+      "testId": "RawSocketCreated",
+      "ruleId": "RawSocketCreated",
+      "trigger": "RawSocketCreated.sh",
+      "packages": [
+        "python3",
+        "tcpdump"
+      ]
+    },
+    {
+      "testId": "CurlWgetExfiltrateData",
+      "ruleId": "CurlWgetExfiltrateData",
+      "trigger": "CurlWgetExfiltrateData.sh",
+      "packages": [
+        "curl"
+      ]
+    },
+    {
+      "testId": "DataSplittingForExfiltration",
+      "ruleId": "DataSplittingForExfiltration",
+      "trigger": "DataSplittingForExfiltration.sh",
+      "packages": []
+    },
+    {
+      "testId": "S3DataExfiltrationWithRclone",
+      "ruleId": "S3DataExfiltrationWithRclone",
+      "trigger": "S3DataExfiltrationWithRclone.sh",
+      "packages": [
+        "rclone"
+      ]
+    },
+    {
+      "testId": "PAMConfigModification",
+      "ruleId": "PAMConfigModification",
+      "trigger": "PAMConfigModification.sh",
+      "packages": []
+    },
+    {
+      "testId": "PasswordModification",
+      "ruleId": "PasswordModification",
+      "trigger": "PasswordModification.sh",
+      "packages": []
+    },
+    {
+      "testId": "SSHAuthorizedKeysModification",
+      "ruleId": "SSHAuthorizedKeysModification",
+      "trigger": "SSHAuthorizedKeysModification.sh",
+      "packages": []
+    },
+    {
+      "testId": "ScheduledJobManipulationCronDaily",
+      "ruleId": "ScheduledJobManipulation",
+      "trigger": "ScheduledJobManipulationCronDaily.sh",
+      "packages": []
+    },
+    {
+      "testId": "ScheduledJobManipulationCronD",
+      "ruleId": "ScheduledJobManipulation",
+      "trigger": "ScheduledJobManipulationCronD.sh",
+      "packages": []
+    },
+    {
+      "testId": "ScheduledJobManipulationCrontab",
+      "ruleId": "ScheduledJobManipulation",
+      "trigger": "ScheduledJobManipulationCrontab.sh",
+      "packages": []
+    },
+    {
+      "testId": "ScheduledJobManipulationSpoolCron",
+      "ruleId": "ScheduledJobManipulation",
+      "trigger": "ScheduledJobManipulationSpoolCron.sh",
+      "packages": []
+    },
+    {
+      "testId": "ScheduledJobManipulationSpoolAt",
+      "ruleId": "ScheduledJobManipulation",
+      "trigger": "ScheduledJobManipulationSpoolAt.sh",
+      "packages": []
+    },
+    {
+      "testId": "ShellRCFileManipulatedBashrc",
+      "ruleId": "ShellRCFileManipulated",
+      "trigger": "ShellRCFileManipulatedBashrc.sh",
+      "packages": []
+    },
+    {
+      "testId": "ShellRCFileManipulatedZshrc",
+      "ruleId": "ShellRCFileManipulated",
+      "trigger": "ShellRCFileManipulatedZshrc.sh",
+      "packages": []
+    },
+    {
+      "testId": "ShellRCFileManipulatedProfile",
+      "ruleId": "ShellRCFileManipulated",
+      "trigger": "ShellRCFileManipulatedProfile.sh",
+      "packages": []
+    },
+    {
+      "testId": "ShellRCFileManipulatedProfileD",
+      "ruleId": "ShellRCFileManipulated",
+      "trigger": "ShellRCFileManipulatedProfileD.sh",
+      "packages": []
+    },
+    {
+      "testId": "SystemdServiceManipulationSystemd",
+      "ruleId": "SystemdServiceManipulation",
+      "trigger": "SystemdServiceManipulationSystemd.sh",
+      "packages": []
+    },
+    {
+      "testId": "SystemdServiceManipulationInitd",
+      "ruleId": "SystemdServiceManipulation",
+      "trigger": "SystemdServiceManipulationInitd.sh",
+      "packages": []
+    },
+    {
+      "testId": "SystemdServiceManipulationRcLocal",
+      "ruleId": "SystemdServiceManipulation",
+      "trigger": "SystemdServiceManipulationRcLocal.sh",
+      "packages": []
+    },
+    {
+      "testId": "AuditdKeylogger",
+      "ruleId": "AuditdKeylogger",
+      "trigger": "AuditdKeylogger.sh",
+      "packages": {
+        "amazonlinux": [
+          "audit"
+        ],
+        "ubuntu": [
+          "auditd"
+        ]
+      }
+    },
+    {
+      "testId": "InteractiveLocalAccountCreation",
+      "ruleId": "InteractiveLocalAccountCreation",
+      "trigger": "InteractiveLocalAccountCreation.sh",
+      "packages": []
+    },
+    {
+      "testId": "NobodyUserManipulation",
+      "ruleId": "NobodyUserManipulation",
+      "trigger": "NobodyUserManipulation.sh",
+      "packages": []
+    },
+    {
+      "testId": "SshFromPublicIPAddress",
+      "ruleId": "SshFromPublicIPAddress",
+      "trigger": "SshFromPublicIPAddress.sh",
+      "packages": []
+    },
+    {
+      "testId": "SystemdTransientServiceCreated",
+      "ruleId": "SystemdTransientServiceCreated",
+      "trigger": "SystemdTransientServiceCreated.sh",
+      "packages": [
+        "systemd"
+      ]
+    },
+    {
+      "testId": "SudoerFileLinked",
+      "ruleId": "SudoerFileLinked",
+      "trigger": "SudoerFileLinked.sh",
+      "packages": []
+    },
+    {
+      "testId": "SudoerFileManipulationSudoers",
+      "ruleId": "SudoerFileManipulation",
+      "trigger": "SudoerFileManipulationSudoers.sh",
+      "packages": []
+    },
+    {
+      "testId": "SudoerFileManipulationSudoersd",
+      "ruleId": "SudoerFileManipulation",
+      "trigger": "SudoerFileManipulationSudoersd.sh",
+      "packages": []
+    },
+    {
+      "testId": "SudoerFileRenamed",
+      "ruleId": "SudoerFileRenamed",
+      "trigger": "SudoerFileRenamed.sh",
+      "packages": []
+    },
+    {
+      "testId": "AddSetUIDCapability",
+      "ruleId": "AddSetUIDCapability",
+      "trigger": "AddSetUIDCapability.sh",
+      "packages": {
+        "amazonlinux": [
+          "libcap"
+        ],
+        "ubuntu": [
+          "libcap2-bin"
+        ]
+      }
+    },
+    {
+      "testId": "NewUserAddedToRootGroup",
+      "ruleId": "NewUserAddedToRootGroup",
+      "trigger": "NewUserAddedToRootGroup.sh",
+      "packages": []
+    },
+    {
+      "testId": "SetUidFlagSet",
+      "ruleId": "SetUidFlagSet",
+      "trigger": "SetUidFlagSet.sh",
+      "packages": []
+    },
+    {
+      "testId": "SudoPrivilegeEnumeration",
+      "ruleId": "SudoPrivilegeEnumeration",
+      "trigger": "SudoPrivilegeEnumeration.sh",
+      "packages": [
+        "sudo"
+      ]
+    },
+    {
+      "testId": "SudoerFileReadSudoers",
+      "ruleId": "SudoerFileRead",
+      "trigger": "SudoerFileReadSudoers.sh",
+      "packages": []
+    },
+    {
+      "testId": "SudoerFileReadSudoersd",
+      "ruleId": "SudoerFileRead",
+      "trigger": "SudoerFileReadSudoersd.sh",
+      "packages": []
+    }
+  ]
+}

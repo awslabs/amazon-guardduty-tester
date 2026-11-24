@@ -31,6 +31,7 @@ export interface DriverRoleProps {
   clusterName: string;
   taskRole: string;
   execRole: string;
+  cdrHostIds: string[];
 }
 
 /**
@@ -156,6 +157,34 @@ export class DriverRole extends Construct {
                 `arn:aws:ec2:${props.region}:${props.accountId}:instance/*`,
                 `arn:aws:ssm:${props.region}::document/AmazonGuardDuty-ConfigureRuntimeMonitoringSsmPlugin`,
               ],
+            }),
+            new PolicyStatement({
+              sid: 'CdrHostsRunShellScript',
+              effect: Effect.ALLOW,
+              // Run trigger scripts (and the agent-active probe) on the static
+              // Custom Detection Rule hosts (the Amazon Linux hosts plus the
+              // Ubuntu host) through SSM AWS-RunShellScript. Scoped to those
+              // instance ids only.
+              actions: ['ssm:SendCommand'],
+              resources: [
+                ...props.cdrHostIds.map((id) => `arn:aws:ec2:${props.region}:${props.accountId}:instance/${id}`),
+                `arn:aws:ec2:${props.region}:${props.accountId}:instance/${props.ubuntuId}`,
+                `arn:aws:ssm:${props.region}::document/AWS-RunShellScript`,
+              ],
+            }),
+            new PolicyStatement({
+              sid: 'CdrCommandResults',
+              effect: Effect.ALLOW,
+              // Poll the result of an SSM command invocation.
+              actions: ['ssm:GetCommandInvocation'],
+              resources: ['*'], // ssm:GetCommandInvocation does not support resource-level scoping.
+            }),
+            new PolicyStatement({
+              sid: 'CdrDescribeInstanceInformation',
+              effect: Effect.ALLOW,
+              // Wait for a host's SSM agent to report Online.
+              actions: ['ssm:DescribeInstanceInformation'],
+              resources: ['*'], // ssm:DescribeInstanceInformation has no resource-level scoping.
             }),
             new PolicyStatement({
               sid: 'RunEcsTask',

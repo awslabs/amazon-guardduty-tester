@@ -60,8 +60,16 @@ exports[`Check All Test Resources 1`] = `
       "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
+    "SsmParameterValueawsserviceamiamazonlinuxlatestal2023amikernel61x8664C96584B6F00A464EAD1953AFF4B05118Parameter": {
+      "Default": "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64",
+      "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+    },
     "SsmParameterValueawsserviceamiwindowslatestWindowsServer2022EnglishFullBaseC96584B6F00A464EAD1953AFF4B05118Parameter": {
       "Default": "/aws/service/ami-windows-latest/Windows_Server-2022-English-Full-Base",
+      "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+    },
+    "SsmParameterValueawsservicecanonicalubuntuserver2204stablecurrentamd64hvmebsgp2amiidC96584B6F00A464EAD1953AFF4B05118Parameter": {
+      "Default": "/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id",
       "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
     },
     "SsmParameterValueawsserviceecsoptimizedamiamazonlinux2023recommendedimageidC96584B6F00A464EAD1953AFF4B05118Parameter": {
@@ -78,7 +86,7 @@ exports[`Check All Test Resources 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-test-account-us-west-2",
-          "S3Key": "2d56e153cac88d3e0c2f842e8e6f6783b8725bf91f95e0673b4725448a56e96d.zip",
+          "S3Key": "97e9ebf0b174a5c8f7faa505739022b7f509edddffcab9211dcd08b759944c4f.zip",
         },
         "Environment": {
           "Variables": {
@@ -97,7 +105,7 @@ exports[`Check All Test Resources 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "python3.9",
+        "Runtime": "python3.13",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -227,7 +235,7 @@ exports[`Check All Test Resources 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-test-account-us-west-2",
-          "S3Key": "6c1e9b465fa4b2d651dbc9ce3e732d8702a7b19137327684a71d89f1d355f1a2.zip",
+          "S3Key": "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip",
         },
         "Description": {
           "Fn::Join": [
@@ -249,7 +257,7 @@ exports[`Check All Test Resources 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": "nodejs24.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -389,7 +397,7 @@ exports[`Check All Test Resources 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-test-account-us-west-2",
-          "S3Key": "aa4c1af5f7ca508b4f57b489be5edf47e57a0f93600dc41192ef1077da685df1.zip",
+          "S3Key": "cd2194e7b51ea18f3ede4f97c59fdd12892f00206a38a76c4155ff58965f1d4b.zip",
         },
         "Handler": "setting_restore.lambda_handler",
         "Role": {
@@ -508,7 +516,7 @@ exports[`Check All Test Resources 1`] = `
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": {
-                "Service": "states.us-west-2.amazonaws.com",
+                "Service": "states.amazonaws.com",
               },
             },
           ],
@@ -614,24 +622,89 @@ exports[`Check All Test Resources 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "attackBucketAutoDeleteObjectsCustomResource3407E7A3": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "attackBucketPolicy5C95FF97",
-      ],
+    "UbuntuRoleUbuntuInstanceRole9CA881F4": {
       "Properties": {
-        "BucketName": {
-          "Ref": "attackBucketC9BA3DF1",
-        },
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
-            "Arn",
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com",
+              },
+            },
           ],
+          "Version": "2012-10-17",
         },
+        "Description": "IAM role for Ubuntu GuardDuty tester instance",
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/AmazonSSMManagedInstanceCore",
+              ],
+            ],
+          },
+        ],
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "s3:GetObject",
+                    "s3:ListBucket",
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:s3:::",
+                          {
+                            "Ref": "testerBucket1B6270A3",
+                          },
+                        ],
+                      ],
+                    },
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:s3:::",
+                          {
+                            "Ref": "testerBucket1B6270A3",
+                          },
+                          "/*",
+                        ],
+                      ],
+                    },
+                  ],
+                  "Sid": "TesterS3BucketSpecific",
+                },
+                {
+                  "Action": "ssm:SendCommand",
+                  "Effect": "Allow",
+                  "Resource": [
+                    "arn:aws:ec2:us-west-2:test-account:instance/*",
+                    "arn:aws:ssm:us-west-2::document/AmazonGuardDuty-ConfigureRuntimeMonitoringSsmPlugin",
+                  ],
+                  "Sid": "InstallGuardDutyAgent",
+                },
+              ],
+              "Version": "2012-10-17",
+            },
+            "PolicyName": "UbuntuInlinePolicy",
+          },
+        ],
       },
-      "Type": "Custom::S3AutoDeleteObjects",
-      "UpdateReplacePolicy": "Delete",
+      "Type": "AWS::IAM::Role",
     },
     "attackBucketC9BA3DF1": {
       "DeletionPolicy": "Delete",
@@ -651,12 +724,6 @@ exports[`Check All Test Resources 1`] = `
           "IgnorePublicAcls": true,
           "RestrictPublicBuckets": true,
         },
-        "Tags": [
-          {
-            "Key": "aws-cdk:auto-delete-objects",
-            "Value": "true",
-          },
-        ],
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -702,45 +769,6 @@ exports[`Check All Test Resources 1`] = `
                 },
               ],
             },
-            {
-              "Action": [
-                "s3:PutBucketPolicy",
-                "s3:GetBucket*",
-                "s3:List*",
-                "s3:DeleteObject*",
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Fn::GetAtt": [
-                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
-                    "Arn",
-                  ],
-                },
-              },
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "attackBucketC9BA3DF1",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "attackBucketC9BA3DF1",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
           ],
           "Version": "2012-10-17",
         },
@@ -758,7 +786,7 @@ exports[`Check All Test Resources 1`] = `
               {
                 "Ref": "AWS::URLSuffix",
               },
-              "/cdk-hnb659fds-assets-test-account-us-west-2/25f25b94c4a436a5af21687dea26a44ef267cf202877c2b6e5eb3415a2079131.json",
+              "/cdk-hnb659fds-assets-test-account-us-west-2/ac137e3b871dac24b5f1d7dd83bcf2deda3d1b0f21bcd6ac51a3bada09db031a.json",
             ],
           ],
         },
@@ -780,6 +808,9 @@ exports[`Check All Test Resources 1`] = `
               "Arn",
             ],
           },
+          "referencetoMyTestStackeksClusterKubectlLayer1D331F73Ref": {
+            "Ref": "eksClusterKubectlLayerDFA829E3",
+          },
         },
         "TemplateURL": {
           "Fn::Join": [
@@ -789,7 +820,7 @@ exports[`Check All Test Resources 1`] = `
               {
                 "Ref": "AWS::URLSuffix",
               },
-              "/cdk-hnb659fds-assets-test-account-us-west-2/5736571c8e2996e419cb9d5c051e3970b01cec0adb9d05c207d155627f05733f.json",
+              "/cdk-hnb659fds-assets-test-account-us-west-2/6a2dfad60fe04312388288ea99305711b6158d74f491fc9cbabd36496216339c.json",
             ],
           ],
         },
@@ -797,7 +828,832 @@ exports[`Check All Test Resources 1`] = `
       "Type": "AWS::CloudFormation::Stack",
       "UpdateReplacePolicy": "Delete",
     },
-    "debianLinuxInstanceA7F598BBef542029a1ab7312": {
+    "cdrHost1Instance7EFC6DED0f7b1445b717b8aa": {
+      "DependsOn": [
+        "cdrHost1RoleDefaultPolicyFEAB5685",
+        "cdrHost1Role361B7A04",
+      ],
+      "Properties": {
+        "AvailabilityZone": "dummy1a",
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "Encrypted": true,
+              "VolumeSize": 8,
+              "VolumeType": "gp3",
+            },
+          },
+        ],
+        "IamInstanceProfile": {
+          "Ref": "cdrHost1InstanceInstanceProfileC9662C2F",
+        },
+        "ImageId": {
+          "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestal2023amikernel61x8664C96584B6F00A464EAD1953AFF4B05118Parameter",
+        },
+        "InstanceType": "t3.small",
+        "LaunchTemplate": {
+          "LaunchTemplateName": "InstanceLaunchTemplate",
+          "Version": {
+            "Fn::GetAtt": [
+              "cdrHost1InstanceLaunchTemplateD5F8A67E",
+              "LatestVersionNumber",
+            ],
+          },
+        },
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "cdrHost1SecurityGroup216C2AAB",
+              "GroupId",
+            ],
+          },
+        ],
+        "SubnetId": {
+          "Ref": "vpcprivatesubnetSubnet1SubnetC88AC256",
+        },
+        "Tags": [
+          {
+            "Key": "CdrTestHost",
+            "Value": "al2023",
+          },
+          {
+            "Key": "CreatedBy",
+            "Value": "GuardDuty Test Script",
+          },
+          {
+            "Key": "GuardDutyTestFramework",
+            "Value": "Instance",
+          },
+          {
+            "Key": "Name",
+            "Value": "CDR-AL2023-GuardDutyTester-1",
+          },
+        ],
+        "UserData": {
+          "Fn::Base64": "#!/bin/bash
+TOKEN=\`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"\`
+INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id)
+aws ssm send-command --region us-west-2 --instance-ids $INSTANCE_ID --document-name "AmazonGuardDuty-ConfigureRuntimeMonitoringSsmPlugin" --parameters "action=Install,name=AmazonGuardDuty-RuntimeMonitoringSsmPlugin" --output text",
+        },
+      },
+      "Type": "AWS::EC2::Instance",
+    },
+    "cdrHost1InstanceInstanceProfileC9662C2F": {
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "cdrHost1Role361B7A04",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::InstanceProfile",
+    },
+    "cdrHost1InstanceLaunchTemplateD5F8A67E": {
+      "Properties": {
+        "LaunchTemplateData": {
+          "MetadataOptions": {
+            "HttpTokens": "required",
+          },
+        },
+        "LaunchTemplateName": "InstanceLaunchTemplate",
+      },
+      "Type": "AWS::EC2::LaunchTemplate",
+    },
+    "cdrHost1Role361B7A04": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Description": "IAM role for a GuardDuty tester Custom Detection Rule host",
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/AmazonSSMManagedInstanceCore",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "cdrHost1RoleDefaultPolicyFEAB5685": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "ssm:SendCommand",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:ec2:us-west-2:test-account:instance/*",
+                "arn:aws:ssm:us-west-2::document/AmazonGuardDuty-ConfigureRuntimeMonitoringSsmPlugin",
+              ],
+              "Sid": "InstallGuardDutyAgent",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "cdrHost1RoleDefaultPolicyFEAB5685",
+        "Roles": [
+          {
+            "Ref": "cdrHost1Role361B7A04",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "cdrHost1SecurityGroup216C2AAB": {
+      "Properties": {
+        "GroupDescription": "Security group for a GuardDuty tester Custom Detection Rule host (no inbound)",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "vpc4346410E",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "cdrHost2Instance0973AC4F0f7b1445b717b8aa": {
+      "DependsOn": [
+        "cdrHost2RoleDefaultPolicy3C13B600",
+        "cdrHost2Role24FF4AAE",
+      ],
+      "Properties": {
+        "AvailabilityZone": "dummy1a",
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "Encrypted": true,
+              "VolumeSize": 8,
+              "VolumeType": "gp3",
+            },
+          },
+        ],
+        "IamInstanceProfile": {
+          "Ref": "cdrHost2InstanceInstanceProfile46A02E35",
+        },
+        "ImageId": {
+          "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestal2023amikernel61x8664C96584B6F00A464EAD1953AFF4B05118Parameter",
+        },
+        "InstanceType": "t3.small",
+        "LaunchTemplate": {
+          "LaunchTemplateName": "InstanceLaunchTemplate",
+          "Version": {
+            "Fn::GetAtt": [
+              "cdrHost2InstanceLaunchTemplate259B0D99",
+              "LatestVersionNumber",
+            ],
+          },
+        },
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "cdrHost2SecurityGroupBA4E415B",
+              "GroupId",
+            ],
+          },
+        ],
+        "SubnetId": {
+          "Ref": "vpcprivatesubnetSubnet1SubnetC88AC256",
+        },
+        "Tags": [
+          {
+            "Key": "CdrTestHost",
+            "Value": "al2023",
+          },
+          {
+            "Key": "CreatedBy",
+            "Value": "GuardDuty Test Script",
+          },
+          {
+            "Key": "GuardDutyTestFramework",
+            "Value": "Instance",
+          },
+          {
+            "Key": "Name",
+            "Value": "CDR-AL2023-GuardDutyTester-2",
+          },
+        ],
+        "UserData": {
+          "Fn::Base64": "#!/bin/bash
+TOKEN=\`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"\`
+INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id)
+aws ssm send-command --region us-west-2 --instance-ids $INSTANCE_ID --document-name "AmazonGuardDuty-ConfigureRuntimeMonitoringSsmPlugin" --parameters "action=Install,name=AmazonGuardDuty-RuntimeMonitoringSsmPlugin" --output text",
+        },
+      },
+      "Type": "AWS::EC2::Instance",
+    },
+    "cdrHost2InstanceInstanceProfile46A02E35": {
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "cdrHost2Role24FF4AAE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::InstanceProfile",
+    },
+    "cdrHost2InstanceLaunchTemplate259B0D99": {
+      "Properties": {
+        "LaunchTemplateData": {
+          "MetadataOptions": {
+            "HttpTokens": "required",
+          },
+        },
+        "LaunchTemplateName": "InstanceLaunchTemplate",
+      },
+      "Type": "AWS::EC2::LaunchTemplate",
+    },
+    "cdrHost2Role24FF4AAE": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Description": "IAM role for a GuardDuty tester Custom Detection Rule host",
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/AmazonSSMManagedInstanceCore",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "cdrHost2RoleDefaultPolicy3C13B600": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "ssm:SendCommand",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:ec2:us-west-2:test-account:instance/*",
+                "arn:aws:ssm:us-west-2::document/AmazonGuardDuty-ConfigureRuntimeMonitoringSsmPlugin",
+              ],
+              "Sid": "InstallGuardDutyAgent",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "cdrHost2RoleDefaultPolicy3C13B600",
+        "Roles": [
+          {
+            "Ref": "cdrHost2Role24FF4AAE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "cdrHost2SecurityGroupBA4E415B": {
+      "Properties": {
+        "GroupDescription": "Security group for a GuardDuty tester Custom Detection Rule host (no inbound)",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "vpc4346410E",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "cdrHost3Instance82C55DC10f7b1445b717b8aa": {
+      "DependsOn": [
+        "cdrHost3RoleDefaultPolicyA6737AE1",
+        "cdrHost3Role7948534D",
+      ],
+      "Properties": {
+        "AvailabilityZone": "dummy1a",
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "Encrypted": true,
+              "VolumeSize": 8,
+              "VolumeType": "gp3",
+            },
+          },
+        ],
+        "IamInstanceProfile": {
+          "Ref": "cdrHost3InstanceInstanceProfile65C75B25",
+        },
+        "ImageId": {
+          "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestal2023amikernel61x8664C96584B6F00A464EAD1953AFF4B05118Parameter",
+        },
+        "InstanceType": "t3.small",
+        "LaunchTemplate": {
+          "LaunchTemplateName": "InstanceLaunchTemplate",
+          "Version": {
+            "Fn::GetAtt": [
+              "cdrHost3InstanceLaunchTemplate57BB30F8",
+              "LatestVersionNumber",
+            ],
+          },
+        },
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "cdrHost3SecurityGroupED6FC044",
+              "GroupId",
+            ],
+          },
+        ],
+        "SubnetId": {
+          "Ref": "vpcprivatesubnetSubnet1SubnetC88AC256",
+        },
+        "Tags": [
+          {
+            "Key": "CdrTestHost",
+            "Value": "al2023",
+          },
+          {
+            "Key": "CreatedBy",
+            "Value": "GuardDuty Test Script",
+          },
+          {
+            "Key": "GuardDutyTestFramework",
+            "Value": "Instance",
+          },
+          {
+            "Key": "Name",
+            "Value": "CDR-AL2023-GuardDutyTester-3",
+          },
+        ],
+        "UserData": {
+          "Fn::Base64": "#!/bin/bash
+TOKEN=\`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"\`
+INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id)
+aws ssm send-command --region us-west-2 --instance-ids $INSTANCE_ID --document-name "AmazonGuardDuty-ConfigureRuntimeMonitoringSsmPlugin" --parameters "action=Install,name=AmazonGuardDuty-RuntimeMonitoringSsmPlugin" --output text",
+        },
+      },
+      "Type": "AWS::EC2::Instance",
+    },
+    "cdrHost3InstanceInstanceProfile65C75B25": {
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "cdrHost3Role7948534D",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::InstanceProfile",
+    },
+    "cdrHost3InstanceLaunchTemplate57BB30F8": {
+      "Properties": {
+        "LaunchTemplateData": {
+          "MetadataOptions": {
+            "HttpTokens": "required",
+          },
+        },
+        "LaunchTemplateName": "InstanceLaunchTemplate",
+      },
+      "Type": "AWS::EC2::LaunchTemplate",
+    },
+    "cdrHost3Role7948534D": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Description": "IAM role for a GuardDuty tester Custom Detection Rule host",
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/AmazonSSMManagedInstanceCore",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "cdrHost3RoleDefaultPolicyA6737AE1": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "ssm:SendCommand",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:ec2:us-west-2:test-account:instance/*",
+                "arn:aws:ssm:us-west-2::document/AmazonGuardDuty-ConfigureRuntimeMonitoringSsmPlugin",
+              ],
+              "Sid": "InstallGuardDutyAgent",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "cdrHost3RoleDefaultPolicyA6737AE1",
+        "Roles": [
+          {
+            "Ref": "cdrHost3Role7948534D",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "cdrHost3SecurityGroupED6FC044": {
+      "Properties": {
+        "GroupDescription": "Security group for a GuardDuty tester Custom Detection Rule host (no inbound)",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "vpc4346410E",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "cdrHost4Instance992C8C0F0f7b1445b717b8aa": {
+      "DependsOn": [
+        "cdrHost4RoleDefaultPolicyABD0B9EC",
+        "cdrHost4Role2038D051",
+      ],
+      "Properties": {
+        "AvailabilityZone": "dummy1a",
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "Encrypted": true,
+              "VolumeSize": 8,
+              "VolumeType": "gp3",
+            },
+          },
+        ],
+        "IamInstanceProfile": {
+          "Ref": "cdrHost4InstanceInstanceProfile73870E3B",
+        },
+        "ImageId": {
+          "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestal2023amikernel61x8664C96584B6F00A464EAD1953AFF4B05118Parameter",
+        },
+        "InstanceType": "t3.small",
+        "LaunchTemplate": {
+          "LaunchTemplateName": "InstanceLaunchTemplate",
+          "Version": {
+            "Fn::GetAtt": [
+              "cdrHost4InstanceLaunchTemplateBD8AD38B",
+              "LatestVersionNumber",
+            ],
+          },
+        },
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "cdrHost4SecurityGroup9572DC45",
+              "GroupId",
+            ],
+          },
+        ],
+        "SubnetId": {
+          "Ref": "vpcprivatesubnetSubnet1SubnetC88AC256",
+        },
+        "Tags": [
+          {
+            "Key": "CdrTestHost",
+            "Value": "al2023",
+          },
+          {
+            "Key": "CreatedBy",
+            "Value": "GuardDuty Test Script",
+          },
+          {
+            "Key": "GuardDutyTestFramework",
+            "Value": "Instance",
+          },
+          {
+            "Key": "Name",
+            "Value": "CDR-AL2023-GuardDutyTester-4",
+          },
+        ],
+        "UserData": {
+          "Fn::Base64": "#!/bin/bash
+TOKEN=\`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"\`
+INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id)
+aws ssm send-command --region us-west-2 --instance-ids $INSTANCE_ID --document-name "AmazonGuardDuty-ConfigureRuntimeMonitoringSsmPlugin" --parameters "action=Install,name=AmazonGuardDuty-RuntimeMonitoringSsmPlugin" --output text",
+        },
+      },
+      "Type": "AWS::EC2::Instance",
+    },
+    "cdrHost4InstanceInstanceProfile73870E3B": {
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "cdrHost4Role2038D051",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::InstanceProfile",
+    },
+    "cdrHost4InstanceLaunchTemplateBD8AD38B": {
+      "Properties": {
+        "LaunchTemplateData": {
+          "MetadataOptions": {
+            "HttpTokens": "required",
+          },
+        },
+        "LaunchTemplateName": "InstanceLaunchTemplate",
+      },
+      "Type": "AWS::EC2::LaunchTemplate",
+    },
+    "cdrHost4Role2038D051": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Description": "IAM role for a GuardDuty tester Custom Detection Rule host",
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/AmazonSSMManagedInstanceCore",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "cdrHost4RoleDefaultPolicyABD0B9EC": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "ssm:SendCommand",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:ec2:us-west-2:test-account:instance/*",
+                "arn:aws:ssm:us-west-2::document/AmazonGuardDuty-ConfigureRuntimeMonitoringSsmPlugin",
+              ],
+              "Sid": "InstallGuardDutyAgent",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "cdrHost4RoleDefaultPolicyABD0B9EC",
+        "Roles": [
+          {
+            "Ref": "cdrHost4Role2038D051",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "cdrHost4SecurityGroup9572DC45": {
+      "Properties": {
+        "GroupDescription": "Security group for a GuardDuty tester Custom Detection Rule host (no inbound)",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "vpc4346410E",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "cdrHost5Instance0916F7920f7b1445b717b8aa": {
+      "DependsOn": [
+        "cdrHost5RoleDefaultPolicyE34FF58B",
+        "cdrHost5Role0AAEF884",
+      ],
+      "Properties": {
+        "AvailabilityZone": "dummy1a",
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "Encrypted": true,
+              "VolumeSize": 8,
+              "VolumeType": "gp3",
+            },
+          },
+        ],
+        "IamInstanceProfile": {
+          "Ref": "cdrHost5InstanceInstanceProfile68AC1496",
+        },
+        "ImageId": {
+          "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestal2023amikernel61x8664C96584B6F00A464EAD1953AFF4B05118Parameter",
+        },
+        "InstanceType": "t3.small",
+        "LaunchTemplate": {
+          "LaunchTemplateName": "InstanceLaunchTemplate",
+          "Version": {
+            "Fn::GetAtt": [
+              "cdrHost5InstanceLaunchTemplateB158C15F",
+              "LatestVersionNumber",
+            ],
+          },
+        },
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "cdrHost5SecurityGroup6ECA6741",
+              "GroupId",
+            ],
+          },
+        ],
+        "SubnetId": {
+          "Ref": "vpcprivatesubnetSubnet1SubnetC88AC256",
+        },
+        "Tags": [
+          {
+            "Key": "CdrTestHost",
+            "Value": "al2023",
+          },
+          {
+            "Key": "CreatedBy",
+            "Value": "GuardDuty Test Script",
+          },
+          {
+            "Key": "GuardDutyTestFramework",
+            "Value": "Instance",
+          },
+          {
+            "Key": "Name",
+            "Value": "CDR-AL2023-GuardDutyTester-5",
+          },
+        ],
+        "UserData": {
+          "Fn::Base64": "#!/bin/bash
+TOKEN=\`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"\`
+INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id)
+aws ssm send-command --region us-west-2 --instance-ids $INSTANCE_ID --document-name "AmazonGuardDuty-ConfigureRuntimeMonitoringSsmPlugin" --parameters "action=Install,name=AmazonGuardDuty-RuntimeMonitoringSsmPlugin" --output text",
+        },
+      },
+      "Type": "AWS::EC2::Instance",
+    },
+    "cdrHost5InstanceInstanceProfile68AC1496": {
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "cdrHost5Role0AAEF884",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::InstanceProfile",
+    },
+    "cdrHost5InstanceLaunchTemplateB158C15F": {
+      "Properties": {
+        "LaunchTemplateData": {
+          "MetadataOptions": {
+            "HttpTokens": "required",
+          },
+        },
+        "LaunchTemplateName": "InstanceLaunchTemplate",
+      },
+      "Type": "AWS::EC2::LaunchTemplate",
+    },
+    "cdrHost5Role0AAEF884": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Description": "IAM role for a GuardDuty tester Custom Detection Rule host",
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/AmazonSSMManagedInstanceCore",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "cdrHost5RoleDefaultPolicyE34FF58B": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "ssm:SendCommand",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:ec2:us-west-2:test-account:instance/*",
+                "arn:aws:ssm:us-west-2::document/AmazonGuardDuty-ConfigureRuntimeMonitoringSsmPlugin",
+              ],
+              "Sid": "InstallGuardDutyAgent",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "cdrHost5RoleDefaultPolicyE34FF58B",
+        "Roles": [
+          {
+            "Ref": "cdrHost5Role0AAEF884",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "cdrHost5SecurityGroup6ECA6741": {
+      "Properties": {
+        "GroupDescription": "Security group for a GuardDuty tester Custom Detection Rule host (no inbound)",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "vpc4346410E",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "debianLinuxInstanceA7F598BBc158d4b5fb7ee395": {
       "DependsOn": [
         "Role8C6B06EB",
         "vpcpublicsubnetSubnet1DefaultRoute924AA571",
@@ -851,16 +1707,25 @@ exports[`Check All Test Resources 1`] = `
         "UserData": {
           "Fn::Base64": "#!/bin/bash
 #!/bin/bash
+exec > >(tee -a /var/log/gd-tester-userdata.log) 2>&1
+set -x
 export DEBIAN_FRONTEND=noninteractive
-mkdir /etc/systemd/resolved.conf.d
-adduser ssm-user
+export PATH=$PATH:/usr/local/bin:/usr/sbin:/root/.local/bin
+apt-get -o DPkg::Lock::Timeout=300 update -y
+apt-get -o DPkg::Lock::Timeout=300 install -y wget curl ca-certificates
+mkdir -p /tmp/ssm-install
+for i in 1 2 3; do wget -q -O /tmp/ssm-install/amazon-ssm-agent.deb https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb && break || sleep 15; done
+dpkg -i /tmp/ssm-install/amazon-ssm-agent.deb || apt-get -o DPkg::Lock::Timeout=300 install -f -y
+systemctl enable amazon-ssm-agent
+systemctl start amazon-ssm-agent
+systemctl is-active --quiet amazon-ssm-agent && echo "SSM agent active" || echo "WARNING: SSM agent not active"
+mkdir -p /etc/systemd/resolved.conf.d
+adduser --disabled-password --gecos "" ssm-user
 echo "ssm-user ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ssm-agent-users
 chmod 440 /etc/sudoers.d/ssm-agent-users
 systemctl restart systemd-resolved
-export PATH=$PATH:/usr/local/bin:/usr/sbin:/root/.local/bin
-echo 'export PATH=/root/.local/bin:/usr/sbin:/home/debian/.local/bin:$PATH' >> /home/debian/.bash_profile
-apt-get update -y
-apt-get install -y nmap hydra jq python3-pip python3 tor freerdp2-dev libssl-dev postgresql-common libpq-dev autoconf libtool automake gcc unzip python3-venv apache2
+echo 'export PATH=/root/.local/bin:/usr/sbin:/home/ssm-user/.local/bin:$PATH' >> /home/ssm-user/.bash_profile
+apt-get -o DPkg::Lock::Timeout=300 install -y nmap hydra jq python3-pip python3 tor freerdp2-dev libssl-dev postgresql-common libpq-dev autoconf libtool automake gcc make git unzip python3-venv apache2
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip awscliv2.zip
 ./aws/install
@@ -902,11 +1767,8 @@ sed -i 's/80/8009/g' /etc/apache2/sites-enabled/000-default.conf
 sed -i 's/80/8009/g' /etc/apache2/ports.conf
 systemctl enable apache2
 systemctl start apache2
-cd /home/ssm-user/install
-wget https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb
-dpkg -i amazon-ssm-agent.deb
-systemctl enable amazon-ssm-agent
-systemctl start amazon-ssm-agent",
+chown -R ssm-user: /home/ssm-user
+echo "gd-tester bootstrap complete"",
         },
       },
       "Type": "AWS::EC2::Instance",
@@ -1133,7 +1995,7 @@ def lambda_handler(event, context):
   lifecycle_event = json.loads(event['Records'][0]['Sns']['Message'])
   instance_id = lifecycle_event.get('EC2InstanceId')
   if not instance_id:
-    print('Got event without EC2InstanceId: %s', json.dumps(dict(event, ResponseURL='...')))
+    print(f"Got event without EC2InstanceId: { json.dumps(dict(event, ResponseURL='...')) }")
     return
 
   instance_arn = container_instance_arn(cluster, instance_id)
@@ -1226,7 +2088,7 @@ def pick(dct, *keys):
             "Arn",
           ],
         },
-        "Runtime": "python3.9",
+        "Runtime": "python3.13",
         "Timeout": 310,
       },
       "Type": "AWS::Lambda::Function",
@@ -1625,6 +2487,12 @@ def pick(dct, *keys):
                   "Sid": "EC2EIPList",
                 },
                 {
+                  "Action": "ec2:DescribeInstances",
+                  "Effect": "Allow",
+                  "Resource": "*",
+                  "Sid": "EC2DescribeInstances",
+                },
+                {
                   "Action": [
                     "guardduty:CreateThreatIntelSet",
                     "guardduty:GetDetector",
@@ -1668,7 +2536,7 @@ def pick(dct, *keys):
                         [
                           "arn:aws:ec2:us-west-2:test-account:instance/",
                           {
-                            "Ref": "debianLinuxInstanceA7F598BBef542029a1ab7312",
+                            "Ref": "debianLinuxInstanceA7F598BBc158d4b5fb7ee395",
                           },
                         ],
                       ],
@@ -1678,6 +2546,31 @@ def pick(dct, *keys):
                   "Sid": "SsmDocs",
                 },
                 {
+                  "Action": "ssm:StartSession",
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:ec2:us-west-2:test-account:instance/",
+                          {
+                            "Ref": "ubuntuInstanceUbuntuInstanceA4B162CFdceb63d41ff0ed03",
+                          },
+                        ],
+                      ],
+                    },
+                    "arn:aws:ssm:us-west-2::document/AWS-StartInteractiveCommand",
+                  ],
+                  "Sid": "SsmSession",
+                },
+                {
+                  "Action": "ssm:TerminateSession",
+                  "Effect": "Allow",
+                  "Resource": "*",
+                  "Sid": "SsmTerminateSession",
+                },
+                {
                   "Action": "ssm:SendCommand",
                   "Effect": "Allow",
                   "Resource": [
@@ -1685,6 +2578,92 @@ def pick(dct, *keys):
                     "arn:aws:ssm:us-west-2::document/AmazonGuardDuty-ConfigureRuntimeMonitoringSsmPlugin",
                   ],
                   "Sid": "InstallGuardDutyAgent",
+                },
+                {
+                  "Action": "ssm:SendCommand",
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:ec2:us-west-2:test-account:instance/",
+                          {
+                            "Ref": "cdrHost1Instance7EFC6DED0f7b1445b717b8aa",
+                          },
+                        ],
+                      ],
+                    },
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:ec2:us-west-2:test-account:instance/",
+                          {
+                            "Ref": "cdrHost2Instance0973AC4F0f7b1445b717b8aa",
+                          },
+                        ],
+                      ],
+                    },
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:ec2:us-west-2:test-account:instance/",
+                          {
+                            "Ref": "cdrHost3Instance82C55DC10f7b1445b717b8aa",
+                          },
+                        ],
+                      ],
+                    },
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:ec2:us-west-2:test-account:instance/",
+                          {
+                            "Ref": "cdrHost4Instance992C8C0F0f7b1445b717b8aa",
+                          },
+                        ],
+                      ],
+                    },
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:ec2:us-west-2:test-account:instance/",
+                          {
+                            "Ref": "cdrHost5Instance0916F7920f7b1445b717b8aa",
+                          },
+                        ],
+                      ],
+                    },
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:ec2:us-west-2:test-account:instance/",
+                          {
+                            "Ref": "ubuntuInstanceUbuntuInstanceA4B162CFdceb63d41ff0ed03",
+                          },
+                        ],
+                      ],
+                    },
+                    "arn:aws:ssm:us-west-2::document/AWS-RunShellScript",
+                  ],
+                  "Sid": "CdrHostsRunShellScript",
+                },
+                {
+                  "Action": "ssm:GetCommandInvocation",
+                  "Effect": "Allow",
+                  "Resource": "*",
+                  "Sid": "CdrCommandResults",
+                },
+                {
+                  "Action": "ssm:DescribeInstanceInformation",
+                  "Effect": "Allow",
+                  "Resource": "*",
+                  "Sid": "CdrDescribeInstanceInformation",
                 },
                 {
                   "Action": "ecs:RunTask",
@@ -1723,6 +2702,11 @@ def pick(dct, *keys):
                 {
                   "Action": [
                     "ecr:CreateRepository",
+                    "ecr:DeleteRepository",
+                    "ecr:DescribeRepositories",
+                    "ecr:ListImages",
+                    "ecr:DescribeImages",
+                    "ecr:BatchDeleteImage",
                     "ecr:CompleteLayerUpload",
                     "ecr:GetAuthorizationToken",
                     "ecr:InitiateLayerUpload",
@@ -1731,7 +2715,13 @@ def pick(dct, *keys):
                   ],
                   "Effect": "Allow",
                   "Resource": "arn:aws:ecr:us-west-2:test-account:repository/*",
-                  "Sid": "EksImageUploadToRepo",
+                  "Sid": "ECRFullAccess",
+                },
+                {
+                  "Action": "ecr:DescribeRepositories",
+                  "Effect": "Allow",
+                  "Resource": "*",
+                  "Sid": "ECRListRepositories",
                 },
                 {
                   "Action": [
@@ -1934,10 +2924,12 @@ aws s3 cp --recursive s3://",
                     "Ref": "testerBucket1B6270A3",
                   },
                   "/py_tester /home/ssm-user/py_tester
+find  /home/ssm-user/py_tester/runtimeScenarios -name "*.sh" -exec chmod +x {} \\;
+find  /home/ssm-user/py_tester/runtimeScenarios -name "*.py" -exec chmod +x {} \\;
 echo "LINUX_IP = '",
                   {
                     "Fn::GetAtt": [
-                      "debianLinuxInstanceA7F598BBef542029a1ab7312",
+                      "debianLinuxInstanceA7F598BBc158d4b5fb7ee395",
                       "PrivateIp",
                     ],
                   },
@@ -1954,7 +2946,7 @@ echo "RED_TEAM_INSTANCE = '$INSTANCE_ID'" >> /home/ssm-user/py_tester/tester_var
 echo "RED_TEAM_IP = '$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/local-ipv4 | grep "172")'" >> /home/ssm-user/py_tester/tester_vars.py
 echo "LINUX_INSTANCE = '",
                   {
-                    "Ref": "debianLinuxInstanceA7F598BBef542029a1ab7312",
+                    "Ref": "debianLinuxInstanceA7F598BBc158d4b5fb7ee395",
                   },
                   "'" >> /home/ssm-user/py_tester/tester_vars.py
 echo "WINDOWS_INSTANCE = '",
@@ -1992,7 +2984,7 @@ echo "EKS_CLUSTER_NAME = 'EksGuardDutyTester'" >> /home/ssm-user/py_tester/teste
 echo "MALICIOUS_IP = '",
                   {
                     "Fn::GetAtt": [
-                      "debianLinuxInstanceA7F598BBef542029a1ab7312",
+                      "debianLinuxInstanceA7F598BBc158d4b5fb7ee395",
                       "PublicIp",
                     ],
                   },
@@ -2052,7 +3044,7 @@ echo "SEC_GROUP = ['",
 echo ",
                   {
                     "Fn::GetAtt": [
-                      "debianLinuxInstanceA7F598BBef542029a1ab7312",
+                      "debianLinuxInstanceA7F598BBc158d4b5fb7ee395",
                       "PublicIp",
                     ],
                   },
@@ -2066,10 +3058,7 @@ echo ECS_CLUSTER=",
                   {
                     "Ref": "driverClusterAE6F201C",
                   },
-                  " >> /etc/ecs/ecs.config
-sudo iptables --insert FORWARD 1 --in-interface docker+ --destination 169.254.169.254/32 --jump DROP
-sudo service iptables save
-echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
+                  " >> /etc/ecs/ecs.config",
                 ],
               ],
             },
@@ -2127,8 +3116,9 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
             "Arn",
           ],
         },
-        "AttributesRevision": 2,
+        "AttributesRevision": 5,
         "Config": {
+          "accessConfig": {},
           "kubernetesNetworkConfig": {
             "ipFamily": "ipv4",
           },
@@ -2439,7 +3429,7 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
                 {
                   "Ref": "AWS::Partition",
                 },
-                ":iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+                ":iam::aws:policy/AmazonEC2ContainerRegistryPullOnly",
               ],
             ],
           },
@@ -2503,6 +3493,17 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
       },
       "Type": "AWS::IAM::Policy",
     },
+    "eksClusterKubectlLayerDFA829E3": {
+      "Properties": {
+        "Content": {
+          "S3Bucket": "cdk-hnb659fds-assets-test-account-us-west-2",
+          "S3Key": "6094cb0ff874f89ab5ab24fb6b9417df0fdeb6966645f90c88ec1d7e28130112.zip",
+        },
+        "Description": "/opt/kubectl/kubectl 1.32.3; /opt/helm/helm 3.17.2",
+        "LicenseInfo": "Apache-2.0",
+      },
+      "Type": "AWS::Lambda::LayerVersion",
+    },
     "eksClusterKubectlReadyBarrierD1A4492E": {
       "DependsOn": [
         "eksClusterCreationRoleDefaultPolicyF9AFA446",
@@ -2519,6 +3520,14 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
       "Properties": {
         "LaunchTemplateData": {
           "InstanceType": "t3.medium",
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "eksClusterSecurityGroup4C0C3515",
+                "GroupId",
+              ],
+            },
+          ],
           "TagSpecifications": [
             {
               "ResourceType": "instance",
@@ -2687,8 +3696,18 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
               ],
             },
             "Description": "allow tcp traffic from within vpc",
+            "IpProtocol": "-1",
+          },
+          {
+            "Description": "allow tcp traffic from ECS cluster",
             "FromPort": 0,
             "IpProtocol": "tcp",
+            "SourceSecurityGroupId": {
+              "Fn::GetAtt": [
+                "driverClusterClusterSecurityGroup11D80937",
+                "GroupId",
+              ],
+            },
             "ToPort": 65535,
           },
         ],
@@ -2697,25 +3716,6 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
         },
       },
       "Type": "AWS::EC2::SecurityGroup",
-    },
-    "emptyBucketAutoDeleteObjectsCustomResource43188392": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "emptyBucketPolicyC1F829A0",
-      ],
-      "Properties": {
-        "BucketName": {
-          "Ref": "emptyBucketCF828118",
-        },
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "Custom::S3AutoDeleteObjects",
-      "UpdateReplacePolicy": "Delete",
     },
     "emptyBucketCF828118": {
       "DeletionPolicy": "Delete",
@@ -2735,12 +3735,6 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
           "IgnorePublicAcls": true,
           "RestrictPublicBuckets": true,
         },
-        "Tags": [
-          {
-            "Key": "aws-cdk:auto-delete-objects",
-            "Value": "true",
-          },
-        ],
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Delete",
@@ -2762,45 +3756,6 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
               "Effect": "Deny",
               "Principal": {
                 "AWS": "*",
-              },
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "emptyBucketCF828118",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "emptyBucketCF828118",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": [
-                "s3:PutBucketPolicy",
-                "s3:GetBucket*",
-                "s3:List*",
-                "s3:DeleteObject*",
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Fn::GetAtt": [
-                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
-                    "Arn",
-                  ],
-                },
               },
               "Resource": [
                 {
@@ -2886,7 +3841,7 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
       "Properties": {
         "Content": {
           "S3Bucket": "cdk-hnb659fds-assets-test-account-us-west-2",
-          "S3Key": "3322b7049fb0ed2b7cbb644a2ada8d1116ff80c32dca89e6ada846b5de26f961.zip",
+          "S3Key": "a72522445441e9b66c2f16956c54d4786af8c61c156b80c48a6e7c32fcc49023.zip",
         },
         "Description": "/opt/awscli/aws",
       },
@@ -2899,6 +3854,7 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
         "DestinationBucketName": {
           "Ref": "testerBucket1B6270A3",
         },
+        "OutputObjectKeys": true,
         "Prune": true,
         "ServiceToken": {
           "Fn::GetAtt": [
@@ -2910,8 +3866,9 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
           "cdk-hnb659fds-assets-test-account-us-west-2",
         ],
         "SourceObjectKeys": [
-          "ad4862694a88f71a818ed8f8048954d9ecadc5a77bd4bc086d5f1957864f342d.zip",
+          "df8952a4070e881013e51383a2299a39b90208b528e7351657b25c87a7e3b6d9.zip",
         ],
+        "WaitForDistributionInvalidation": true,
       },
       "Type": "Custom::CDKBucketDeployment",
       "UpdateReplacePolicy": "Delete",
@@ -3161,6 +4118,12 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
                   "Sid": "GuardDutyServiceRoleThreatListCleanup",
                 },
                 {
+                  "Action": "ec2:DescribeImages",
+                  "Effect": "Allow",
+                  "Resource": "*",
+                  "Sid": "FindDebianImagePermission",
+                },
+                {
                   "Action": "ecr:DeleteRepository",
                   "Effect": "Allow",
                   "Resource": "arn:aws:ecr:us-west-2:test-account:repository/gd-eks-tester",
@@ -3207,7 +4170,7 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-test-account-us-west-2",
-          "S3Key": "722b1d70d12c8c7a334fb33d404ddb2d0b5d46e1c6acfdebd42c5b2921b4864c.zip",
+          "S3Key": "ccb05b8893b20a3cb0b3300590e0a88fd269fdcccded29e12675e089cfc7ac41.zip",
         },
         "Handler": "cfn_on_event.on_event",
         "MemorySize": 512,
@@ -3246,7 +4209,7 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-test-account-us-west-2",
-          "S3Key": "4993317cb64cbc86b7898a55458f7465aa5816f877643aa8ce813f6508db47d2.zip",
+          "S3Key": "d014ff2c97e1a48cf3d43ac7203deb8eb76673ee54b0197b8b1454ba7632b97b.zip",
         },
         "Handler": "tester_lambda.lambda_handler",
         "Role": {
@@ -3295,6 +4258,129 @@ echo ECS_AWSVPC_BLOCK_IMDS=true >> /etc/ecs/ecs.config",
         ],
       },
       "Type": "AWS::IAM::Role",
+    },
+    "ubuntuInstanceUbuntuInstanceA4B162CFdceb63d41ff0ed03": {
+      "DependsOn": [
+        "UbuntuRoleUbuntuInstanceRole9CA881F4",
+      ],
+      "Properties": {
+        "AvailabilityZone": "dummy1a",
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "VolumeSize": 32,
+              "VolumeType": "gp3",
+            },
+          },
+        ],
+        "IamInstanceProfile": {
+          "Ref": "ubuntuInstanceUbuntuInstanceInstanceProfile68D34457",
+        },
+        "ImageId": {
+          "Ref": "SsmParameterValueawsservicecanonicalubuntuserver2204stablecurrentamd64hvmebsgp2amiidC96584B6F00A464EAD1953AFF4B05118Parameter",
+        },
+        "InstanceType": "t3.medium",
+        "LaunchTemplate": {
+          "LaunchTemplateName": "UbuntuInstanceLaunchTemplate",
+          "Version": {
+            "Fn::GetAtt": [
+              "ubuntuInstanceUbuntuInstanceLaunchTemplate6869CC80",
+              "LatestVersionNumber",
+            ],
+          },
+        },
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "ubuntuInstanceUbuntuSecurityGroupD44B0B33",
+              "GroupId",
+            ],
+          },
+        ],
+        "SubnetId": {
+          "Ref": "vpcprivatesubnetSubnet1SubnetC88AC256",
+        },
+        "Tags": [
+          {
+            "Key": "CreatedBy",
+            "Value": "GuardDuty Test Script",
+          },
+          {
+            "Key": "GuardDutyTestFramework",
+            "Value": "Instance",
+          },
+          {
+            "Key": "Name",
+            "Value": "Ubuntu-GuardDutyTester",
+          },
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash
+apt-get update -y
+apt-get install -y awscli
+snap install amazon-ssm-agent --classic
+systemctl enable snap.amazon-ssm-agent.amazon-ssm-agent.service
+systemctl start snap.amazon-ssm-agent.amazon-ssm-agent.service
+apt install awscli -y
+aws s3 cp --recursive s3://",
+                {
+                  "Ref": "testerBucket1B6270A3",
+                },
+                "/py_tester /home/ssm-user/py_tester
+find  /home/ssm-user/py_tester/runtimeScenarios -name "*.sh" -exec chmod +x {} \\;
+find  /home/ssm-user/py_tester/runtimeScenarios -name "*.py" -exec chmod +x {} \\;
+chown -R ssm-user: /home/ssm-user
+TOKEN=\`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"\`
+INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/instance-id)
+aws ssm send-command --region us-west-2 --instance-ids $INSTANCE_ID --document-name "AmazonGuardDuty-ConfigureRuntimeMonitoringSsmPlugin" --parameters "action=Install,name=AmazonGuardDuty-RuntimeMonitoringSsmPlugin" --output text",
+              ],
+            ],
+          },
+        },
+      },
+      "Type": "AWS::EC2::Instance",
+    },
+    "ubuntuInstanceUbuntuInstanceInstanceProfile68D34457": {
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "UbuntuRoleUbuntuInstanceRole9CA881F4",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::InstanceProfile",
+    },
+    "ubuntuInstanceUbuntuInstanceLaunchTemplate6869CC80": {
+      "Properties": {
+        "LaunchTemplateData": {
+          "MetadataOptions": {
+            "HttpTokens": "required",
+          },
+        },
+        "LaunchTemplateName": "UbuntuInstanceLaunchTemplate",
+      },
+      "Type": "AWS::EC2::LaunchTemplate",
+    },
+    "ubuntuInstanceUbuntuSecurityGroupD44B0B33": {
+      "Properties": {
+        "GroupDescription": "Security group for Ubuntu GuardDuty tester instance",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "vpc4346410E",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
     },
     "vpc4346410E": {
       "DeletionPolicy": "Delete",
