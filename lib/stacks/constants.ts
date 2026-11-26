@@ -32,3 +32,13 @@ export const CREATED_BY_TAG: Tag = new Tag('CreatedBy', 'GuardDuty Test Script')
 export const INSTANCE_TAG: Tag = new Tag('GuardDutyTestFramework', 'Instance');
 export const EC2_TASK_FAMILY: string = 'EcsEc2GuardDutyTest';
 export const FARGATE_TASK_FAMILY: string = 'EcsFargateGuardDutyTest';
+
+// Static Amazon Linux 2023 hosts that run the runtime Custom Detection Rule
+// tests. t3.small (2 GiB): a t3.micro (1 GiB) ran out of memory installing the
+// GuardDuty agent and lost its SSM connection. The harness finds the hosts at run time
+// by the CdrTestHost tag (value 'al2023'), so the count can change here without
+// touching the Python.
+export const CDR_HOST_COUNT: number = 5;
+export const CDR_HOST_NAME_PREFIX: string = 'CDR-AL2023-GuardDutyTester';
+export const CDR_HOST_INSTANCE_TYPE: InstanceType = InstanceType.of(InstanceClass.T3, InstanceSize.SMALL);
+export const CDR_HOST_TAG: Tag = new Tag('CdrTestHost', 'al2023');

@@ -15,6 +15,7 @@ import { Stack, type StackProps } from 'aws-cdk-lib';
 import { type Construct } from 'constructs';
 
 import { TempRole } from '../common/access/iam/tester-temp-tole';
+import { CdrAmazonLinuxInstance } from '../common/compute/ec2/cdr-instance';
 import { DebianLinuxInstance } from '../common/compute/ec2/debian-instance';
 import { UbuntuInstance } from '../common/compute/ec2/ubuntu-instance';
 import { BasicWindowsInstance } from '../common/compute/ec2/windows-instance';
@@ -29,6 +30,10 @@ import { EmptyBucket } from '../common/storage/s3/empty-bucket';
 import { TesterBucket } from '../common/storage/s3/tester-bucket';
 import {
   ASG_NAME,
+  CDR_HOST_COUNT,
+  CDR_HOST_INSTANCE_TYPE,
+  CDR_HOST_NAME_PREFIX,
+  CDR_HOST_TAG,
   CREATED_BY_TAG,
   DEBIAN_INSTANCE_NAME,
   DRIVER_INSTANCE_TYPE,
@@ -94,6 +99,22 @@ export class GuardDutyTesterStack extends Stack {
     // dedicated vpc for testing
     const testerVpc = new CdkGdTesterVPC(this, 'vpc', { region: this.region });
 
+    // static Amazon Linux hosts for the runtime Custom Detection Rule tests
+    const cdrHosts = Array.from(
+      { length: CDR_HOST_COUNT },
+      (_, i) =>
+        new CdrAmazonLinuxInstance(this, `cdrHost${i + 1}`, {
+          vpc: testerVpc.vpc,
+          instanceName: `${CDR_HOST_NAME_PREFIX}-${i + 1}`,
+          instanceType: CDR_HOST_INSTANCE_TYPE,
+          region: this.region,
+          tag: INSTANCE_TAG,
+          createdBy: CREATED_BY_TAG,
+          hostTag: CDR_HOST_TAG,
+          accountId: this.account,
+        }),
+    );
+
     // public subnet instance
     const debianInstance = new DebianLinuxInstance(this, 'debianLinuxInstance', {
       vpc: testerVpc.vpc,
@@ -141,6 +162,7 @@ export class GuardDutyTesterStack extends Stack {
       debianIp: debianInstance.ec2.instancePrivateIp,
       debianInstance: debianInstance.ec2.instanceId,
       ubuntuInstance: ubuntuInstance.ec2.instanceId,
+      cdrHostIds: cdrHosts.map((host) => host.ec2.instanceId),
       debianRoleName: debianInstance.instanceRole.role.roleName,
       windowsIp: windowsInstance.ec2.instancePrivateIp,
       windowsInstance: windowsInstance.ec2.instanceId,

@@ -1,0 +1,27 @@
+#!/bin/sh
+#Copyright 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#  
+#  Licensed under the Apache License, Version 2.0 (the "License").
+#  You may not use this file except in compliance with the License.
+#  A copy of the License is located at
+#  
+#      http://www.apache.org/licenses/LICENSE-2.0
+#  
+#  or in the "license" file accompanying this file. This file is distributed 
+#  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+#  express or implied. See the License for the specific language governing 
+#  permissions and limitations under the License.
+#
+# Benign trigger for test PasswordShadowFileDiscoveryPasswd (rule PasswordShadowFileDiscovery)
+# Finding type: Discovery:Runtime/SensitiveFileRead
+#
+# Strategy: read /etc/passwd as a non-root user with cat (a reader in the rule's
+# process list). This is the realistic credential-discovery case the rule
+# targets; a read of the world-readable file by root (uid 0) is not surfaced.
+# Drops to the unprivileged 'nobody' account via runuser (falling back to su).
+# Runs on the static test host; the read is benign.
+set -eu
+TARGET='/etc/passwd'
+runuser -u nobody -- cat "$TARGET" >/dev/null 2>&1 \
+  || su -s /bin/sh nobody -c "cat $TARGET >/dev/null"
+echo "[cdr] PasswordShadowFileDiscoveryPasswd: done"

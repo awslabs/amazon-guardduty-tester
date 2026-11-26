@@ -39,7 +39,14 @@ export class TesterBucket extends Construct {
 
     // upload tester python + bash code to bucket
     new BucketDeployment(this, 'DeployTester', {
-      sources: [Source.asset('./lib/common/testResources')],
+      sources: [
+        Source.asset('./lib/common/testResources', {
+          // Exclude Python bytecode so the deployed asset hash stays
+          // deterministic (stray __pycache__ must not change the synthesized
+          // template across machines/CI).
+          exclude: ['__pycache__', '**/__pycache__', '*.pyc', '**/*.pyc'],
+        }),
+      ],
       destinationBucket: this.bucket,
       destinationKeyPrefix: 'py_tester',
     });

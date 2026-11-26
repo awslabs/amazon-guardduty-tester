@@ -2,3 +2,16 @@ build
 cdk.context.json
 cdk.out/
 node_modules/
+
+
+# Compiled TypeScript output — tsc emits .js/.d.ts beside sources (tsconfig "declaration": true)
+lib/**/*.js
+lib/**/*.d.ts
+bin/**/*.js
+bin/**/*.d.ts
+test/**/*.js
+test/**/*.d.ts
+
+# Python bytecode cache
+__pycache__/
+*.pyc

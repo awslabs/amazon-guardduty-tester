@@ -30,6 +30,7 @@ export interface EcsProps extends Ec2Props {
   debianIp: string;
   debianInstance: string;
   ubuntuInstance: string;
+  cdrHostIds: string[];
   debianRoleName: string;
   windowsIp: string;
   windowsInstance: string;
@@ -90,6 +91,7 @@ export class TestDriverEcsCluster extends Construct {
       execRole: executionRole.role.roleArn,
       fargateTaskFamily: props.fargateTaskFamily,
       clusterName: props.ecsCluster,
+      cdrHostIds: props.cdrHostIds,
     });
 
     const cluster_sg = new ClusterSecurityGroup(this, 'ClusterSecurityGroup', {
